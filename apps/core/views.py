@@ -1,5 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from django.http import Http404
 from django.db.models import (
     Avg,
@@ -710,6 +712,25 @@ def profissional_detalhe(
         },
     )
 
+
+
+@login_required
+def alterar_senha(request):
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            update_session_auth_hash(request, usuario)
+            messages.success(request, "Senha alterada com sucesso.")
+            return redirect("core:minha_conta")
+    else:
+        form = PasswordChangeForm(request.user)
+
+    return render(
+        request,
+        "core/alterar_senha.html",
+        {"form": form},
+    )
 
 @login_required
 def minha_conta(request):

@@ -31,6 +31,18 @@ urlpatterns = [
     ),
 
     path(
+        "empresas/<int:empresa_id>/definir-senha/",
+        views.definir_senha_empresa,
+        name="definir_senha_empresa",
+    ),
+
+    path(
+        "profissionais/<int:profissional_id>/definir-senha/",
+        views.definir_senha_profissional,
+        name="definir_senha_profissional",
+    ),
+
+    path(
         "assinaturas/",
         views.assinaturas,
         name="assinaturas",

@@ -18,6 +18,11 @@ Minha Conta | Conecta Interior
         </p>
     </div>
 
+    <div class="d-flex gap-2">
+        <a href="{% url 'core:alterar_senha' %}" class="btn btn-outline-primary">
+            🔐 Segurança / Alterar senha
+        </a>
+
     <form
         method="post"
         action="{% url 'core:logout' %}"
@@ -31,6 +36,7 @@ Minha Conta | Conecta Interior
             Sair
         </button>
     </form>
+    </div>
 
 </div>
 

@@ -43,6 +43,12 @@ urlpatterns = [
     ),
 
     path(
+        "minha-conta/seguranca/alterar-senha/",
+        views.alterar_senha,
+        name="alterar_senha",
+    ),
+
+    path(
         "minha-conta/assinatura/<int:assinatura_id>/renovacao-automatica/",
         views.alterar_renovacao_automatica,
         name="alterar_renovacao_automatica",

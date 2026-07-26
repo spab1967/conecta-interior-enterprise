@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from apps.servicos.models import Servico
 from django.contrib import messages
+from django.contrib.auth.forms import SetPasswordForm
 from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.conf import settings
@@ -233,6 +234,7 @@ def empresas(request):
         .select_related(
             "cidade",
             "categoria",
+            "usuario",
         )
         .order_by(
             "-destaque",
@@ -281,7 +283,7 @@ def profissionais(request):
 
     profissionais_cadastrados = (
         Profissional.objects
-        .select_related("cidade", "categoria", "empresa")
+        .select_related("cidade", "categoria", "empresa", "usuario")
         .order_by("-destaque", "nome")
     )
 
@@ -789,3 +791,39 @@ def servicos(request):
         },
     )
 
+
+
+@staff_member_required
+def definir_senha_empresa(request, empresa_id):
+    empresa = get_object_or_404(Empresa.objects.select_related("usuario"), pk=empresa_id)
+    if not empresa.usuario:
+        messages.error(request, "Esta empresa não possui usuário responsável vinculado.")
+        return redirect("administracao:empresas")
+    form = SetPasswordForm(empresa.usuario, request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, f"Senha do usuário {empresa.usuario.username} definida com sucesso.")
+        return redirect("administracao:empresas")
+    return render(request, "administracao/definir_senha.html", {
+        "form": form, "usuario_alvo": empresa.usuario,
+        "cadastro": empresa.nome_fantasia, "tipo": "Empresa",
+        "voltar_url": "administracao:empresas",
+    })
+
+
+@staff_member_required
+def definir_senha_profissional(request, profissional_id):
+    profissional = get_object_or_404(Profissional.objects.select_related("usuario"), pk=profissional_id)
+    if not profissional.usuario:
+        messages.error(request, "Este profissional não possui usuário responsável vinculado.")
+        return redirect("administracao:profissionais")
+    form = SetPasswordForm(profissional.usuario, request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, f"Senha do usuário {profissional.usuario.username} definida com sucesso.")
+        return redirect("administracao:profissionais")
+    return render(request, "administracao/definir_senha.html", {
+        "form": form, "usuario_alvo": profissional.usuario,
+        "cadastro": profissional.nome, "tipo": "Profissional",
+        "voltar_url": "administracao:profissionais",
+    })
