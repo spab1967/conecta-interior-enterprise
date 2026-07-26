@@ -1,0 +1,503 @@
+{% extends "base.html" %}
+
+{% block title %}
+Meus Favoritos | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+
+<div class="mb-5">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+        <div>
+
+            <p class="text-primary fw-semibold mb-2">
+                ♥ Seus favoritos
+            </p>
+
+            <h1 class="fw-bold mb-2">
+                Meus Favoritos
+            </h1>
+
+            <p class="text-muted mb-0">
+                Empresas e profissionais que você salvou para consultar depois.
+            </p>
+
+        </div>
+
+        <a
+            href="{% url 'core:home' %}"
+            class="btn btn-outline-primary"
+        >
+            Explorar plataforma
+        </a>
+
+    </div>
+
+</div>
+
+
+{% if messages %}
+
+    {% for message in messages %}
+
+        <div
+            class="alert alert-{{ message.tags|default:'success' }} alert-dismissible fade show"
+            role="alert"
+        >
+
+            {{ message }}
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Fechar"
+            ></button>
+
+        </div>
+
+    {% endfor %}
+
+{% endif %}
+
+
+<div class="row mb-5">
+
+    <div class="col-md-6 mb-3 mb-md-0">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div class="d-flex align-items-center">
+
+                    <div
+                        class="me-3"
+                        style="font-size: 36px;"
+                    >
+                        🏢
+                    </div>
+
+                    <div>
+
+                        <div class="display-6 fw-bold">
+                            {{ total_empresas }}
+                        </div>
+
+                        <div class="text-muted">
+                            {% if total_empresas == 1 %}
+                                empresa favorita
+                            {% else %}
+                                empresas favoritas
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-6">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body p-4">
+
+                <div class="d-flex align-items-center">
+
+                    <div
+                        class="me-3"
+                        style="font-size: 36px;"
+                    >
+                        👤
+                    </div>
+
+                    <div>
+
+                        <div class="display-6 fw-bold">
+                            {{ total_profissionais }}
+                        </div>
+
+                        <div class="text-muted">
+                            {% if total_profissionais == 1 %}
+                                profissional favorito
+                            {% else %}
+                                profissionais favoritos
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<section class="mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Empresas
+            </h2>
+
+            <p class="text-muted mb-0">
+                Empresas que você adicionou aos favoritos.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {% if favoritos_empresas %}
+
+        <div class="row">
+
+            {% for favorito in favoritos_empresas %}
+
+                <div class="col-md-6 col-xl-4 mb-4">
+
+                    <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body p-4">
+
+                            {% if favorito.empresa.logo %}
+
+                                <img
+                                    src="{{ favorito.empresa.logo.url }}"
+                                    alt="{{ favorito.empresa.nome_fantasia }}"
+                                    class="img-fluid rounded mb-3"
+                                    style="
+                                        height: 90px;
+                                        max-width: 160px;
+                                        object-fit: contain;
+                                    "
+                                >
+
+                            {% else %}
+
+                                <div
+                                    class="mb-3"
+                                    style="font-size: 40px;"
+                                >
+                                    🏢
+                                </div>
+
+                            {% endif %}
+
+
+                            {% if favorito.empresa.destaque %}
+
+                                <span class="badge bg-warning text-dark mb-2">
+                                    ★ Destaque
+                                </span>
+
+                            {% endif %}
+
+
+                            <h3 class="h5 fw-bold">
+                                {{ favorito.empresa.nome_fantasia }}
+                            </h3>
+
+
+                            {% if favorito.empresa.categoria %}
+
+                                <p class="text-primary mb-2">
+                                    {{ favorito.empresa.categoria.nome }}
+                                </p>
+
+                            {% endif %}
+
+
+                            <p class="text-muted">
+
+                                {{ favorito.empresa.cidade.nome }}/{{ favorito.empresa.cidade.estado }}
+
+                                {% if favorito.empresa.bairro %}
+                                    • {{ favorito.empresa.bairro }}
+                                {% endif %}
+
+                            </p>
+
+
+                            {% if favorito.empresa.descricao %}
+
+                                <p>
+                                    {{ favorito.empresa.descricao|truncatewords:20 }}
+                                </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="card-footer bg-white border-0 p-4 pt-0">
+
+                            <div class="d-grid gap-2">
+
+                                <a
+                                    href="{% url 'core:empresa_detalhe' favorito.empresa.cidade.slug favorito.empresa.slug %}"
+                                    class="btn btn-primary"
+                                >
+                                    Ver empresa
+                                </a>
+
+                                <form
+                                    method="post"
+                                    action="{% url 'favoritos:remover_empresa' favorito.empresa.cidade.slug favorito.empresa.slug %}"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-outline-danger w-100"
+                                    >
+                                        ♥ Remover dos favoritos
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body text-center py-5">
+
+                <div
+                    class="mb-3"
+                    style="font-size: 48px;"
+                >
+                    ♡
+                </div>
+
+                <h3 class="h5 fw-bold">
+                    Nenhuma empresa favorita
+                </h3>
+
+                <p class="text-muted mb-0">
+                    Ao salvar uma empresa, ela aparecerá aqui.
+                </p>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<section>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Profissionais
+            </h2>
+
+            <p class="text-muted mb-0">
+                Profissionais que você adicionou aos favoritos.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {% if favoritos_profissionais %}
+
+        <div class="row">
+
+            {% for favorito in favoritos_profissionais %}
+
+                <div class="col-md-6 col-xl-4 mb-4">
+
+                    <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body p-4">
+
+                            {% if favorito.profissional.foto %}
+
+                                <img
+                                    src="{{ favorito.profissional.foto.url }}"
+                                    alt="{{ favorito.profissional.nome }}"
+                                    class="rounded-circle mb-3"
+                                    style="
+                                        width: 90px;
+                                        height: 90px;
+                                        object-fit: cover;
+                                    "
+                                >
+
+                            {% else %}
+
+                                <div
+                                    class="mb-3"
+                                    style="font-size: 40px;"
+                                >
+                                    👤
+                                </div>
+
+                            {% endif %}
+
+
+                            {% if favorito.profissional.destaque %}
+
+                                <span class="badge bg-warning text-dark mb-2">
+                                    ★ Destaque
+                                </span>
+
+                            {% endif %}
+
+
+                            <h3 class="h5 fw-bold">
+                                {{ favorito.profissional.nome }}
+                            </h3>
+
+
+                            {% if favorito.profissional.especialidade %}
+
+                                <p class="text-primary mb-2">
+                                    {{ favorito.profissional.especialidade }}
+                                </p>
+
+                            {% endif %}
+
+
+                            <p class="text-muted">
+
+                                {{ favorito.profissional.cidade.nome }}/{{ favorito.profissional.cidade.estado }}
+
+                                {% if favorito.profissional.bairro %}
+                                    • {{ favorito.profissional.bairro }}
+                                {% endif %}
+
+                            </p>
+
+
+                            {% if favorito.profissional.descricao %}
+
+                                <p>
+                                    {{ favorito.profissional.descricao|truncatewords:20 }}
+                                </p>
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <div class="card-footer bg-white border-0 p-4 pt-0">
+
+                            <div class="d-grid gap-2">
+
+                                <a
+                                    href="{% url 'core:profissional_detalhe' favorito.profissional.cidade.slug favorito.profissional.slug %}"
+                                    class="btn btn-primary"
+                                >
+                                    Ver perfil
+                                </a>
+
+                                <form
+                                    method="post"
+                                    action="{% url 'favoritos:remover_profissional' favorito.profissional.cidade.slug favorito.profissional.slug %}"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-outline-danger w-100"
+                                    >
+                                        ♥ Remover dos favoritos
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body text-center py-5">
+
+                <div
+                    class="mb-3"
+                    style="font-size: 48px;"
+                >
+                    ♡
+                </div>
+
+                <h3 class="h5 fw-bold">
+                    Nenhum profissional favorito
+                </h3>
+
+                <p class="text-muted mb-0">
+                    Ao salvar um profissional, ele aparecerá aqui.
+                </p>
+
+            </div>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<div class="mt-5">
+
+    <a
+        href="{% url 'core:home' %}"
+        class="btn btn-outline-secondary"
+    >
+        ← Voltar ao início
+    </a>
+
+</div>
+
+
+{% endblock %}

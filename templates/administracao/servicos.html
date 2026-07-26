@@ -1,0 +1,71 @@
+{% extends "base_enterprise.html" %}
+
+{% block title %}
+Serviços | Administração Enterprise
+{% endblock %}
+
+{% block content %}
+<div class="enterprise-page-header">
+    <div>
+        <h1 class="enterprise-page-title">Serviços</h1>
+        <p class="enterprise-page-subtitle">Catálogo de serviços de empresas e profissionais</p>
+    </div>
+    <div class="enterprise-page-date">{{ total_servicos }} cadastrados</div>
+</div>
+
+<section class="enterprise-panel">
+    <div class="enterprise-panel-header enterprise-panel-header-wrap">
+        <div>
+            <h2 class="enterprise-panel-title">Serviços cadastrados</h2>
+            <span class="enterprise-panel-subtitle">{{ servicos_ativos }} ativos de {{ total_servicos }}</span>
+        </div>
+
+        <form method="get" class="enterprise-search-form">
+            <input type="search" class="form-control" name="q" value="{{ pesquisa }}" placeholder="Serviço, empresa ou profissional">
+            <button type="submit" class="btn btn-primary">Pesquisar</button>
+            {% if pesquisa %}
+            <a href="{% url 'administracao:servicos' %}" class="btn btn-outline-secondary">Limpar</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="enterprise-panel-body p-0">
+        <div class="table-responsive">
+            <table class="table enterprise-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Serviço</th>
+                        <th>Titular</th>
+                        <th>Tipo</th>
+                        <th>Cidade</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for servico in page_obj %}
+                    <tr>
+                        <td>#{{ servico.id }}</td>
+                        <td><strong>{{ servico.nome }}</strong></td>
+                        <td>{{ servico.titular }}</td>
+                        <td>{{ servico.tipo_titular }}</td>
+                        <td>{{ servico.cidade.nome }}</td>
+                        <td>{% if servico.valor != None %}R$ {{ servico.valor|floatformat:2 }}{% else %}Sob consulta{% endif %}</td>
+                        <td>
+                            {% if servico.ativo %}
+                                <span class="enterprise-status enterprise-status-success">Ativo</span>
+                            {% else %}
+                                <span class="enterprise-status enterprise-status-muted">Inativo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7" class="text-center py-5 text-muted">Nenhum serviço encontrado.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

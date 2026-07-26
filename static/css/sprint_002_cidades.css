@@ -1,0 +1,40 @@
+.cidade-hero {
+  background-position: center;
+  background-size: cover;
+}
+
+.dados-cidade {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 14px;
+  margin: -12px 0 30px;
+}
+
+.dados-cidade div {
+  background: #fff;
+  border: 1px solid #d7e0db;
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.dados-cidade strong {
+  color: #176b45;
+  font-size: 1.25rem;
+}
+
+.dados-cidade span {
+  color: #64736b;
+  font-size: .88rem;
+}
+
+.link-prefeitura {
+  margin: 0 0 32px;
+}
+
+.link-prefeitura a {
+  color: #176b45;
+  font-weight: 700;
+}

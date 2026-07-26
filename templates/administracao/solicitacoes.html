@@ -1,0 +1,106 @@
+{% extends "base_enterprise.html" %}
+{% block title %}Solicitações | Administração Enterprise{% endblock %}
+{% block content %}
+<div class="enterprise-page-header">
+  <div>
+    <h1 class="enterprise-page-title">Solicitações</h1>
+    <p class="enterprise-page-subtitle">Administração das solicitações de cadastro da plataforma</p>
+  </div>
+  <div class="enterprise-page-date">{{ total_pendentes }} pendentes de {{ total_solicitacoes }}</div>
+</div>
+
+<section class="enterprise-panel">
+  <div class="enterprise-panel-header enterprise-panel-header-wrap">
+    <div>
+      <h2 class="enterprise-panel-title">Solicitações recebidas</h2>
+      <span class="enterprise-panel-subtitle">{{ total_solicitacoes }} resultado{{ total_solicitacoes|pluralize }}</span>
+    </div>
+    <form method="get" class="enterprise-search-form">
+      <input type="search" class="form-control" name="q" value="{{ pesquisa }}"
+             placeholder="Nome, responsável, cidade ou categoria">
+      <button type="submit" class="btn btn-primary">Pesquisar</button>
+      {% if pesquisa %}
+      <a href="{% url 'administracao:solicitacoes' %}" class="btn btn-outline-secondary">Limpar</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="enterprise-panel-body p-0">
+    <div class="table-responsive">
+      <table class="table enterprise-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>ID</th><th>Solicitação</th><th>Tipo</th><th>Cidade</th>
+            <th>Categoria</th><th>Plano</th><th>Status</th><th>Enviada em</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for solicitacao in page_obj %}
+          <tr>
+            <td>#{{ solicitacao.id }}</td>
+            <td>
+              <strong>{{ solicitacao.nome }}</strong>
+              {% if solicitacao.responsavel %}
+              <div class="small text-muted mt-1">{{ solicitacao.responsavel }}</div>
+              {% endif %}
+            </td>
+            <td>{{ solicitacao.get_tipo_display }}</td>
+            <td>{{ solicitacao.cidade.nome }}</td>
+            <td>{% if solicitacao.categoria %}{{ solicitacao.categoria.nome }}{% else %}—{% endif %}</td>
+            <td>{% if solicitacao.plano %}{{ solicitacao.plano }}{% else %}—{% endif %}</td>
+            <td>
+              {% if solicitacao.status == "aprovado" %}
+              <span class="enterprise-status enterprise-status-success">Aprovado</span>
+              {% elif solicitacao.status == "recusado" %}
+              <span class="enterprise-status enterprise-status-danger">Recusado</span>
+              {% else %}
+              <span class="enterprise-status enterprise-status-warning">Pendente</span>
+              {% endif %}
+            </td>
+            <td>{{ solicitacao.criado_em|date:"d/m/Y H:i" }}</td>
+            <td>
+              {% if solicitacao.status == "pendente" %}
+              <div class="d-flex gap-2 flex-wrap">
+                <form method="post" action="{% url 'administracao:aprovar_solicitacao' solicitacao.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-success"
+                          onclick="return confirm('Aprovar esta solicitação e criar o cadastro?');">
+                    Aprovar
+                  </button>
+                </form>
+                <form method="post" action="{% url 'administracao:recusar_solicitacao' solicitacao.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger"
+                          onclick="return confirm('Recusar esta solicitação?');">
+                    Recusar
+                  </button>
+                </form>
+              </div>
+              {% else %}
+              <span class="text-muted">Processada</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="9" class="text-center py-5 text-muted">Nenhuma solicitação encontrada.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="enterprise-pagination" aria-label="Paginação de solicitações">
+  <ul class="pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">Anterior</a></li>
+    {% endif %}
+    <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">Próxima</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ cidade.titulo_seo|default:cidade.nome }}
+{% endblock %}
+
+{% block content %}
+
+<!-- VOLTAR -->
+<div class="mb-3">
+    <a href="/" class="text-decoration-none">
+        ← Voltar para cidades
+    </a>
+</div>
+
+
+<!-- BANNER DA CIDADE -->
+{% if cidade.banner %}
+
+<div
+    class="rounded-4 shadow-sm mb-4 overflow-hidden"
+    style="
+        min-height: 280px;
+        background:
+            linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)),
+            url('{{ cidade.banner.url }}') center/cover no-repeat;
+        display:flex;
+        align-items:center;
+    "
+>
+
+    <div class="p-5 text-white">
+
+        <h1 class="display-5 fw-bold">
+            {{ cidade.nome }}/{{ cidade.estado }}
+        </h1>
+
+        {% if cidade.descricao %}
+        <p class="lead mb-0">
+            {{ cidade.descricao|truncatewords:35 }}
+        </p>
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% else %}
+
+<div class="bg-primary text-white rounded-4 shadow-sm p-5 mb-4">
+
+    <h1 class="display-5 fw-bold">
+        {{ cidade.nome }}/{{ cidade.estado }}
+    </h1>
+
+    {% if cidade.descricao %}
+    <p class="lead mb-0">
+        {{ cidade.descricao|truncatewords:35 }}
+    </p>
+    {% else %}
+    <p class="lead mb-0">
+        Encontre empresas, profissionais e serviços em {{ cidade.nome }}.
+    </p>
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+
+<!-- INDICADORES -->
+<div class="row g-3 mb-5">
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body text-center">
+
+                <div class="fs-2 fw-bold text-primary">
+                    {{ empresas|length }}
+                </div>
+
+                <div class="text-muted">
+                    Empresas
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body text-center">
+
+                <div class="fs-2 fw-bold text-primary">
+                    {{ profissionais|length }}
+                </div>
+
+                <div class="text-muted">
+                    Profissionais
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="card border-0 shadow-sm h-100">
+
+            <div class="card-body text-center">
+
+                <div class="fs-2 fw-bold text-primary">
+                    {{ categorias|length }}
+                </div>
+
+                <div class="text-muted">
+                    Categorias
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- PESQUISA -->
+<section class="mb-5">
+
+    <h2 class="fw-bold mb-3">
+        O que você procura?
+    </h2>
+
+    <form method="get">
+
+        <div class="input-group input-group-lg shadow-sm">
+
+            <input
+                type="text"
+                name="q"
+                value="{{ busca }}"
+                class="form-control"
+                placeholder="Ex.: eletricista, oficina, advogado, pizzaria..."
+            >
+
+            <button
+                type="submit"
+                class="btn btn-primary"
+            >
+                Pesquisar
+            </button>
+
+        </div>
+
+    </form>
+
+    {% if busca %}
+
+    <div class="mt-3">
+
+        <span class="text-muted">
+            Resultados para:
+        </span>
+
+        <strong>
+            "{{ busca }}"
+        </strong>
+
+        <a
+            href="/{{ cidade.slug }}/"
+            class="ms-2 text-decoration-none"
+        >
+            Limpar pesquisa
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+
+<!-- CATEGORIAS -->
+<section class="mb-5">
+
+    <h2 class="fw-bold mb-4">
+        Categorias
+    </h2>
+
+    <div class="row g-3">
+
+        {% for categoria in categorias %}
+
+        <div class="col-6 col-md-4 col-lg-3">
+
+            {% include "includes/card_categoria.html" %}
+
+        </div>
+
+        {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-secondary">
+                Nenhuma categoria disponível.
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+<hr class="my-5">
+
+
+<!-- EMPRESAS -->
+<section class="mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="fw-bold mb-0">
+            Empresas
+        </h2>
+
+        <span class="badge bg-primary rounded-pill">
+            {{ empresas|length }}
+        </span>
+
+    </div>
+
+    <div class="row">
+
+        {% for empresa in empresas %}
+
+        <div class="col-md-6 col-xl-4 mb-4">
+
+            {% include "includes/card_empresa.html" %}
+
+        </div>
+
+        {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-secondary">
+                Nenhuma empresa encontrada.
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+<hr class="my-5">
+
+
+<!-- PROFISSIONAIS -->
+<section>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="fw-bold mb-0">
+            Profissionais
+        </h2>
+
+        <span class="badge bg-primary rounded-pill">
+            {{ profissionais|length }}
+        </span>
+
+    </div>
+
+    <div class="row">
+
+        {% for profissional in profissionais %}
+
+        <div class="col-md-6 col-xl-4 mb-4">
+
+            {% include "includes/card_profissional.html" %}
+
+        </div>
+
+        {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-secondary">
+                Nenhum profissional encontrado.
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}

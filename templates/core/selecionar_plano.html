@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}
+Selecionar Plano | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-4">
+
+    <div class="mb-4">
+
+        <a
+            href="{% url 'core:planos' %}"
+            class="btn btn-outline-secondary btn-sm mb-3"
+        >
+            ← Voltar aos planos
+        </a>
+
+        <h1 class="fw-bold mb-2">
+            Plano {{ plano.nome }}
+        </h1>
+
+        <p class="text-muted mb-0">
+            Selecione onde deseja aplicar este plano.
+        </p>
+
+    </div>
+
+
+    <div class="card border-0 shadow-sm mb-5">
+
+        <div class="card-body p-4">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-8">
+
+                    <h2 class="h4 fw-bold mb-2">
+                        {{ plano.nome }}
+                    </h2>
+
+                    {% if plano.descricao %}
+
+                        <p class="text-muted mb-3">
+                            {{ plano.descricao }}
+                        </p>
+
+                    {% endif %}
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        {% if plano.destaque_busca %}
+                            <span class="badge bg-primary">
+                                Destaque nas buscas
+                            </span>
+                        {% endif %}
+
+                        {% if plano.destaque_perfil %}
+                            <span class="badge bg-primary">
+                                Destaque no perfil
+                            </span>
+                        {% endif %}
+
+                        {% if plano.prioridade_resultados %}
+                            <span class="badge bg-primary">
+                                Prioridade nos resultados
+                            </span>
+                        {% endif %}
+
+                        {% if plano.selo_destaque %}
+                            <span class="badge bg-primary">
+                                Selo de destaque
+                            </span>
+                        {% endif %}
+
+                        {% if plano.acesso_metricas %}
+                            <span class="badge bg-success">
+                                Métricas
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <div class="col-md-4 text-md-end mt-4 mt-md-0">
+
+                    <div class="text-muted">
+                        Valor mensal
+                    </div>
+
+                    <div class="display-6 fw-bold">
+                        R$ {{ plano.preco_mensal|floatformat:2 }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {% if empresas %}
+
+        <h2 class="h4 fw-bold mb-3">
+            Minhas empresas
+        </h2>
+
+        <div class="row g-4 mb-5">
+
+            {% for empresa in empresas %}
+
+                <div class="col-md-6">
+
+                    <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body p-4 d-flex flex-column">
+
+                            <h3 class="h5 fw-bold mb-2">
+                                {{ empresa.nome_fantasia }}
+                            </h3>
+
+                            <p class="text-muted">
+                                {{ empresa.cidade.nome }}
+                            </p>
+
+                            <div class="alert alert-light border small">
+
+                                Ao confirmar, o plano vigente desta empresa,
+                                se houver, será encerrado e o
+                                <strong>Plano {{ plano.nome }}</strong>
+                                será ativado.
+
+                            </div>
+
+                            <form
+                                method="post"
+                                action="{% url 'core:alterar_plano_empresa' plano.pk empresa.pk %}"
+                                class="mt-auto"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary w-100"
+                                    onclick="return confirm('Confirma a alteração para o Plano {{ plano.nome|escapejs }}?');"
+                                >
+                                    Confirmar Plano {{ plano.nome }}
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    {% if profissionais %}
+
+        <h2 class="h4 fw-bold mb-3">
+            Meus perfis profissionais
+        </h2>
+
+        <div class="row g-4 mb-5">
+
+            {% for profissional in profissionais %}
+
+                <div class="col-md-6">
+
+                    <div class="card border-0 shadow-sm h-100">
+
+                        <div class="card-body p-4 d-flex flex-column">
+
+                            <h3 class="h5 fw-bold mb-2">
+                                {{ profissional.nome }}
+                            </h3>
+
+                            {% if profissional.especialidade %}
+
+                                <p class="mb-1">
+                                    {{ profissional.especialidade }}
+                                </p>
+
+                            {% endif %}
+
+                            <p class="text-muted">
+                                {{ profissional.cidade.nome }}
+                            </p>
+
+                            <div class="alert alert-light border small">
+
+                                Ao confirmar, o plano vigente deste perfil,
+                                se houver, será encerrado e o
+                                <strong>Plano {{ plano.nome }}</strong>
+                                será ativado.
+
+                            </div>
+
+                            <form
+                                method="post"
+                                action="{% url 'core:alterar_plano_profissional' plano.pk profissional.pk %}"
+                                class="mt-auto"
+                            >
+
+                                {% csrf_token %}
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary w-100"
+                                    onclick="return confirm('Confirma a alteração para o Plano {{ plano.nome|escapejs }}?');"
+                                >
+                                    Confirmar Plano {{ plano.nome }}
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% endif %}
+
+
+    {% if not empresas and not profissionais %}
+
+        <div class="alert alert-warning">
+
+            Nenhuma empresa ou perfil profissional
+            está disponível para receber este plano.
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="d-flex flex-wrap gap-2">
+
+        <a
+            href="{% url 'core:minha_conta' %}"
+            class="btn btn-outline-primary"
+        >
+            Minha Conta
+        </a>
+
+        <a
+            href="{% url 'core:planos' %}"
+            class="btn btn-outline-secondary"
+        >
+            Ver outros planos
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

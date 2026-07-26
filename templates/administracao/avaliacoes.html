@@ -1,0 +1,104 @@
+{% extends "base_enterprise.html" %}
+{% block title %}Avaliações | Administração Enterprise{% endblock %}
+{% block content %}
+<div class="enterprise-page-header">
+  <div>
+    <h1 class="enterprise-page-title">Avaliações</h1>
+    <p class="enterprise-page-subtitle">Controle de avaliações, notas e moderação da plataforma</p>
+  </div>
+  <div class="enterprise-page-date">{{ avaliacoes_aprovadas }} aprovadas de {{ total_avaliacoes }}</div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="enterprise-metric-card">
+      <p class="enterprise-metric-label">Avaliações</p>
+      <div class="enterprise-metric-value">{{ total_avaliacoes }}</div>
+      <span class="enterprise-metric-note">Total recebido</span>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="enterprise-metric-card">
+      <p class="enterprise-metric-label">Aprovadas</p>
+      <div class="enterprise-metric-value">{{ avaliacoes_aprovadas }}</div>
+      <span class="enterprise-metric-note">{{ avaliacoes_pendentes }} aguardando moderação</span>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="enterprise-metric-card">
+      <p class="enterprise-metric-label">Nota média</p>
+      <div class="enterprise-metric-value">{{ media_avaliacoes|floatformat:1 }}</div>
+      <span class="enterprise-metric-note">Média das avaliações aprovadas</span>
+    </div>
+  </div>
+</div>
+
+<section class="enterprise-panel">
+  <div class="enterprise-panel-header enterprise-panel-header-wrap">
+    <div>
+      <h2 class="enterprise-panel-title">Avaliações recebidas</h2>
+      <span class="enterprise-panel-subtitle">{{ total_avaliacoes }} resultado{{ total_avaliacoes|pluralize }}</span>
+    </div>
+    <form method="get" class="enterprise-search-form">
+      <input type="search" class="form-control" name="q" value="{{ pesquisa }}"
+             placeholder="Avaliador, empresa, profissional ou comentário">
+      <button type="submit" class="btn btn-primary">Pesquisar</button>
+      {% if pesquisa %}<a href="{% url 'administracao:avaliacoes' %}" class="btn btn-outline-secondary">Limpar</a>{% endif %}
+    </form>
+  </div>
+
+  <div class="enterprise-panel-body p-0">
+    <div class="table-responsive">
+      <table class="table enterprise-table align-middle mb-0">
+        <thead>
+          <tr><th>ID</th><th>Avaliador</th><th>Avaliado</th><th>Tipo</th><th>Nota</th><th>Comentário</th><th>Status</th><th>Data</th></tr>
+        </thead>
+        <tbody>
+        {% for avaliacao in page_obj %}
+          <tr>
+            <td>#{{ avaliacao.id }}</td>
+            <td><strong>{{ avaliacao.nome }}</strong></td>
+            <td>
+              {% if avaliacao.empresa %}
+                {{ avaliacao.empresa.nome_fantasia }}
+              {% elif avaliacao.profissional %}
+                {{ avaliacao.profissional.nome }}
+              {% else %}—{% endif %}
+            </td>
+            <td>
+              {% if avaliacao.empresa %}Empresa{% elif avaliacao.profissional %}Profissional{% else %}—{% endif %}
+            </td>
+            <td><strong>{{ avaliacao.nota }}/5</strong></td>
+            <td>{{ avaliacao.comentario|truncatechars:70 }}</td>
+            <td>
+              {% if avaliacao.aprovado %}
+                <span class="enterprise-status enterprise-status-success">Aprovada</span>
+              {% else %}
+                <span class="enterprise-status enterprise-status-warning">Pendente</span>
+              {% endif %}
+            </td>
+            <td>{{ avaliacao.criado_em|date:"d/m/Y H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" class="text-center py-5 text-muted">Nenhuma avaliação encontrada.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="enterprise-pagination" aria-label="Paginação de avaliações">
+  <ul class="pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">Anterior</a></li>
+    {% endif %}
+    <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">Próxima</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

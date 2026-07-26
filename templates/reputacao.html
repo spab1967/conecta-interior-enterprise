@@ -1,0 +1,83 @@
+{% if reputacao %}
+
+<div class="mt-4">
+
+    <div
+        class="alert alert-{{ reputacao.classe }} mb-0"
+        role="alert"
+    >
+
+        <div class="d-flex align-items-start">
+
+            <div
+                class="me-3"
+                style="font-size: 30px;"
+            >
+
+                {% if reputacao.consolidada %}
+
+                    {% if reputacao.classe == "success" %}
+                        🏆
+                    {% elif reputacao.classe == "primary" %}
+                        👍
+                    {% elif reputacao.classe == "warning" %}
+                        ⚠️
+                    {% elif reputacao.classe == "danger" %}
+                        ⚠️
+                    {% else %}
+                        ★
+                    {% endif %}
+
+                {% else %}
+
+                    {% if total_avaliacoes > 0 %}
+                        📊
+                    {% else %}
+                        ☆
+                    {% endif %}
+
+                {% endif %}
+
+            </div>
+
+
+            <div>
+
+                <h3 class="h6 fw-bold mb-1">
+                    {{ reputacao.titulo }}
+                </h3>
+
+                <p class="mb-0">
+                    {{ reputacao.descricao }}
+                </p>
+
+
+                {% if not reputacao.consolidada and total_avaliacoes > 0 %}
+
+                    <small class="d-block mt-2">
+
+                        {% if total_avaliacoes == 1 %}
+
+                            Mais 2 avaliações são necessárias para
+                            consolidar a reputação.
+
+                        {% elif total_avaliacoes == 2 %}
+
+                            Mais 1 avaliação é necessária para
+                            consolidar a reputação.
+
+                        {% endif %}
+
+                    </small>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}

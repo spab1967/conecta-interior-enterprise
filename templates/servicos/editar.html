@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar serviço | Conecta Interior
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <a href="{% url 'core:minha_conta' %}" class="text-decoration-none">← Voltar para Minha Conta</a>
+
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-body p-4 p-lg-5">
+                <h1 class="h3 fw-bold mb-4">Editar serviço</h1>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nome</label>
+                        {{ form.nome }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Valor</label>
+                        {{ form.valor }}
+                    </div>
+
+                    <div class="form-check mb-4">
+                        {{ form.ativo }}
+                        <label class="form-check-label">Serviço ativo</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Salvar alterações</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

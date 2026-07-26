@@ -1,0 +1,66 @@
+{% if total_avaliacoes > 0 %}
+
+<div class="mt-4">
+
+    <h3 class="h6 fw-bold mb-3">
+        Distribuição das avaliações
+    </h3>
+
+    {% for item in distribuicao_avaliacoes %}
+
+        <div class="row align-items-center mb-2">
+
+            <div
+                class="col-auto"
+                style="width: 70px;"
+            >
+                <strong>
+                    {{ item.nota }} ★
+                </strong>
+            </div>
+
+            <div class="col">
+
+                <div
+                    class="progress"
+                    role="progressbar"
+                    aria-label="{{ item.nota }} estrelas"
+                    aria-valuenow="{{ item.percentual }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    style="height: 10px;"
+                >
+
+                    <div
+                        class="progress-bar bg-warning"
+                        style="width: {{ item.percentual }}%;"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div
+                class="col-auto text-end"
+                style="width: 90px;"
+            >
+                <span class="text-muted">
+
+                    {{ item.quantidade }}
+
+                    <small>
+                        ({{ item.percentual }}%)
+                    </small>
+
+                </span>
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endif %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Perfil Profissional | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-9">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <div>
+                <h1 class="fw-bold mb-1">
+                    Editar perfil profissional
+                </h1>
+
+                <p class="text-muted mb-0">
+                    {{ profissional.nome }}
+                </p>
+            </div>
+
+            <a
+                href="{% url 'core:minha_conta' %}"
+                class="btn btn-outline-secondary"
+            >
+                ← Voltar
+            </a>
+
+        </div>
+
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4">
+
+                <form
+                    method="post"
+                    enctype="multipart/form-data"
+                >
+
+                    {% csrf_token %}
+
+
+                    {% if form.non_field_errors %}
+
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+
+                    {% endif %}
+
+
+                    {% for field in form %}
+
+                        <div class="mb-4">
+
+                            {% if field.field.widget.input_type == "checkbox" %}
+
+                                <div class="form-check">
+
+                                    {{ field }}
+
+                                    <label
+                                        class="form-check-label"
+                                        for="{{ field.id_for_label }}"
+                                    >
+                                        {{ field.label }}
+                                    </label>
+
+                                </div>
+
+                            {% else %}
+
+                                <label
+                                    for="{{ field.id_for_label }}"
+                                    class="form-label fw-semibold"
+                                >
+                                    {{ field.label }}
+                                </label>
+
+                                {{ field }}
+
+                            {% endif %}
+
+
+                            {% if field.help_text %}
+
+                                <div class="form-text">
+                                    {{ field.help_text }}
+                                </div>
+
+                            {% endif %}
+
+
+                            {% for error in field.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Salvar alterações
+                        </button>
+
+                        <a
+                            href="{% url 'core:minha_conta' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Cancelar
+                        </a>
+
+                        <a
+                            href="{% url 'core:profissional_detalhe' profissional.cidade.slug profissional.slug %}"
+                            class="btn btn-outline-primary"
+                            target="_blank"
+                        >
+                            Ver perfil público
+                        </a>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

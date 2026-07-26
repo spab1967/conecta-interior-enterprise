@@ -1,0 +1,149 @@
+.cabecalho{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+gap:40px;
+
+}
+
+
+nav{
+
+display:flex;
+
+gap:30px;
+
+}
+
+nav a{
+
+font-weight:700;
+
+color:#176b45;
+
+}
+
+nav a:hover{
+
+color:#0f5e3a;
+
+}
+
+.rodape{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+flex-wrap:wrap;
+
+gap:15px;
+
+}
+
+@media(max-width:700px){
+
+.cabecalho{
+
+flex-direction:column;
+
+}
+
+.rodape{
+
+flex-direction:column;
+
+text-align:center;
+
+}
+
+}
+.cabecalho {
+    min-height: 76px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+}
+
+.marca-completa {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icone-marca {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #176b45, #23885c);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    box-shadow: 0 8px 20px rgba(23, 107, 69, 0.22);
+}
+
+.nome-marca {
+    color: #176b45;
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.menu-principal {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.menu-principal a {
+    color: #17231d;
+    font-weight: 700;
+    padding: 10px 14px;
+    border-radius: 9px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.menu-principal a:hover {
+    color: #176b45;
+    background: #e6f3ec;
+}
+
+.rodape {
+    min-height: auto;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+@media (max-width: 700px) {
+    .cabecalho {
+        min-height: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .nome-marca {
+        font-size: 1.2rem;
+    }
+
+    .rodape {
+        flex-direction: column;
+        text-align: center;
+    }
+}

@@ -1,0 +1,723 @@
+{% extends "base.html" %}
+
+{% block title %}
+Minha Conta | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+
+    <div>
+        <h1 class="fw-bold mb-1">
+            Minha Conta
+        </h1>
+
+        <p class="text-muted mb-0">
+            Olá, {{ request.user.get_full_name|default:request.user.username }}.
+        </p>
+    </div>
+
+    <form
+        method="post"
+        action="{% url 'core:logout' %}"
+    >
+        {% csrf_token %}
+
+        <button
+            type="submit"
+            class="btn btn-outline-secondary"
+        >
+            Sair
+        </button>
+    </form>
+
+</div>
+
+
+{% if messages %}
+
+    {% for message in messages %}
+
+        <div
+            class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+            role="alert"
+        >
+            {{ message }}
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Fechar"
+            ></button>
+        </div>
+
+    {% endfor %}
+
+{% endif %}
+
+
+{% if empresas_cliente %}
+
+    <h2 class="h4 fw-bold mb-3">
+        Minhas empresas
+    </h2>
+
+    <div class="row g-4 mb-5">
+
+        {% for item in empresas_cliente %}
+
+            <div class="col-md-6 col-lg-4">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-body d-flex flex-column">
+
+                        <h3 class="h5 fw-bold mb-1">
+                            {{ item.objeto.nome_fantasia }}
+                        </h3>
+
+                        <p class="text-muted mb-3">
+                            {{ item.objeto.cidade.nome }}
+                        </p>
+
+
+                        {% if item.assinatura %}
+
+                            <div class="border rounded p-3 mb-3 bg-light">
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                    <strong>
+                                        Assinatura
+                                    </strong>
+
+                                    <span class="badge bg-success">
+                                        Ativa
+                                    </span>
+
+                                </div>
+
+
+                                <div class="mb-2">
+
+                                    <span class="text-muted">
+                                        Plano:
+                                    </span>
+
+                                    <strong>
+                                        {{ item.plano.nome }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="mb-2">
+
+                                    <span class="text-muted">
+                                        Valor:
+                                    </span>
+
+                                    {% if item.plano.preco_mensal > 0 %}
+
+                                        <strong>
+                                            R$ {{ item.plano.preco_mensal|floatformat:2 }}/mês
+                                        </strong>
+
+                                    {% else %}
+
+                                        <strong>
+                                            Gratuito
+                                        </strong>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="mb-2">
+
+                                    <span class="text-muted">
+                                        Início:
+                                    </span>
+
+                                    {{ item.assinatura.inicio|date:"d/m/Y" }}
+
+                                </div>
+
+
+                                <div class="mb-2">
+
+                                    <span class="text-muted">
+                                        Vencimento:
+                                    </span>
+
+                                    {% if item.assinatura.vencimento %}
+
+                                        <strong>
+                                            {{ item.assinatura.vencimento|date:"d/m/Y" }}
+                                        </strong>
+
+                                    {% else %}
+
+                                        Sem vencimento
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                {% if item.dias_restantes != None %}
+
+                                    <div class="mb-2">
+
+                                        <span class="text-muted">
+                                            Dias restantes:
+                                        </span>
+
+                                        <strong>
+                                            {{ item.dias_restantes }}
+                                        </strong>
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                {% if item.renovacao_programada %}
+
+                                    <div class="alert alert-success mt-3 mb-3">
+
+                                        <strong>
+                                            Renovação programada
+                                        </strong>
+
+                                        <div class="mt-2">
+                                            Plano:
+                                            <strong>
+                                                {{ item.renovacao_programada.plano.nome }}
+                                            </strong>
+                                        </div>
+
+                                        <div>
+                                            Início:
+                                            <strong>
+                                                {{ item.renovacao_programada.inicio|date:"d/m/Y" }}
+                                            </strong>
+                                        </div>
+
+                                        <div>
+                                            Vencimento:
+                                            <strong>
+                                                {% if item.renovacao_programada.vencimento %}
+                                                    {{ item.renovacao_programada.vencimento|date:"d/m/Y" }}
+                                                {% else %}
+                                                    Sem vencimento
+                                                {% endif %}
+                                            </strong>
+                                        </div>
+
+                                    </div>
+
+                                {% endif %}
+
+                                {% if item.pedido_pendente %}
+
+                                    <div class="alert alert-warning mt-3 mb-3">
+
+                                        <strong>
+                                            Cobrança pendente
+                                        </strong>
+
+                                        <div class="mt-2">
+                                            Plano:
+                                            <strong>
+                                                {{ item.pedido_pendente.plano.nome }}
+                                            </strong>
+                                        </div>
+
+                                        <div>
+                                            Valor:
+                                            <strong>
+                                                R$ {{ item.pedido_pendente.valor|floatformat:2 }}
+                                            </strong>
+                                        </div>
+
+                                        <a
+                                            href="{% url 'financeiro:pagamento' item.pedido_pendente.pk %}"
+                                            class="btn btn-warning btn-sm mt-2"
+                                        >
+                                            Pagar agora
+                                        </a>
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div>
+
+                                    <span class="text-muted">
+                                        Renovação automática:
+                                    </span>
+
+                                    {% if item.assinatura.renovacao_automatica %}
+
+                                        <strong class="text-success">
+                                            Ativada
+                                        </strong>
+
+                                    {% else %}
+
+                                        <strong>
+                                            Desativada
+                                        </strong>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="small text-muted mb-3">
+
+                                {% if item.plano.acesso_metricas %}
+
+                                    ✓ Métricas de desempenho disponíveis
+
+                                {% else %}
+
+                                    Métricas não incluídas neste plano
+
+                                {% endif %}
+
+                            </div>
+
+
+                        {% else %}
+
+                            <div class="alert alert-secondary py-2">
+
+                                <strong>
+                                    Sem assinatura vigente
+                                </strong>
+
+                                <div class="small mt-1">
+                                    Consulte os planos disponíveis para este cadastro.
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="mt-auto d-grid gap-2">
+
+                            <a
+                                href="{% url 'core:editar_empresa' item.objeto.pk %}"
+                                class="btn btn-outline-secondary"
+                            >
+                                ✏️ Editar meus dados
+                            </a>
+
+                            <a
+                                href="{% url 'servicos:gerenciar_empresa' item.objeto.pk %}"
+                                class="btn btn-outline-primary"
+                            >
+                                🧰 Gerenciar serviços
+                            </a>
+
+
+                            {% if item.plano and item.plano.acesso_metricas %}
+
+                                <a
+                                    href="{% url 'metricas:painel_empresa' item.objeto.pk %}"
+                                    class="btn btn-primary"
+                                >
+                                    📊 Ver minhas métricas
+                                </a>
+
+                            {% endif %}
+
+
+                            <a
+                                href="{% url 'core:empresa_detalhe' item.objeto.cidade.slug item.objeto.slug %}"
+                                class="btn btn-outline-primary"
+                            >
+                                👁 Ver minha página pública
+                            </a>
+
+
+                            <a
+                                href="{% url 'core:planos' %}"
+                                class="btn btn-outline-dark"
+                            >
+                                💳 Ver planos
+                            </a>
+                            <a
+                            href="{% url 'financeiro:historico' %}"
+                            class="btn btn-outline-success"
+                            >
+                           Histórico Financeiro
+                           </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% endif %}
+
+
+{% if profissionais_cliente %}
+
+    <h2 class="h4 fw-bold mb-3">
+        Meus perfis profissionais
+    </h2>
+
+    <div class="row g-4 mb-5">
+
+        {% for item in profissionais_cliente %}
+
+            <div class="col-md-6 col-lg-4">
+
+                <div class="card border-0 shadow-sm h-100">
+
+                    <div class="card-body d-flex flex-column">
+
+                        <h3 class="h5 fw-bold mb-1">
+                            {{ item.objeto.nome }}
+                        </h3>
+
+
+                        {% if item.objeto.especialidade %}
+
+                            <p class="text-muted mb-1">
+                                {{ item.objeto.especialidade }}
+                            </p>
+
+                        {% endif %}
+
+
+                        <p class="text-muted mb-3">
+                            {{ item.objeto.cidade.nome }}
+                        </p>
+
+
+                        {% if item.assinatura %}
+
+                            <div class="border rounded p-3 mb-3 bg-light">
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                    <strong>
+                                        Assinatura
+                                    </strong>
+
+                                    <span class="badge bg-success">
+                                        Ativa
+                                    </span>
+
+                                </div>
+
+
+                                <div class="mb-2">
+
+                                    <span class="text-muted">
+                                        Plano:
+                                    </span>
+
+                                    <strong>
+                                        {{ item.plano.nome }}
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="mb-2">
+
+                                    <span class="text-muted">
+                                        Valor:
+                                    </span>
+
+                                    {% if item.plano.preco_mensal > 0 %}
+
+                                        <strong>
+                                            R$ {{ item.plano.preco_mensal|floatformat:2 }}/mês
+                                        </strong>
+
+                                    {% else %}
+
+                                        <strong>
+                                            Gratuito
+                                        </strong>
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div class="mb-2">
+
+                                    <span class="text-muted">
+                                        Início:
+                                    </span>
+
+                                    {{ item.assinatura.inicio|date:"d/m/Y" }}
+
+                                </div>
+
+
+                                <div class="mb-2">
+
+                                    <span class="text-muted">
+                                        Vencimento:
+                                    </span>
+
+                                    {% if item.assinatura.vencimento %}
+
+                                        <strong>
+                                            {{ item.assinatura.vencimento|date:"d/m/Y" }}
+                                        </strong>
+
+                                    {% else %}
+
+                                        Sem vencimento
+
+                                    {% endif %}
+
+                                </div>
+
+
+                                {% if item.dias_restantes != None %}
+
+                                    <div class="mb-2">
+
+                                        <span class="text-muted">
+                                            Dias restantes:
+                                        </span>
+
+                                        <strong>
+                                            {{ item.dias_restantes }}
+                                        </strong>
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                {% if item.renovacao_programada %}
+
+                                    <div class="alert alert-success mt-3 mb-3">
+
+                                        <strong>
+                                            Renovação programada
+                                        </strong>
+
+                                        <div class="mt-2">
+                                            Plano:
+                                            <strong>
+                                                {{ item.renovacao_programada.plano.nome }}
+                                            </strong>
+                                        </div>
+
+                                        <div>
+                                            Início:
+                                            <strong>
+                                                {{ item.renovacao_programada.inicio|date:"d/m/Y" }}
+                                            </strong>
+                                        </div>
+
+                                        <div>
+                                            Vencimento:
+                                            <strong>
+                                                {% if item.renovacao_programada.vencimento %}
+                                                    {{ item.renovacao_programada.vencimento|date:"d/m/Y" }}
+                                                {% else %}
+                                                    Sem vencimento
+                                                {% endif %}
+                                            </strong>
+                                        </div>
+
+                                    </div>
+
+                                {% endif %}
+
+                                {% if item.pedido_pendente %}
+
+                                    <div class="alert alert-warning mt-3 mb-3">
+
+                                        <strong>
+                                            Cobrança pendente
+                                        </strong>
+
+                                        <div class="mt-2">
+                                            Plano:
+                                            <strong>
+                                                {{ item.pedido_pendente.plano.nome }}
+                                            </strong>
+                                        </div>
+
+                                        <div>
+                                            Valor:
+                                            <strong>
+                                                R$ {{ item.pedido_pendente.valor|floatformat:2 }}
+                                            </strong>
+                                        </div>
+
+                                        <a
+                                            href="{% url 'financeiro:pagamento' item.pedido_pendente.pk %}"
+                                            class="btn btn-warning btn-sm mt-2"
+                                        >
+                                            Pagar agora
+                                        </a>
+
+                                    </div>
+
+                                {% endif %}
+
+
+                                <div>
+
+                                    <span class="text-muted">
+                                        Renovação automática:
+                                    </span>
+
+                                    {% if item.assinatura.renovacao_automatica %}
+
+                                        <strong class="text-success">
+                                            Ativada
+                                        </strong>
+
+                                    {% else %}
+
+                                        <strong>
+                                            Desativada
+                                        </strong>
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="small text-muted mb-3">
+
+                                {% if item.plano.acesso_metricas %}
+
+                                    ✓ Métricas de desempenho disponíveis
+
+                                {% else %}
+
+                                    Métricas não incluídas neste plano
+
+                                {% endif %}
+
+                            </div>
+
+
+                        {% else %}
+
+                            <div class="alert alert-secondary py-2">
+
+                                <strong>
+                                    Sem assinatura vigente
+                                </strong>
+
+                                <div class="small mt-1">
+                                    Consulte os planos disponíveis para este cadastro.
+                                </div>
+
+                            </div>
+
+                        {% endif %}
+
+
+                        <div class="mt-auto d-grid gap-2">
+
+                            <a
+                                href="{% url 'core:editar_profissional' item.objeto.pk %}"
+                                class="btn btn-outline-secondary"
+                            >
+                                ✏️ Editar meus dados
+                            </a>
+
+                            <a
+                                href="{% url 'servicos:gerenciar_profissional' item.objeto.pk %}"
+                                class="btn btn-outline-primary"
+                            >
+                                🧰 Gerenciar serviços
+                            </a>
+
+
+                            {% if item.plano and item.plano.acesso_metricas %}
+
+                                <a
+                                    href="{% url 'metricas:painel_profissional' item.objeto.pk %}"
+                                    class="btn btn-primary"
+                                >
+                                    📊 Ver minhas métricas
+                                </a>
+
+                            {% endif %}
+
+
+                            <a
+                                href="{% url 'core:profissional_detalhe' item.objeto.cidade.slug item.objeto.slug %}"
+                                class="btn btn-outline-primary"
+                            >
+                                👁 Ver meu perfil público
+                            </a>
+
+
+                            <a
+                                href="{% url 'core:planos' %}"
+                                class="btn btn-outline-dark"
+                            >
+                                💳 Ver planos
+                            </a>
+
+                            <a
+                                href="{% url 'financeiro:historico' %}"
+                                class="btn btn-outline-success"
+                            >
+                                Histórico Financeiro
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% endif %}
+
+
+{% if not empresas_cliente and not profissionais_cliente %}
+
+    <div class="alert alert-info">
+
+        Sua conta ainda não está vinculada
+        a nenhuma empresa ou profissional.
+
+    </div>
+
+{% endif %}
+
+{% endblock %}

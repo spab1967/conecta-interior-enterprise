@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}
+Solicitação enviada | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-7">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-5 text-center">
+
+                <div
+                    class="mb-4"
+                    style="font-size: 64px;"
+                >
+                    ✓
+                </div>
+
+                <h1 class="fw-bold mb-3">
+                    Solicitação enviada
+                </h1>
+
+                <p class="lead">
+                    Recebemos os dados para cadastro no
+                    Conecta Interior.
+                </p>
+
+                <p class="text-muted">
+                    A solicitação será analisada antes da
+                    publicação na plataforma.
+                </p>
+
+
+                {% if solicitacao_id %}
+
+                    <div class="alert alert-light border my-4">
+
+                        Número da solicitação:
+
+                        <strong>
+                            #{{ solicitacao_id }}
+                        </strong>
+
+                    </div>
+
+                {% endif %}
+
+
+                <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+
+                    <a
+                        href="{% url 'core:home' %}"
+                        class="btn btn-primary"
+                    >
+                        Voltar ao início
+                    </a>
+
+                    <a
+                        href="{% url 'cadastros:anuncie' %}"
+                        class="btn btn-outline-primary"
+                    >
+                        Enviar outro cadastro
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{% endblock %}

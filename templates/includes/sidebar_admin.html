@@ -1,0 +1,497 @@
+{% load static %}
+
+<aside class="enterprise-sidebar">
+
+    <div class="enterprise-brand">
+
+        <div class="enterprise-brand-logo">
+
+            <img
+                src="{% static 'img/conecta-interior-logo.svg' %}"
+                alt="Conecta Interior"
+            >
+
+        </div>
+
+        <div class="enterprise-brand-text">
+
+            <p class="enterprise-brand-title">
+                CONECTA INTERIOR
+            </p>
+
+            <span class="enterprise-brand-subtitle">
+                Enterprise 1.0
+            </span>
+
+        </div>
+
+    </div>
+
+    <div class="enterprise-menu-label">
+        Administração
+    </div>
+
+    <nav>
+
+        <ul class="enterprise-nav">
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:dashboard' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'dashboard' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <rect
+                                x="3"
+                                y="3"
+                                width="7"
+                                height="7"
+                                rx="1"
+                            ></rect>
+
+                            <rect
+                                x="14"
+                                y="3"
+                                width="7"
+                                height="7"
+                                rx="1"
+                            ></rect>
+
+                            <rect
+                                x="3"
+                                y="14"
+                                width="7"
+                                height="7"
+                                rx="1"
+                            ></rect>
+
+                            <rect
+                                x="14"
+                                y="14"
+                                width="7"
+                                height="7"
+                                rx="1"
+                            ></rect>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Dashboard
+                    </span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:empresas' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'empresas' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path d="M3 21h18"></path>
+                            <path d="M5 21V7l7-4 7 4v14"></path>
+                            <path d="M9 21v-6h6v6"></path>
+                            <path d="M9 9h.01"></path>
+                            <path d="M15 9h.01"></path>
+                            <path d="M9 12h.01"></path>
+                            <path d="M15 12h.01"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Empresas
+                    </span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:profissionais' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'profissionais' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <circle cx="12" cy="8" r="4"></circle>
+
+                            <path
+                                d="M4 21a8 8 0 0 1 16 0"
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Profissionais
+                    </span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:servicos' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'servicos' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path d="M4 7h16"></path>
+                            <path d="M4 12h16"></path>
+                            <path d="M4 17h10"></path>
+                            <circle cx="18" cy="17" r="2"></circle>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Serviços
+                    </span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:solicitacoes' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'solicitacoes' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path
+                                d="M4 4h16v16H4z"
+                            ></path>
+
+                            <path d="M8 9h8"></path>
+                            <path d="M8 13h6"></path>
+                            <path d="M8 17h4"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Solicitações
+                    </span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:assinaturas' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'assinaturas' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path
+                                d="M6 3h12v18l-6-4-6 4z"
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Assinaturas
+                    </span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:financeiro' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'financeiro' or request.resolver_match.url_name == 'pagamentos' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <rect
+                                x="3"
+                                y="5"
+                                width="18"
+                                height="14"
+                                rx="2"
+                            ></rect>
+
+                            <path d="M3 10h18"></path>
+                            <path d="M7 15h2"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Financeiro
+                    </span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:avaliacoes' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'avaliacoes' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path
+                                d="
+                                    M12 3
+                                    14.8 8.7
+                                    21 9.6
+                                    16.5 14
+                                    17.6 20.2
+                                    12 17.3
+                                    6.4 20.2
+                                    7.5 14
+                                    3 9.6
+                                    9.2 8.7
+                                    Z
+                                "
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Avaliações
+                    </span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:metricas' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'metricas' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <path d="M4 19V9"></path>
+                            <path d="M10 19V5"></path>
+                            <path d="M16 19v-7"></path>
+                            <path d="M22 19H2"></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Métricas
+                    </span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a
+                    href="{% url 'administracao:configuracoes' %}"
+                    class="
+                        enterprise-nav-link
+                        {% if request.resolver_match.url_name == 'configuracoes' %}
+                            active
+                        {% endif %}
+                    "
+                >
+
+                    <span class="enterprise-nav-icon">
+
+                        <svg viewBox="0 0 24 24">
+
+                            <circle cx="12" cy="12" r="3"></circle>
+
+                            <path
+                                d="
+                                    M19.4 15
+                                    a1.7 1.7 0 0 0 .3 1.9
+                                    l.1.1-2 3.4-.1-.1
+                                    a1.7 1.7 0 0 0-2-.2
+                                    1.7 1.7 0 0 0-1 1.5
+                                    V22h-4v-.4
+                                    a1.7 1.7 0 0 0-1-1.5
+                                    1.7 1.7 0 0 0-2 .2
+                                    l-.1.1-2-3.4.1-.1
+                                    A1.7 1.7 0 0 0 5 15
+                                    a1.7 1.7 0 0 0-1.7-1
+                                    H3v-4h.3
+                                    A1.7 1.7 0 0 0 5 9
+                                    a1.7 1.7 0 0 0-.3-1.9
+                                    l-.1-.1 2-3.4.1.1
+                                    a1.7 1.7 0 0 0 2 .2
+                                    1.7 1.7 0 0 0 1-1.5
+                                    V2h4v.4
+                                    a1.7 1.7 0 0 0 1 1.5
+                                    1.7 1.7 0 0 0 2-.2
+                                    l.1-.1 2 3.4-.1.1
+                                    A1.7 1.7 0 0 0 19 9
+                                    a1.7 1.7 0 0 0 1.7 1
+                                    h.3v4h-.3
+                                    a1.7 1.7 0 0 0-1.3 1
+                                "
+                            ></path>
+
+                        </svg>
+
+                    </span>
+
+                    <span class="enterprise-nav-text">
+                        Configurações
+                    </span>
+
+                </a>
+
+            </li>
+
+        </ul>
+
+    </nav>
+
+    <div class="enterprise-sidebar-footer">
+
+        <div class="enterprise-user">
+
+            <div class="enterprise-user-avatar">
+
+                {% if request.user.first_name %}
+
+                    {{ request.user.first_name|slice:":1"|upper }}
+
+                {% else %}
+
+                    {{ request.user.username|slice:":1"|upper }}
+
+                {% endif %}
+
+            </div>
+
+            <div>
+
+                <p class="enterprise-user-name">
+
+                    {% if request.user.get_full_name %}
+
+                        {{ request.user.get_full_name }}
+
+                    {% else %}
+
+                        {{ request.user.username }}
+
+                    {% endif %}
+
+                </p>
+
+                <span class="enterprise-user-role">
+                    Administrador
+                </span>
+
+            </div>
+
+        </div>
+
+        <span class="enterprise-version">
+            Conecta Interior Enterprise · Versão 1.0
+        </span>
+
+    </div>
+
+</aside>

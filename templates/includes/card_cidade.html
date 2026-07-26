@@ -1,0 +1,30 @@
+<div class="card shadow-sm border-0 h-100">
+
+    <div class="card-body text-center">
+
+        <h5 class="fw-bold">
+            {{ cidade.nome }}
+        </h5>
+
+        <p class="text-muted">
+            {{ cidade.estado }}
+        </p>
+
+        <p class="small text-secondary">
+
+            {{ cidade.empresas.count }} empresas<br>
+            {{ cidade.profissionais.count }} profissionais
+
+        </p>
+
+        <a
+            href="/{{ cidade.slug }}/"
+            class="btn btn-primary w-100">
+
+            Entrar na Cidade
+
+        </a>
+
+    </div>
+
+</div>

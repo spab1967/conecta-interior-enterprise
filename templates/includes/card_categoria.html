@@ -1,0 +1,29 @@
+<div class="card shadow-sm border-0 h-100">
+
+    <div class="card-body text-center p-4">
+
+        <div
+            class="mb-3"
+            style="font-size: 38px;"
+        >
+            {{ categoria.icone }}
+        </div>
+
+        <h5 class="fw-bold">
+            {{ categoria.nome }}
+        </h5>
+
+        <p class="small text-muted">
+            Ver empresas desta categoria
+        </p>
+
+        <a
+            href="/{{ cidade.slug }}/categoria/{{ categoria.slug }}/"
+            class="btn btn-outline-primary w-100"
+        >
+            Explorar
+        </a>
+
+    </div>
+
+</div>

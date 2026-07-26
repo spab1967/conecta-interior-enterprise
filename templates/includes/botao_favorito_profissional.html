@@ -1,0 +1,29 @@
+<form
+    method="post"
+    action="{% url 'favoritos:alternar_profissional' profissional.cidade.slug profissional.slug %}"
+    class="d-inline"
+>
+
+    {% csrf_token %}
+
+    {% if esta_favoritado %}
+
+        <button
+            type="submit"
+            class="btn btn-danger btn-lg"
+        >
+            ♥ Favoritado
+        </button>
+
+    {% else %}
+
+        <button
+            type="submit"
+            class="btn btn-outline-danger btn-lg"
+        >
+            ♡ Adicionar aos favoritos
+        </button>
+
+    {% endif %}
+
+</form>

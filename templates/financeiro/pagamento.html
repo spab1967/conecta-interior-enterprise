@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}
+Pagamento | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-7">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="text-center mb-4">
+
+                        <h1 class="h2 fw-bold">
+                            Finalizar contratação
+                        </h1>
+
+                        <p class="text-muted">
+                            Confira os dados antes de confirmar o pagamento.
+                        </p>
+
+                    </div>
+
+                    <div class="border rounded p-4 mb-4">
+
+                        <div class="row mb-3">
+
+                            <div class="col-5 text-muted">
+                                Titular
+                            </div>
+
+                            <div class="col-7 text-end fw-semibold">
+                                {{ pedido.titular }}
+                            </div>
+
+                        </div>
+
+                        <div class="row mb-3">
+
+                            <div class="col-5 text-muted">
+                                Plano
+                            </div>
+
+                            <div class="col-7 text-end fw-semibold">
+                                {{ pedido.plano.nome }}
+                            </div>
+
+                        </div>
+
+                        <div class="row mb-3">
+
+                            <div class="col-5 text-muted">
+                                Status
+                            </div>
+
+                            <div class="col-7 text-end">
+                                <span class="badge bg-warning text-dark">
+                                    Pendente
+                                </span>
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <div class="row align-items-center">
+
+                            <div class="col-5 fw-bold">
+                                Total
+                            </div>
+
+                            <div class="col-7 text-end">
+
+                                <span class="h3 fw-bold mb-0">
+                                    R$ {{ pedido.valor }}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="alert alert-info">
+
+                        <strong>Ambiente de validação financeira.</strong>
+
+                        <br>
+
+                        Nesta etapa, o botão abaixo simula a confirmação
+                        do pagamento. A integração com o gateway de
+                        pagamento será realizada na próxima etapa.
+
+                    </div>
+
+                    <div class="d-grid gap-2">
+
+                        <form
+                            method="post"
+                            action="{% url 'financeiro:confirmar' pagamento.id %}"
+                        >
+
+                            {% csrf_token %}
+
+                            <button
+                                type="submit"
+                                class="btn btn-success btn-lg w-100"
+                            >
+                                Confirmar pagamento
+                            </button>
+
+                        </form>
+
+                        <a
+                            href="{% url 'core:minha_conta' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            Voltar para Minha Conta
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

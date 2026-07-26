@@ -1,0 +1,509 @@
+{% extends "base_enterprise.html" %}
+{% block title %}
+Dashboard Executivo | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+        <header class="enterprise-page-header">
+
+            <div>
+
+                <span class="enterprise-page-eyebrow">
+                    Visão administrativa
+                </span>
+
+                <h1 class="enterprise-page-title">
+                    Dashboard Executivo
+                </h1>
+
+                <p class="enterprise-page-description">
+                    Indicadores consolidados da plataforma
+                    Conecta Interior.
+                </p>
+
+            </div>
+
+            <div class="enterprise-page-date">
+
+                {% now "d/m/Y · H:i" %}
+
+            </div>
+
+        </header>
+
+        <section class="row g-4">
+
+            <div class="col-sm-6 col-xl-3">
+
+                <article class="enterprise-metric-card">
+
+                    <div class="enterprise-metric-head">
+
+                        <p class="enterprise-metric-label">
+                            Empresas
+                        </p>
+
+                        <span class="enterprise-metric-icon">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <path d="M3 21h18"></path>
+                                <path d="M5 21V7l7-4 7 4v14"></path>
+                                <path d="M9 21v-6h6v6"></path>
+
+                            </svg>
+
+                        </span>
+
+                    </div>
+
+                    <p class="enterprise-metric-value">
+                        {{ total_empresas }}
+                    </p>
+
+                    <span class="enterprise-metric-note">
+
+                        <span class="enterprise-metric-positive">
+                            {{ empresas_ativas }}
+                        </span>
+
+                        empresas ativas
+
+                    </span>
+
+                </article>
+
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+
+                <article class="enterprise-metric-card">
+
+                    <div class="enterprise-metric-head">
+
+                        <p class="enterprise-metric-label">
+                            Profissionais
+                        </p>
+
+                        <span class="enterprise-metric-icon">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <circle cx="12" cy="8" r="4"></circle>
+
+                                <path
+                                    d="M4 21a8 8 0 0 1 16 0"
+                                ></path>
+
+                            </svg>
+
+                        </span>
+
+                    </div>
+
+                    <p class="enterprise-metric-value">
+                        {{ total_profissionais }}
+                    </p>
+
+                    <span class="enterprise-metric-note">
+
+                        <span class="enterprise-metric-positive">
+                            {{ profissionais_ativos }}
+                        </span>
+
+                        profissionais ativos
+
+                    </span>
+
+                </article>
+
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+
+                <article class="enterprise-metric-card">
+
+                    <div class="enterprise-metric-head">
+
+                        <p class="enterprise-metric-label">
+                            Assinaturas
+                        </p>
+
+                        <span class="enterprise-metric-icon">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <path
+                                    d="M6 3h12v18l-6-4-6 4z"
+                                ></path>
+
+                            </svg>
+
+                        </span>
+
+                    </div>
+
+                    <p class="enterprise-metric-value">
+                        {{ assinaturas_ativas }}
+                    </p>
+
+                    <span class="enterprise-metric-note">
+                        Assinaturas atualmente ativas
+                    </span>
+
+                </article>
+
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+
+                <article class="enterprise-metric-card">
+
+                    <div class="enterprise-metric-head">
+
+                        <p class="enterprise-metric-label">
+                            Avaliações
+                        </p>
+
+                        <span class="enterprise-metric-icon">
+
+                            <svg viewBox="0 0 24 24">
+
+                                <path
+                                    d="
+                                        M12 3
+                                        14.8 8.7
+                                        21 9.6
+                                        16.5 14
+                                        17.6 20.2
+                                        12 17.3
+                                        6.4 20.2
+                                        7.5 14
+                                        3 9.6
+                                        9.2 8.7
+                                        Z
+                                    "
+                                ></path>
+
+                            </svg>
+
+                        </span>
+
+                    </div>
+
+                    <p class="enterprise-metric-value">
+                        {{ total_avaliacoes }}
+                    </p>
+
+                    <span class="enterprise-metric-note">
+
+                        Média geral:
+
+                        <span class="enterprise-metric-positive">
+                            {{ media_avaliacoes|floatformat:1 }}
+                        </span>
+
+                    </span>
+
+                </article>
+
+            </div>
+
+        </section>
+
+        <section class="row g-4 mt-1">
+
+            <div class="col-xl-6">
+
+                <article class="enterprise-panel">
+
+                    <header class="enterprise-panel-header">
+
+                        <h2 class="enterprise-panel-title">
+                            Resumo financeiro
+                        </h2>
+
+                        <span class="enterprise-panel-subtitle">
+                            Pagamentos aprovados
+                        </span>
+
+                    </header>
+
+                    <div class="enterprise-panel-body">
+
+                        <table class="enterprise-table">
+
+                            <tbody>
+
+                                <tr>
+
+                                    <th>Receita total</th>
+
+                                    <td class="text-end">
+                                        R$ {{ receita_total|floatformat:2 }}
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <th>Receita do mês</th>
+
+                                    <td class="text-end">
+                                        R$ {{ receita_mes|floatformat:2 }}
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <th>Ticket médio</th>
+
+                                    <td class="text-end">
+                                        R$ {{ ticket_medio|floatformat:2 }}
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <th>Pagamentos aprovados</th>
+
+                                    <td class="text-end">
+                                        {{ total_pagamentos }}
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+            <div class="col-xl-6">
+
+                <article class="enterprise-panel">
+
+                    <header class="enterprise-panel-header">
+
+                        <h2 class="enterprise-panel-title">
+                            Estrutura da plataforma
+                        </h2>
+
+                        <span class="enterprise-panel-subtitle">
+                            Base cadastrada
+                        </span>
+
+                    </header>
+
+                    <div class="enterprise-panel-body">
+
+                        <table class="enterprise-table">
+
+                            <tbody>
+
+                                <tr>
+
+                                    <th>Cidades</th>
+
+                                    <td class="text-end">
+                                        {{ total_cidades }}
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <th>Categorias</th>
+
+                                    <td class="text-end">
+                                        {{ total_categorias }}
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <th>Pedidos financeiros</th>
+
+                                    <td class="text-end">
+                                        {{ total_pedidos }}
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+        <section class="row g-4 mt-1">
+
+            <div class="col-xl-6">
+
+                <article class="enterprise-panel">
+
+                    <header class="enterprise-panel-header">
+
+                        <h2 class="enterprise-panel-title">
+                            Últimas empresas
+                        </h2>
+
+                        <span class="enterprise-panel-subtitle">
+                            Cadastros recentes
+                        </span>
+
+                    </header>
+
+                    <div class="enterprise-panel-body">
+
+                        <div class="table-responsive">
+
+                            <table class="enterprise-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>Empresa</th>
+                                        <th>Cidade</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    {% for empresa in ultimas_empresas %}
+
+                                    <tr>
+
+                                        <td>
+                                            {{ empresa.nome_fantasia }}
+                                        </td>
+
+                                        <td>
+                                            {{ empresa.cidade.nome }}
+                                        </td>
+
+                                    </tr>
+
+                                    {% empty %}
+
+                                    <tr>
+
+                                        <td
+                                            colspan="2"
+                                            class="enterprise-empty"
+                                        >
+                                            Nenhuma empresa cadastrada.
+                                        </td>
+
+                                    </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+            <div class="col-xl-6">
+
+                <article class="enterprise-panel">
+
+                    <header class="enterprise-panel-header">
+
+                        <h2 class="enterprise-panel-title">
+                            Últimos profissionais
+                        </h2>
+
+                        <span class="enterprise-panel-subtitle">
+                            Cadastros recentes
+                        </span>
+
+                    </header>
+
+                    <div class="enterprise-panel-body">
+
+                        <div class="table-responsive">
+
+                            <table class="enterprise-table">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>Profissional</th>
+                                        <th>Cidade</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    {% for profissional in ultimos_profissionais %}
+
+                                    <tr>
+
+                                        <td>
+                                            {{ profissional.nome }}
+                                        </td>
+
+                                        <td>
+                                            {{ profissional.cidade.nome }}
+                                        </td>
+
+                                    </tr>
+
+                                    {% empty %}
+
+                                    <tr>
+
+                                        <td
+                                            colspan="2"
+                                            class="enterprise-empty"
+                                        >
+                                            Nenhum profissional cadastrado.
+                                        </td>
+
+                                    </tr>
+
+                                    {% endfor %}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+{% endblock %}

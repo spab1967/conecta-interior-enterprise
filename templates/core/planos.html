@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}
+Planos e Preços | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="text-center py-4">
+
+    <h1 class="display-5 fw-bold">
+        Planos e Preços
+    </h1>
+
+    <p class="lead text-muted mx-auto" style="max-width: 760px;">
+        Escolha o plano ideal para aumentar a presença
+        da sua empresa ou do seu trabalho profissional
+        no Conecta Interior.
+    </p>
+
+</div>
+
+
+<div class="row g-4 justify-content-center mb-5">
+
+    {% for plano in planos %}
+
+        <div class="col-md-6 col-lg-4">
+
+            <div
+                class="card h-100 shadow-sm
+                {% if plano.nome|lower == 'premium' %}
+                    border-dark border-2
+                {% elif plano.nome|lower == 'destaque' %}
+                    border-warning border-2
+                {% endif %}"
+            >
+
+                <div class="card-body p-4 d-flex flex-column">
+
+                    <div class="text-center mb-4">
+
+                        {% if plano.nome|lower == "premium" %}
+
+                            <span class="badge bg-dark mb-3">
+                                ★ PREMIUM
+                            </span>
+
+                        {% elif plano.nome|lower == "destaque" %}
+
+                            <span class="badge bg-warning text-dark mb-3">
+                                ★ DESTAQUE
+                            </span>
+
+                        {% endif %}
+
+
+                        <h2 class="h3 fw-bold">
+                            {{ plano.nome }}
+                        </h2>
+
+
+                        {% if plano.descricao %}
+
+                            <p class="text-muted">
+                                {{ plano.descricao }}
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="text-center mb-4">
+
+                        {% if plano.preco_mensal == 0 %}
+
+                            <span class="display-6 fw-bold">
+                                Grátis
+                            </span>
+
+                        {% else %}
+
+                            <span class="fs-5">
+                                R$
+                            </span>
+
+                            <span class="display-6 fw-bold">
+                                {{ plano.preco_mensal|floatformat:2 }}
+                            </span>
+
+                            <span class="text-muted">
+                                /mês
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <hr>
+
+
+                    <h3 class="h6 fw-bold mb-3">
+                        Benefícios
+                    </h3>
+
+
+                    <ul class="list-unstyled flex-grow-1">
+
+                        <li class="mb-2">
+                            ✓ Perfil público no Conecta Interior
+                        </li>
+
+                        <li class="mb-2">
+                            ✓ Presença nas pesquisas
+                        </li>
+
+                        <li class="mb-2">
+                            ✓ Canais de contato
+                        </li>
+
+
+                        {% if plano.destaque_busca %}
+
+                            <li class="mb-2">
+                                ✓ Destaque nas buscas
+                            </li>
+
+                        {% endif %}
+
+
+                        {% if plano.destaque_perfil %}
+
+                            <li class="mb-2">
+                                ✓ Destaque visual no perfil
+                            </li>
+
+                        {% endif %}
+
+
+                        {% if plano.prioridade_resultados %}
+
+                            <li class="mb-2">
+                                ✓ Prioridade nos resultados
+                            </li>
+
+                        {% endif %}
+
+
+                        {% if plano.selo_destaque %}
+
+                            <li class="mb-2">
+                                ✓ Selo comercial de destaque
+                            </li>
+
+                        {% endif %}
+
+
+                        {% if plano.acesso_metricas %}
+
+                            <li class="mb-2">
+                                ✓ Painel de métricas
+                            </li>
+
+                        {% endif %}
+
+
+                        <li class="mb-2">
+
+                            ✓ Até {{ plano.limite_fotos }}
+
+                            {% if plano.limite_fotos == 1 %}
+
+                                foto
+
+                            {% else %}
+
+                                fotos
+
+                            {% endif %}
+
+                        </li>
+
+                    </ul>
+
+
+                    <div class="d-grid mt-4">
+
+                        {% if request.user.is_authenticated %}
+
+                            {% if plano.preco_mensal == 0 %}
+
+                                <a
+                                    href="{% url 'core:selecionar_plano' plano.id %}"
+                                    class="btn btn-outline-primary btn-lg"
+                                >
+                                    Escolher plano grátis
+                                </a>
+
+                            {% elif plano.nome|lower == "premium" %}
+
+                                <a
+                                    href="{% url 'core:selecionar_plano' plano.id %}"
+                                    class="btn btn-dark btn-lg"
+                                >
+                                    Escolher Premium
+                                </a>
+
+                            {% elif plano.nome|lower == "destaque" %}
+
+                                <a
+                                    href="{% url 'core:selecionar_plano' plano.id %}"
+                                    class="btn btn-warning btn-lg"
+                                >
+                                    Escolher Destaque
+                                </a>
+
+                            {% else %}
+
+                                <a
+                                    href="{% url 'core:selecionar_plano' plano.id %}"
+                                    class="btn btn-primary btn-lg"
+                                >
+                                    Escolher {{ plano.nome }}
+                                </a>
+
+                            {% endif %}
+
+                        {% else %}
+
+                            {% if plano.preco_mensal == 0 %}
+
+                                <a
+                                    href="{% url 'cadastros:anuncie' %}?plano={{ plano.id }}"
+                                    class="btn btn-outline-primary btn-lg"
+                                >
+                                    Começar grátis
+                                </a>
+
+                            {% elif plano.nome|lower == "premium" %}
+
+                                <a
+                                    href="{% url 'cadastros:anuncie' %}?plano={{ plano.id }}"
+                                    class="btn btn-dark btn-lg"
+                                >
+                                    Escolher Premium
+                                </a>
+
+                            {% elif plano.nome|lower == "destaque" %}
+
+                                <a
+                                    href="{% url 'cadastros:anuncie' %}?plano={{ plano.id }}"
+                                    class="btn btn-warning btn-lg"
+                                >
+                                    Escolher Destaque
+                                </a>
+
+                            {% else %}
+
+                                <a
+                                    href="{% url 'cadastros:anuncie' %}?plano={{ plano.id }}"
+                                    class="btn btn-primary btn-lg"
+                                >
+                                    Escolher {{ plano.nome }}
+                                </a>
+
+                            {% endif %}
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    {% empty %}
+
+        <div class="col-12">
+
+            <div class="alert alert-info text-center">
+
+                Nenhum plano está disponível no momento.
+
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+
+<div class="card border-0 bg-light mb-4">
+
+    <div class="card-body p-4 text-center">
+
+        <h2 class="h4 fw-bold">
+            Não sabe qual escolher?
+        </h2>
+
+        {% if request.user.is_authenticated %}
+
+            <p class="text-muted mb-3">
+                Consulte sua assinatura atual ou escolha
+                outro plano para sua empresa ou perfil profissional.
+            </p>
+
+            <a
+                href="{% url 'core:minha_conta' %}"
+                class="btn btn-primary"
+            >
+                Ir para Minha Conta
+            </a>
+
+        {% else %}
+
+            <p class="text-muted mb-3">
+                Você pode começar gratuitamente e escolher
+                um plano com mais recursos quando quiser
+                ampliar sua presença no Conecta Interior.
+            </p>
+
+            <a
+                href="{% url 'cadastros:anuncie' %}"
+                class="btn btn-primary"
+            >
+                Anunciar no Conecta Interior
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

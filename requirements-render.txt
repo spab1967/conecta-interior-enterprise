@@ -1,0 +1,5 @@
+dj-database-url
+psycopg[binary]
+gunicorn
+uvicorn
+whitenoise[brotli]

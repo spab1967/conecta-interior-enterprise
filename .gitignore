@@ -1,0 +1,37 @@
+.env
+.env.*
+!.env.example
+!.env.render.example
+db.sqlite3
+*.sqlite3
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+staticfiles/
+media/
+.idea/
+.vscode/
+*.log
+*_BACKUP_*
+
+# Artefatos de desenvolvimento e implantacao
+*.zip
+ConectaInterior_*/
+*_atual.txt
+*_atual.html
+*_original.html
+administracao_estrutura.txt
+apps.txt
+config_urls.txt
+core_views.txt
+estrutura.txt
+estrutura_completa.txt
+LEIA-ME.txt
+README.txt
+
+# Duplicatas e copias locais
+*(2).py
+*_ANTES_*.html
+*_PRE_*.html

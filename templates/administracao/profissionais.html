@@ -1,0 +1,84 @@
+{% extends "base_enterprise.html" %}
+{% block title %}Profissionais | Administração Enterprise{% endblock %}
+{% block content %}
+<div class="enterprise-page-header">
+    <div>
+        <h1 class="enterprise-page-title">Profissionais</h1>
+        <p class="enterprise-page-subtitle">Administração dos profissionais cadastrados na plataforma</p>
+    </div>
+    <div class="enterprise-page-date">{{ profissionais_ativos }} ativos de {{ total_profissionais }}</div>
+</div>
+
+<section class="enterprise-panel">
+    <div class="enterprise-panel-header enterprise-panel-header-wrap">
+        <div>
+            <h2 class="enterprise-panel-title">Profissionais cadastrados</h2>
+            <span class="enterprise-panel-subtitle">{{ total_profissionais }} resultado{{ total_profissionais|pluralize }}</span>
+        </div>
+        <form method="get" class="enterprise-search-form">
+            <input type="search" class="form-control" name="q" value="{{ pesquisa }}"
+                   placeholder="Profissional, especialidade, cidade ou categoria"
+                   aria-label="Pesquisar profissionais">
+            <button type="submit" class="btn btn-primary">Pesquisar</button>
+            {% if pesquisa %}
+            <a href="{% url 'administracao:profissionais' %}" class="btn btn-outline-secondary">Limpar</a>
+            {% endif %}
+        </form>
+    </div>
+
+    <div class="enterprise-panel-body p-0">
+        <div class="table-responsive">
+            <table class="table enterprise-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Profissional</th><th>Especialidade</th>
+                        <th>Cidade</th><th>Categoria</th><th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for profissional in page_obj %}
+                    <tr>
+                        <td>#{{ profissional.id }}</td>
+                        <td>
+                            <strong>{{ profissional.nome }}</strong>
+                            {% if profissional.destaque %}
+                            <span class="badge text-bg-warning ms-2">Destaque</span>
+                            {% endif %}
+                            {% if profissional.atendimento_domiciliar %}
+                            <div class="small text-muted mt-1">Atendimento domiciliar</div>
+                            {% endif %}
+                        </td>
+                        <td>{{ profissional.especialidade|default:"—" }}</td>
+                        <td>{{ profissional.cidade.nome }}</td>
+                        <td>{% if profissional.categoria %}{{ profissional.categoria.nome }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if profissional.ativo %}
+                            <span class="enterprise-status enterprise-status-success">Ativo</span>
+                            {% else %}
+                            <span class="enterprise-status enterprise-status-muted">Inativo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6" class="text-center py-5 text-muted">Nenhum profissional encontrado.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="enterprise-pagination" aria-label="Paginação de profissionais">
+    <ul class="pagination mb-0">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">Anterior</a></li>
+        {% endif %}
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">Próxima</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

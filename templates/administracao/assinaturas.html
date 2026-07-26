@@ -1,0 +1,87 @@
+{% extends "base_enterprise.html" %}
+{% block title %}Assinaturas | Administração Enterprise{% endblock %}
+{% block content %}
+<div class="enterprise-page-header">
+  <div>
+    <h1 class="enterprise-page-title">Assinaturas</h1>
+    <p class="enterprise-page-subtitle">Administração das assinaturas e renovações da plataforma</p>
+  </div>
+  <div class="enterprise-page-date">{{ assinaturas_ativas }} ativas de {{ total_assinaturas }}</div>
+</div>
+
+<section class="enterprise-panel">
+  <div class="enterprise-panel-header enterprise-panel-header-wrap">
+    <div>
+      <h2 class="enterprise-panel-title">Assinaturas cadastradas</h2>
+      <span class="enterprise-panel-subtitle">{{ total_assinaturas }} resultado{{ total_assinaturas|pluralize }}</span>
+    </div>
+    <form method="get" class="enterprise-search-form">
+      <input type="search" class="form-control" name="q" value="{{ pesquisa }}"
+             placeholder="Titular, plano ou status">
+      <button type="submit" class="btn btn-primary">Pesquisar</button>
+      {% if pesquisa %}
+      <a href="{% url 'administracao:assinaturas' %}" class="btn btn-outline-secondary">Limpar</a>
+      {% endif %}
+    </form>
+  </div>
+
+  <div class="enterprise-panel-body p-0">
+    <div class="table-responsive">
+      <table class="table enterprise-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>ID</th><th>Titular</th><th>Tipo</th><th>Plano</th>
+            <th>Início</th><th>Vencimento</th><th>Renovação</th><th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for assinatura in page_obj %}
+          <tr>
+            <td>#{{ assinatura.id }}</td>
+            <td><strong>{{ assinatura.titular }}</strong></td>
+            <td>{{ assinatura.tipo_titular }}</td>
+            <td>{{ assinatura.plano.nome }}</td>
+            <td>{{ assinatura.inicio|date:"d/m/Y" }}</td>
+            <td>{% if assinatura.vencimento %}{{ assinatura.vencimento|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+            <td>
+              {% if assinatura.renovacao_automatica %}
+              <span class="enterprise-status enterprise-status-success">Automática</span>
+              {% else %}
+              <span class="enterprise-status enterprise-status-muted">Manual</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if assinatura.status == "ativa" %}
+              <span class="enterprise-status enterprise-status-success">Ativa</span>
+              {% elif assinatura.status == "pendente" %}
+              <span class="enterprise-status enterprise-status-warning">Pendente</span>
+              {% elif assinatura.status == "cancelada" %}
+              <span class="enterprise-status enterprise-status-danger">Cancelada</span>
+              {% else %}
+              <span class="enterprise-status enterprise-status-muted">Vencida</span>
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" class="text-center py-5 text-muted">Nenhuma assinatura encontrada.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="enterprise-pagination" aria-label="Paginação de assinaturas">
+  <ul class="pagination mb-0">
+    {% if page_obj.has_previous %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">Anterior</a></li>
+    {% endif %}
+    <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">Próxima</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

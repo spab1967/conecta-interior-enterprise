@@ -1,0 +1,436 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}
+Painel — {{ nome_perfil }}
+{% endblock %}
+
+{% block content %}
+
+<style>
+
+.painel-cabecalho {
+    margin-bottom: 30px;
+}
+
+.painel-cabecalho h1 {
+    margin-bottom: 5px;
+}
+
+.painel-grid {
+    display: grid;
+    grid-template-columns:
+        repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.painel-card {
+    border: 1px solid var(--hairline-color);
+    border-radius: 8px;
+    padding: 20px;
+    background: var(--body-bg);
+}
+
+.painel-card strong {
+    display: block;
+    font-size: 30px;
+    margin-top: 8px;
+}
+
+.painel-secao {
+    margin-top: 35px;
+    margin-bottom: 15px;
+}
+
+.painel-tabela {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.painel-tabela th,
+.painel-tabela td {
+    padding: 10px;
+    border-bottom:
+        1px solid var(--hairline-color);
+    text-align: left;
+}
+
+.grafico-container {
+    border: 1px solid var(--hairline-color);
+    border-radius: 8px;
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.grafico {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    min-width: 900px;
+    height: 260px;
+    padding-top: 20px;
+}
+
+.grafico-dia {
+    flex: 1;
+    min-width: 22px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.grafico-valor {
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.grafico-barra-area {
+    width: 100%;
+    height: 190px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.grafico-barra {
+    width: 70%;
+    min-height: 2px;
+    background: var(--link-fg);
+    border-radius: 4px 4px 0 0;
+}
+
+.grafico-data {
+    font-size: 10px;
+    margin-top: 6px;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    height: 45px;
+}
+
+.canal-box {
+    border: 1px solid var(--hairline-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.canal-linha {
+    display: grid;
+    grid-template-columns: 120px 1fr 80px;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.canal-barra-fundo {
+    width: 100%;
+    height: 18px;
+    background: var(--hairline-color);
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.canal-barra {
+    height: 100%;
+    background: var(--link-fg);
+    border-radius: 9px;
+}
+
+.canal-numero {
+    text-align: right;
+    font-weight: bold;
+}
+
+.painel-voltar {
+    margin-top: 30px;
+}
+
+</style>
+
+
+<div class="painel-cabecalho">
+
+    <h1>
+        {{ nome_perfil }}
+    </h1>
+
+    <p>
+        {{ tipo_perfil }}
+        — {{ cidade_perfil }}
+    </p>
+
+</div>
+
+
+<h2>
+    Desempenho
+</h2>
+
+<div class="painel-grid">
+
+    <div class="painel-card">
+        Hoje
+        <strong>
+            {{ hoje }}
+        </strong>
+    </div>
+
+    <div class="painel-card">
+        Últimos 7 dias
+        <strong>
+            {{ sete_dias }}
+        </strong>
+    </div>
+
+    <div class="painel-card">
+        Últimos 30 dias
+        <strong>
+            {{ trinta_dias }}
+        </strong>
+    </div>
+
+    <div class="painel-card">
+        Total histórico
+        <strong>
+            {{ total }}
+        </strong>
+    </div>
+
+</div>
+
+
+<h2 class="painel-secao">
+    Contatos por canal
+</h2>
+
+<div class="painel-grid">
+
+    <div class="painel-card">
+        WhatsApp
+        <strong>{{ whatsapp }}</strong>
+    </div>
+
+    <div class="painel-card">
+        Telefone
+        <strong>{{ telefone }}</strong>
+    </div>
+
+    <div class="painel-card">
+        E-mail
+        <strong>{{ email }}</strong>
+    </div>
+
+    <div class="painel-card">
+        Site
+        <strong>{{ site }}</strong>
+    </div>
+
+    <div class="painel-card">
+        Instagram
+        <strong>{{ instagram }}</strong>
+    </div>
+
+</div>
+
+
+<h2 class="painel-secao">
+    Distribuição dos contatos
+</h2>
+
+<div class="canal-box">
+
+    {% if total %}
+
+        <div class="canal-linha">
+            <div>WhatsApp</div>
+
+            <div class="canal-barra-fundo">
+                <div
+                    class="canal-barra"
+                    style="width: {% widthratio whatsapp total 100 %}%;"
+                ></div>
+            </div>
+
+            <div class="canal-numero">
+                {% widthratio whatsapp total 100 %}%
+            </div>
+        </div>
+
+
+        <div class="canal-linha">
+            <div>Telefone</div>
+
+            <div class="canal-barra-fundo">
+                <div
+                    class="canal-barra"
+                    style="width: {% widthratio telefone total 100 %}%;"
+                ></div>
+            </div>
+
+            <div class="canal-numero">
+                {% widthratio telefone total 100 %}%
+            </div>
+        </div>
+
+
+        <div class="canal-linha">
+            <div>E-mail</div>
+
+            <div class="canal-barra-fundo">
+                <div
+                    class="canal-barra"
+                    style="width: {% widthratio email total 100 %}%;"
+                ></div>
+            </div>
+
+            <div class="canal-numero">
+                {% widthratio email total 100 %}%
+            </div>
+        </div>
+
+
+        <div class="canal-linha">
+            <div>Site</div>
+
+            <div class="canal-barra-fundo">
+                <div
+                    class="canal-barra"
+                    style="width: {% widthratio site total 100 %}%;"
+                ></div>
+            </div>
+
+            <div class="canal-numero">
+                {% widthratio site total 100 %}%
+            </div>
+        </div>
+
+
+        <div class="canal-linha">
+            <div>Instagram</div>
+
+            <div class="canal-barra-fundo">
+                <div
+                    class="canal-barra"
+                    style="width: {% widthratio instagram total 100 %}%;"
+                ></div>
+            </div>
+
+            <div class="canal-numero">
+                {% widthratio instagram total 100 %}%
+            </div>
+        </div>
+
+    {% else %}
+
+        <p>
+            Ainda não existem contatos suficientes para calcular
+            a distribuição por canal.
+        </p>
+
+    {% endif %}
+
+</div>
+
+
+<h2 class="painel-secao">
+    Evolução dos contatos — últimos 30 dias
+</h2>
+
+<div class="grafico-container">
+
+    <div class="grafico">
+
+        {% for item in evolucao_30_dias %}
+
+            <div class="grafico-dia">
+
+                <div class="grafico-valor">
+                    {{ item.total }}
+                </div>
+
+                <div class="grafico-barra-area">
+
+                    <div
+                        class="grafico-barra"
+                        style="height: {{ item.percentual }}%;"
+                        title="{{ item.dia|date:'d/m/Y' }} — {{ item.total }} contato(s)"
+                    ></div>
+
+                </div>
+
+                <div class="grafico-data">
+                    {{ item.dia|date:"d/m" }}
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<h2 class="painel-secao">
+    Últimos contatos registrados
+</h2>
+
+<table class="painel-tabela">
+
+    <thead>
+        <tr>
+            <th>Canal</th>
+            <th>Data</th>
+            <th>Horário</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for evento in ultimos_eventos %}
+
+            <tr>
+
+                <td>
+                    {{ evento.get_tipo_display }}
+                </td>
+
+                <td>
+                    {{ evento.criado_em|date:"d/m/Y" }}
+                </td>
+
+                <td>
+                    {{ evento.criado_em|date:"H:i" }}
+                </td>
+
+            </tr>
+
+        {% empty %}
+
+            <tr>
+                <td colspan="3">
+                    Nenhum contato registrado ainda.
+                </td>
+            </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+
+<div class="painel-voltar">
+
+    <a
+        href="{% url 'admin:metricas_eventocontato_changelist' %}"
+        class="button"
+    >
+        ← Voltar ao Painel Geral
+    </a>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,556 @@
+{% extends "base.html" %}
+
+{% block title %}
+Anuncie | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-xl-9 col-lg-10">
+
+        <div class="text-center mb-5">
+
+            <h1 class="fw-bold">
+                Anuncie no Conecta Interior
+            </h1>
+
+            <p class="lead text-muted">
+                Cadastre sua empresa ou seu serviço profissional
+                para análise da nossa equipe.
+            </p>
+
+        </div>
+
+
+        {% if plano_selecionado %}
+
+            <div class="alert alert-success border-0 shadow-sm mb-4">
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                    <div>
+
+                        <strong>
+                            Plano selecionado:
+                        </strong>
+
+                        {{ plano_selecionado.nome }}
+
+                        {% if plano_selecionado.preco_mensal == 0 %}
+
+                            — Grátis
+
+                        {% else %}
+
+                            — R$ {{ plano_selecionado.preco_mensal }}/mês
+
+                        {% endif %}
+
+                    </div>
+
+                    <a
+                        href="{% url 'core:planos' %}"
+                        class="btn btn-sm btn-outline-success"
+                    >
+                        Trocar plano
+                    </a>
+
+                </div>
+
+            </div>
+
+        {% endif %}
+
+
+        <div class="alert alert-primary border-0 shadow-sm mb-4">
+
+            <strong>
+                Como funciona?
+            </strong>
+
+            <p class="mb-0 mt-2">
+                Preencha seus dados e envie a solicitação.
+                As informações serão analisadas antes da publicação
+                na plataforma.
+            </p>
+
+        </div>
+
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4 p-lg-5">
+
+                {% if form.non_field_errors %}
+
+                    <div class="alert alert-danger">
+
+                        {% for erro in form.non_field_errors %}
+
+                            <div>
+                                {{ erro }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                {% endif %}
+
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+
+                    <h2 class="h4 fw-bold mb-4">
+                        Plano
+                    </h2>
+
+
+                    <div class="mb-4">
+
+                        <label
+                            for="{{ form.plano.id_for_label }}"
+                            class="form-label fw-semibold"
+                        >
+                            Plano escolhido *
+                        </label>
+
+                        {{ form.plano }}
+
+                        <div class="form-text">
+                            Você poderá conferir os benefícios
+                            antes de concluir sua solicitação.
+                        </div>
+
+                        {% for erro in form.plano.errors %}
+
+                            <div class="text-danger small mt-1">
+                                {{ erro }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <hr class="my-5">
+
+
+                    <h2 class="h4 fw-bold mb-4">
+                        Identificação
+                    </h2>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.tipo.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Quero cadastrar *
+                            </label>
+
+                            {{ form.tipo }}
+
+                            {% for erro in form.tipo.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.nome.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Nome *
+                            </label>
+
+                            {{ form.nome }}
+
+                            {% for erro in form.nome.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.responsavel.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Responsável
+                            </label>
+
+                            {{ form.responsavel }}
+
+                            {% for erro in form.responsavel.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.cidade.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Cidade *
+                            </label>
+
+                            {{ form.cidade }}
+
+                            {% for erro in form.cidade.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.categoria.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Categoria
+                            </label>
+
+                            {{ form.categoria }}
+
+                            {% for erro in form.categoria.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.especialidade.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Especialidade
+                            </label>
+
+                            {{ form.especialidade }}
+
+                            <div class="form-text">
+                                Obrigatória para profissionais.
+                            </div>
+
+                            {% for erro in form.especialidade.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label
+                            for="{{ form.descricao.id_for_label }}"
+                            class="form-label fw-semibold"
+                        >
+                            Descrição
+                        </label>
+
+                        {{ form.descricao }}
+
+                        {% for erro in form.descricao.errors %}
+
+                            <div class="text-danger small mt-1">
+                                {{ erro }}
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+
+                    <hr class="my-5">
+
+
+                    <h2 class="h4 fw-bold mb-4">
+                        Localização
+                    </h2>
+
+
+                    <div class="row">
+
+                        <div class="col-md-8 mb-4">
+
+                            <label
+                                for="{{ form.endereco.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Endereço
+                            </label>
+
+                            {{ form.endereco }}
+
+                            {% for erro in form.endereco.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-4 mb-4">
+
+                            <label
+                                for="{{ form.bairro.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Bairro
+                            </label>
+
+                            {{ form.bairro }}
+
+                            {% for erro in form.bairro.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+
+                    <hr class="my-5">
+
+
+                    <h2 class="h4 fw-bold mb-4">
+                        Contato
+                    </h2>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.whatsapp.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                WhatsApp *
+                            </label>
+
+                            {{ form.whatsapp }}
+
+                            {% for erro in form.whatsapp.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.telefone.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Telefone
+                            </label>
+
+                            {{ form.telefone }}
+
+                            {% for erro in form.telefone.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.email.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                E-mail
+                            </label>
+
+                            {{ form.email }}
+
+                            {% for erro in form.email.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.instagram.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Instagram
+                            </label>
+
+                            {{ form.instagram }}
+
+                            {% for erro in form.instagram.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.site.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Site
+                            </label>
+
+                            {{ form.site }}
+
+                            {% for erro in form.site.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.horario.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Horário de atendimento
+                            </label>
+
+                            {{ form.horario }}
+
+                            {% for erro in form.horario.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="alert alert-light border mt-3">
+
+                        <strong>
+                            Importante:
+                        </strong>
+
+                        o envio desta solicitação não publica
+                        automaticamente o cadastro. As informações
+                        passarão por análise administrativa.
+
+                    </div>
+
+
+                    <div class="d-grid mt-4">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-lg"
+                        >
+                            Enviar solicitação
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+
+        <div class="text-center mt-4">
+
+            <a
+                href="{% url 'core:home' %}"
+                class="text-decoration-none"
+            >
+                ← Voltar ao Conecta Interior
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,374 @@
+{% extends "base_enterprise.html" %}
+
+{% block title %}
+{{ titulo_pagina|default:"Painel Administrativo" }} | Conecta Interior Enterprise
+{% endblock %}
+
+{% block content %}
+
+<div class="enterprise-page-header">
+
+    <div>
+        <h1 class="enterprise-page-title">
+            {{ titulo_pagina|default:"Painel Administrativo" }}
+        </h1>
+
+        <p class="enterprise-page-subtitle">
+            Centro de Operações do Conecta Interior Enterprise
+        </p>
+    </div>
+
+</div>
+
+{% if titulo_pagina == "Painel Administrativo" %}
+
+<div class="enterprise-metrics-grid">
+
+    <a href="{% url 'administracao:empresas' %}"
+       class="enterprise-metric-card text-decoration-none">
+
+        <div class="enterprise-metric-icon">E</div>
+
+        <div class="enterprise-metric-content">
+            <span class="enterprise-metric-label">Empresas</span>
+            <strong class="enterprise-metric-value">{{ total_empresas }}</strong>
+            <span class="enterprise-metric-note">Cadastros empresariais</span>
+        </div>
+
+    </a>
+
+    <a href="{% url 'administracao:profissionais' %}"
+       class="enterprise-metric-card text-decoration-none">
+
+        <div class="enterprise-metric-icon">P</div>
+
+        <div class="enterprise-metric-content">
+            <span class="enterprise-metric-label">Profissionais</span>
+            <strong class="enterprise-metric-value">{{ total_profissionais }}</strong>
+            <span class="enterprise-metric-note">Prestadores cadastrados</span>
+        </div>
+
+    </a>
+
+    <a href="{% url 'administracao:assinaturas' %}"
+       class="enterprise-metric-card text-decoration-none">
+
+        <div class="enterprise-metric-icon">A</div>
+
+        <div class="enterprise-metric-content">
+            <span class="enterprise-metric-label">Assinaturas ativas</span>
+            <strong class="enterprise-metric-value">{{ assinaturas_ativas }}</strong>
+            <span class="enterprise-metric-note">Planos em atividade</span>
+        </div>
+
+    </a>
+
+    <a href="{% url 'administracao:pagamentos' %}"
+       class="enterprise-metric-card text-decoration-none">
+
+        <div class="enterprise-metric-icon">R$</div>
+
+        <div class="enterprise-metric-content">
+            <span class="enterprise-metric-label">Pagamentos</span>
+            <strong class="enterprise-metric-value">{{ total_pagamentos }}</strong>
+            <span class="enterprise-metric-note">{{ pagamentos_aprovados }} aprovados</span>
+        </div>
+
+    </a>
+
+</div>
+
+<div class="row g-4 mb-4">
+
+    <div class="col-xl-4">
+
+        <section class="enterprise-panel h-100">
+
+            <div class="enterprise-panel-header">
+                <h2 class="enterprise-panel-title">Cadastros</h2>
+            </div>
+
+            <div class="enterprise-panel-body p-0">
+
+                <a href="{% url 'administracao:empresas' %}"
+                   class="enterprise-operation-link">
+                    <span>Empresas</span>
+                    <strong>{{ total_empresas }}</strong>
+                </a>
+
+                <a href="{% url 'administracao:profissionais' %}"
+                   class="enterprise-operation-link">
+                    <span>Profissionais</span>
+                    <strong>{{ total_profissionais }}</strong>
+                </a>
+
+                <a href="{% url 'administracao:categorias' %}"
+                   class="enterprise-operation-link">
+                    <span>Categorias</span>
+                    <strong>{{ total_categorias }}</strong>
+                </a>
+
+                <a href="{% url 'administracao:cidades' %}"
+                   class="enterprise-operation-link">
+                    <span>Cidades</span>
+                    <strong>{{ total_cidades }}</strong>
+                </a>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <div class="col-xl-4">
+
+        <section class="enterprise-panel h-100">
+
+            <div class="enterprise-panel-header">
+                <h2 class="enterprise-panel-title">Financeiro</h2>
+            </div>
+
+            <div class="enterprise-panel-body p-0">
+
+                <a href="{% url 'administracao:financeiro' %}"
+                   class="enterprise-operation-link">
+                    <span>Pedidos</span>
+                    <strong>{{ total_pedidos }}</strong>
+                </a>
+
+                <a href="{% url 'administracao:pagamentos' %}"
+                   class="enterprise-operation-link">
+                    <span>Pagamentos</span>
+                    <strong>{{ total_pagamentos }}</strong>
+                </a>
+
+                <a href="{% url 'administracao:pagamentos' %}"
+                   class="enterprise-operation-link">
+                    <span>Pagamentos aprovados</span>
+                    <strong>{{ pagamentos_aprovados }}</strong>
+                </a>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <div class="col-xl-4">
+
+        <section class="enterprise-panel h-100">
+
+            <div class="enterprise-panel-header">
+                <h2 class="enterprise-panel-title">Qualidade e operação</h2>
+            </div>
+
+            <div class="enterprise-panel-body p-0">
+
+                <a href="{% url 'administracao:avaliacoes' %}"
+                   class="enterprise-operation-link">
+                    <span>Avaliações aprovadas</span>
+                    <strong>{{ total_avaliacoes }}</strong>
+                </a>
+
+                <a href="{% url 'administracao:assinaturas' %}"
+                   class="enterprise-operation-link">
+                    <span>Assinaturas</span>
+                    <strong>{{ total_assinaturas }}</strong>
+                </a>
+
+                <a href="{% url 'administracao:assinaturas' %}"
+                   class="enterprise-operation-link">
+                    <span>Assinaturas ativas</span>
+                    <strong>{{ assinaturas_ativas }}</strong>
+                </a>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+<div class="row g-4">
+
+    <div class="col-xl-6">
+
+        <section class="enterprise-panel h-100">
+
+            <div class="enterprise-panel-header">
+                <h2 class="enterprise-panel-title">Últimas empresas</h2>
+
+                <a href="{% url 'administracao:empresas' %}"
+                   class="btn btn-sm btn-outline-primary">
+                    Ver todas
+                </a>
+            </div>
+
+            <div class="enterprise-panel-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table enterprise-table align-middle mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>Empresa</th>
+                                <th>Cidade</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for empresa in ultimas_empresas %}
+
+                            <tr>
+                                <td>{{ empresa.nome_fantasia }}</td>
+                                <td>{{ empresa.cidade.nome }}</td>
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+                                <td colspan="2" class="text-center py-4 text-muted">
+                                    Nenhuma empresa cadastrada.
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+    <div class="col-xl-6">
+
+        <section class="enterprise-panel h-100">
+
+            <div class="enterprise-panel-header">
+                <h2 class="enterprise-panel-title">Últimos profissionais</h2>
+
+                <a href="{% url 'administracao:profissionais' %}"
+                   class="btn btn-sm btn-outline-primary">
+                    Ver todos
+                </a>
+            </div>
+
+            <div class="enterprise-panel-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table enterprise-table align-middle mb-0">
+
+                        <thead>
+                            <tr>
+                                <th>Profissional</th>
+                                <th>Cidade</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% for profissional in ultimos_profissionais %}
+
+                            <tr>
+                                <td>{{ profissional.nome }}</td>
+                                <td>{{ profissional.cidade.nome }}</td>
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+                                <td colspan="2" class="text-center py-4 text-muted">
+                                    Nenhum profissional cadastrado.
+                                </td>
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+{% else %}
+
+<section class="enterprise-panel">
+
+    <div class="enterprise-panel-header">
+
+        <div>
+            <h2 class="enterprise-panel-title">
+                {{ titulo_pagina }}
+            </h2>
+
+            {% if total_registros != None %}
+            <span class="enterprise-panel-subtitle">
+                {{ total_registros }} registro{{ total_registros|pluralize }}
+            </span>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="enterprise-panel-body">
+
+        {% if registros %}
+
+            <div class="table-responsive">
+
+                <table class="table enterprise-table align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Registro</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for registro in registros %}
+                        <tr>
+                            <td>{{ registro }}</td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        {% else %}
+
+            <div class="enterprise-empty-state">
+                <strong>{{ titulo_pagina }}</strong>
+                <span>Nenhum registro disponível para exibição neste momento.</span>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endif %}
+
+{% endblock %}

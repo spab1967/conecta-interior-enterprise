@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Administração Enterprise | ConectaInterior</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        header {
+            background: #111827;
+            color: #ffffff;
+            padding: 24px 32px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 26px;
+        }
+
+        header p {
+            margin: 8px 0 0;
+            color: #d1d5db;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .painel {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 32px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .painel h2 {
+            margin-top: 0;
+        }
+
+        .status {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            background: #dcfce7;
+            color: #166534;
+            font-weight: bold;
+        }
+
+        .acoes {
+            margin-top: 28px;
+        }
+
+        .acoes a {
+            display: inline-block;
+            margin-right: 12px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            background: #111827;
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>ConectaInterior Enterprise</h1>
+        <p>Painel Administrativo da Plataforma</p>
+    </header>
+
+    <main>
+        <section class="painel">
+            <h2>Administração Enterprise</h2>
+
+            <p>
+                O módulo administrativo foi instalado corretamente.
+            </p>
+
+            <p>
+                Os indicadores, menus gerenciais e recursos de administração
+                serão incorporados nas próximas etapas do Sprint 2.
+            </p>
+
+            <div class="status">
+                Módulo administrativo ativo
+            </div>
+
+            <div class="acoes">
+                <a href="/admin/">Abrir Django Admin</a>
+                <a href="/">Abrir plataforma</a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

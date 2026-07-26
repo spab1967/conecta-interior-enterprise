@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ profissional.nome }} | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-lg-8">
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+
+                <div class="d-flex align-items-start gap-4">
+
+                    {% if profissional.foto %}
+                        <img
+                            src="{{ profissional.foto.url }}"
+                            alt="{{ profissional.nome }}"
+                            class="rounded-circle"
+                            style="width: 120px; height: 120px; object-fit: cover;"
+                        >
+                    {% else %}
+                        <div
+                            class="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                            style="width: 120px; height: 120px; font-size: 48px;"
+                        >
+                            👤
+                        </div>
+                    {% endif %}
+
+                    <div class="flex-grow-1">
+
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+
+                            {% if profissional.prioridade_comercial == 3 %}
+
+                                <span class="badge bg-dark">
+                                    ★ PREMIUM
+                                </span>
+
+                            {% elif profissional.prioridade_comercial == 2 %}
+
+                                <span class="badge bg-warning text-dark">
+                                    ★ DESTAQUE
+                                </span>
+
+                            {% endif %}
+
+                            {% if profissional.categoria %}
+                                <span class="badge bg-primary">
+                                    {{ profissional.categoria.nome }}
+                                </span>
+                            {% endif %}
+
+                            {% if profissional.atendimento_domiciliar %}
+                                <span class="badge bg-success">
+                                    🏠 Atendimento domiciliar
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                        <h1 class="fw-bold mb-2">
+                            {{ profissional.nome }}
+                        </h1>
+
+                        {% if profissional.especialidade %}
+                            <p class="lead text-muted mb-2">
+                                {{ profissional.especialidade }}
+                            </p>
+                        {% endif %}
+
+                        <p class="mb-0">
+                            📍 {{ profissional.cidade.nome }}/{{ profissional.cidade.estado }}
+
+                            {% if profissional.bairro %}
+                                — {{ profissional.bairro }}
+                            {% endif %}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+        {% include "includes/reputacao.html" %}
+
+
+        {% if profissional.descricao %}
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+
+                    <h2 class="h4 fw-bold mb-3">
+                        Sobre
+                    </h2>
+
+                    <p class="mb-0">
+                        {{ profissional.descricao|linebreaksbr }}
+                    </p>
+
+                </div>
+            </div>
+
+        {% endif %}
+
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+
+                <h2 class="h4 fw-bold mb-4">
+                    Contato
+                </h2>
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    {% if profissional.whatsapp %}
+
+                        <a
+                            href="{% url 'metricas:contato_profissional' profissional.id 'whatsapp' %}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-success"
+                        >
+                            💬 WhatsApp
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if profissional.telefone %}
+
+                        <a
+                            href="{% url 'metricas:contato_profissional' profissional.id 'telefone' %}"
+                            class="btn btn-outline-primary"
+                        >
+                            📞 {{ profissional.telefone }}
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if profissional.email %}
+
+                        <a
+                            href="{% url 'metricas:contato_profissional' profissional.id 'email' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            ✉️ E-mail
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if profissional.site %}
+
+                        <a
+                            href="{% url 'metricas:contato_profissional' profissional.id 'site' %}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-outline-dark"
+                        >
+                            🌐 Site
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if profissional.instagram %}
+
+                        <a
+                            href="{% url 'metricas:contato_profissional' profissional.id 'instagram' %}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-outline-danger"
+                        >
+                            📷 Instagram
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+
+                {% if profissional.endereco %}
+
+                    <hr>
+
+                    <p class="mb-1">
+                        <strong>Endereço:</strong>
+                        {{ profissional.endereco }}
+                    </p>
+
+                    {% if profissional.bairro %}
+                        <p class="mb-1">
+                            <strong>Bairro:</strong>
+                            {{ profissional.bairro }}
+                        </p>
+                    {% endif %}
+
+                {% endif %}
+
+
+                {% if profissional.horario %}
+                    <p class="mb-0 mt-3">
+                        <strong>Horário:</strong>
+                        {{ profissional.horario }}
+                    </p>
+                {% endif %}
+
+            </div>
+        </div>
+
+
+        {% if profissional.endereco %}
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+
+                    <h2 class="h4 fw-bold mb-3">
+                        Localização
+                    </h2>
+
+                    <div class="ratio ratio-16x9">
+
+                        <iframe
+                            src="https://www.google.com/maps?q={{ profissional.endereco|urlencode }},{{ profissional.cidade.nome|urlencode }},{{ profissional.cidade.estado|urlencode }}&output=embed"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                        ></iframe>
+
+                    </div>
+
+                </div>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="col-lg-4">
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+
+                <h2 class="h5 fw-bold mb-3">
+                    ★ Favoritos
+                </h2>
+
+                <p class="text-muted">
+                    Salve este profissional para encontrá-lo novamente com facilidade.
+                </p>
+
+                <form
+                    method="post"
+                    action="{% url 'favoritos:alternar_profissional' profissional.cidade.slug profissional.slug %}"
+                >
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-outline-warning w-100"
+                    >
+                        ★ Adicionar ou remover dos favoritos
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+
+        {% if profissional.empresa %}
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+
+                    <h2 class="h5 fw-bold">
+                        Empresa
+                    </h2>
+
+                    <p class="mb-3">
+                        {{ profissional.empresa.nome_fantasia }}
+                    </p>
+
+                    <a
+                        href="{% url 'empresa_detalhe' profissional.empresa.cidade.slug profissional.empresa.slug %}"
+                        class="btn btn-outline-primary"
+                    >
+                        Ver empresa
+                    </a>
+
+                </div>
+            </div>
+
+        {% endif %}
+
+
+        {% if relacionados %}
+
+            <h2 class="h4 fw-bold mb-3">
+                Profissionais relacionados
+            </h2>
+
+            {% for relacionado in relacionados %}
+
+                <div class="mb-3">
+
+                    {% with profissional=relacionado %}
+                        {% include "includes/card_profissional.html" %}
+                    {% endwith %}
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+
+<style>
+.ci-reputacao{margin-top:32px;padding:24px;border:1px solid #e3e8ef;border-radius:16px;background:#fff;box-shadow:0 4px 16px rgba(15,35,60,.05)}
+.ci-reputacao-topo{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+.ci-reputacao-titulo{margin:0;font-weight:800}
+.ci-reputacao-resumo{display:flex;align-items:center;gap:10px;margin-top:6px}
+.ci-reputacao-nota{font-size:1.7rem;font-weight:800;color:#172033}
+.ci-reputacao-estrelas{color:#f4b400;letter-spacing:2px}
+.ci-reputacao-total{color:#667085;font-size:.86rem}
+.ci-avaliacao{padding:16px 0;border-top:1px solid #edf1f5}
+.ci-avaliacao:first-of-type{border-top:0}
+.ci-avaliacao-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px}
+.ci-avaliacao-nome{font-weight:700}
+.ci-avaliacao-nota{color:#f4b400;white-space:nowrap}
+.ci-avaliacao-comentario{margin:0;color:#475467;line-height:1.55}
+.ci-avaliacao-data{margin-top:6px;color:#98a2b3;font-size:.78rem}
+.ci-sem-avaliacao{padding:14px 0 4px;color:#667085}
+</style>
+
+<section class="ci-reputacao">
+    <div class="ci-reputacao-topo">
+        <div>
+            <h2 class="ci-reputacao-titulo">Avaliações</h2>
+            <div class="ci-reputacao-resumo">
+                <span class="ci-reputacao-nota">{{ media_avaliacoes|floatformat:1 }}</span>
+                <span class="ci-reputacao-estrelas">★★★★★</span>
+                <span class="ci-reputacao-total">{{ total_avaliacoes }} avaliação(ões)</span>
+            </div>
+        </div>
+        <a href="{% url 'avaliacoes:avaliar_profissional' profissional.cidade.slug profissional.slug %}" class="btn btn-primary">
+            Avaliar este profissional
+        </a>
+    </div>
+
+    {% for avaliacao in avaliacoes_aprovadas %}
+        <article class="ci-avaliacao">
+            <div class="ci-avaliacao-head">
+                <span class="ci-avaliacao-nome">{{ avaliacao.nome }}</span>
+                <span class="ci-avaliacao-nota">{{ avaliacao.nota }}/5 ★</span>
+            </div>
+            <p class="ci-avaliacao-comentario">{{ avaliacao.comentario }}</p>
+            <div class="ci-avaliacao-data">{{ avaliacao.criado_em|date:"d/m/Y" }}</div>
+        </article>
+    {% empty %}
+        <div class="ci-sem-avaliacao">Ainda não há avaliações publicadas. Seja o primeiro a avaliar.</div>
+    {% endfor %}
+</section>
+
+
+<section class="card border-0 shadow-sm mt-4 ci-servicos-publicos">
+    <div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">Serviços</h2>
+        <div class="row g-3">
+            {% for servico in profissional.servicos.all %}
+                {% if servico.ativo %}
+                <div class="col-md-6">
+                    <div class="border rounded p-3 h-100">
+                        <strong>{{ servico.nome }}</strong>
+                        <div class="text-primary mt-1">
+                            {% if servico.valor != None %}R$ {{ servico.valor|floatformat:2 }}{% else %}Sob consulta{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% empty %}
+                <div class="text-muted">Nenhum serviço informado.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}

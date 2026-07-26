@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}
+Avaliar | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-8">
+
+        <div class="mb-4">
+
+            {% if tipo == "empresa" %}
+
+                <a
+                    href="/{{ objeto.cidade.slug }}/empresa/{{ objeto.slug }}/"
+                    class="text-decoration-none"
+                >
+                    ← Voltar para {{ objeto.nome_fantasia }}
+                </a>
+
+            {% else %}
+
+                <a
+                    href="/{{ objeto.cidade.slug }}/profissionais/{{ objeto.slug }}/"
+                    class="text-decoration-none"
+                >
+                    ← Voltar para {{ objeto.nome }}
+                </a>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-4 p-lg-5">
+
+                <h1 class="fw-bold mb-2">
+
+                    Deixe sua avaliação
+
+                </h1>
+
+
+                <p class="text-muted mb-4">
+
+                    {% if tipo == "empresa" %}
+
+                        Avaliando
+                        <strong>
+                            {{ objeto.nome_fantasia }}
+                        </strong>
+
+                    {% else %}
+
+                        Avaliando
+                        <strong>
+                            {{ objeto.nome }}
+                        </strong>
+
+                    {% endif %}
+
+                    em {{ objeto.cidade.nome }}/{{ objeto.cidade.estado }}.
+
+                </p>
+
+
+                {% if erros %}
+
+                    <div class="alert alert-danger">
+
+                        <strong>
+                            Verifique os dados:
+                        </strong>
+
+                        <ul class="mb-0 mt-2">
+
+                            {% for erro in erros %}
+
+                                <li>
+                                    {{ erro }}
+                                </li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    </div>
+
+                {% endif %}
+
+
+                <form method="post">
+
+                    {% csrf_token %}
+
+
+                    <div class="mb-4">
+
+                        <label
+                            for="nome"
+                            class="form-label fw-semibold"
+                        >
+                            Seu nome
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nome"
+                            name="nome"
+                            maxlength="120"
+                            value="{{ nome|default:'' }}"
+                            class="form-control form-control-lg"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label
+                            for="nota"
+                            class="form-label fw-semibold"
+                        >
+                            Nota
+                        </label>
+
+                        <select
+                            id="nota"
+                            name="nota"
+                            class="form-select form-select-lg"
+                            required
+                        >
+
+                            <option value="">
+                                Selecione
+                            </option>
+
+                            <option value="5" {% if nota == "5" %}selected{% endif %}>
+                                ★★★★★ — Excelente
+                            </option>
+
+                            <option value="4" {% if nota == "4" %}selected{% endif %}>
+                                ★★★★☆ — Muito bom
+                            </option>
+
+                            <option value="3" {% if nota == "3" %}selected{% endif %}>
+                                ★★★☆☆ — Bom
+                            </option>
+
+                            <option value="2" {% if nota == "2" %}selected{% endif %}>
+                                ★★☆☆☆ — Regular
+                            </option>
+
+                            <option value="1" {% if nota == "1" %}selected{% endif %}>
+                                ★☆☆☆☆ — Ruim
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label
+                            for="comentario"
+                            class="form-label fw-semibold"
+                        >
+                            Comentário
+                        </label>
+
+                        <textarea
+                            id="comentario"
+                            name="comentario"
+                            rows="6"
+                            class="form-control"
+                            placeholder="Conte como foi sua experiência."
+                            required
+                        >{{ comentario|default:'' }}</textarea>
+
+                    </div>
+
+
+                    <div class="alert alert-light border">
+
+                        Sua avaliação será analisada antes de aparecer publicamente
+                        na plataforma.
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-lg"
+                    >
+                        Enviar avaliação
+                    </button>
+
+
+                    {% if tipo == "empresa" %}
+
+                        <a
+                            href="/{{ objeto.cidade.slug }}/empresa/{{ objeto.slug }}/"
+                            class="btn btn-outline-secondary btn-lg ms-2"
+                        >
+                            Cancelar
+                        </a>
+
+                    {% else %}
+
+                        <a
+                            href="/{{ objeto.cidade.slug }}/profissionais/{{ objeto.slug }}/"
+                            class="btn btn-outline-secondary btn-lg ms-2"
+                        >
+                            Cancelar
+                        </a>
+
+                    {% endif %}
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

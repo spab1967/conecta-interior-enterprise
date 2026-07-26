@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Empresa
+{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-10">
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h2>
+
+                        Editar Empresa
+
+                    </h2>
+
+                    <p class="text-muted mb-0">
+
+                        {{ empresa.nome_fantasia }}
+
+                    </p>
+
+                </div>
+
+                <a
+                    href="{% url 'empresas:visualizar' empresa.pk %}"
+                    class="btn btn-outline-secondary">
+
+                    Cancelar
+
+                </a>
+
+            </div>
+
+            <div class="card shadow-sm">
+
+                <div class="card-body">
+
+                    <form
+                        method="post"
+                        enctype="multipart/form-data">
+
+                        {% csrf_token %}
+
+                        {% for field in form %}
+
+                            <div class="mb-3">
+
+                                <label
+                                    class="form-label">
+
+                                    {{ field.label }}
+
+                                </label>
+
+                                {{ field }}
+
+                                {% if field.help_text %}
+
+                                    <div class="form-text">
+
+                                        {{ field.help_text }}
+
+                                    </div>
+
+                                {% endif %}
+
+                                {% for erro in field.errors %}
+
+                                    <div class="text-danger small">
+
+                                        {{ erro }}
+
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endfor %}
+
+                        <hr>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                            Salvar Alterações
+
+                        </button>
+
+                        <a
+                            href="{% url 'empresas:visualizar' empresa.pk %}"
+                            class="btn btn-outline-secondary">
+
+                            Cancelar
+
+                        </a>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

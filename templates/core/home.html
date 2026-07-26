@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block title %}
+Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+{% include "includes/hero.html" %}
+
+
+<section id="empresas" class="mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Empresas
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                {{ total_empresas }}
+
+                {% if total_empresas == 1 %}
+                    empresa encontrada
+                {% else %}
+                    empresas encontradas
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        {% for empresa in empresas %}
+
+            <div class="col-md-6 col-xl-4 mb-4">
+
+                {% include "includes/card_empresa.html" %}
+
+            </div>
+
+        {% empty %}
+
+            <div class="col-12">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body text-center py-5">
+
+                        <div
+                            class="mb-3"
+                            style="font-size: 42px;"
+                        >
+                            🏢
+                        </div>
+
+                        <h3 class="h5 fw-bold">
+                            Nenhuma empresa encontrada
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            Tente alterar os filtros da pesquisa.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% if pagina_empresas.paginator.num_pages > 1 %}
+
+        <nav
+            aria-label="Paginação das empresas"
+            class="mt-2"
+        >
+
+            <ul class="pagination justify-content-center">
+
+                {% if pagina_empresas.has_previous %}
+
+                    <li class="page-item">
+
+                        <a
+                            class="page-link"
+                            href="?{% if query_filtros %}{{ query_filtros }}&{% endif %}pagina_empresas={{ pagina_empresas.previous_page_number }}#empresas"
+                        >
+                            ← Anterior
+                        </a>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            ← Anterior
+                        </span>
+                    </li>
+
+                {% endif %}
+
+
+                <li class="page-item disabled">
+
+                    <span class="page-link">
+
+                        Página
+                        {{ pagina_empresas.number }}
+                        de
+                        {{ pagina_empresas.paginator.num_pages }}
+
+                    </span>
+
+                </li>
+
+
+                {% if pagina_empresas.has_next %}
+
+                    <li class="page-item">
+
+                        <a
+                            class="page-link"
+                            href="?{% if query_filtros %}{{ query_filtros }}&{% endif %}pagina_empresas={{ pagina_empresas.next_page_number }}#empresas"
+                        >
+                            Próxima →
+                        </a>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Próxima →
+                        </span>
+                    </li>
+
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    {% endif %}
+
+</section>
+
+
+<section id="profissionais" class="mb-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                Profissionais
+            </h2>
+
+            <p class="text-muted mb-0">
+
+                {{ total_profissionais }}
+
+                {% if total_profissionais == 1 %}
+                    profissional encontrado
+                {% else %}
+                    profissionais encontrados
+                {% endif %}
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="row">
+
+        {% for profissional in profissionais %}
+
+            <div class="col-md-6 col-xl-4 mb-4">
+
+                {% include "includes/card_profissional.html" %}
+
+            </div>
+
+        {% empty %}
+
+            <div class="col-12">
+
+                <div class="card border-0 shadow-sm">
+
+                    <div class="card-body text-center py-5">
+
+                        <div
+                            class="mb-3"
+                            style="font-size: 42px;"
+                        >
+                            👤
+                        </div>
+
+                        <h3 class="h5 fw-bold">
+                            Nenhum profissional encontrado
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            Tente alterar os filtros da pesquisa.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% if pagina_profissionais.paginator.num_pages > 1 %}
+
+        <nav
+            aria-label="Paginação dos profissionais"
+            class="mt-2"
+        >
+
+            <ul class="pagination justify-content-center">
+
+                {% if pagina_profissionais.has_previous %}
+
+                    <li class="page-item">
+
+                        <a
+                            class="page-link"
+                            href="?{% if query_filtros %}{{ query_filtros }}&{% endif %}pagina_profissionais={{ pagina_profissionais.previous_page_number }}#profissionais"
+                        >
+                            ← Anterior
+                        </a>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            ← Anterior
+                        </span>
+                    </li>
+
+                {% endif %}
+
+
+                <li class="page-item disabled">
+
+                    <span class="page-link">
+
+                        Página
+                        {{ pagina_profissionais.number }}
+                        de
+                        {{ pagina_profissionais.paginator.num_pages }}
+
+                    </span>
+
+                </li>
+
+
+                {% if pagina_profissionais.has_next %}
+
+                    <li class="page-item">
+
+                        <a
+                            class="page-link"
+                            href="?{% if query_filtros %}{{ query_filtros }}&{% endif %}pagina_profissionais={{ pagina_profissionais.next_page_number }}#profissionais"
+                        >
+                            Próxima →
+                        </a>
+
+                    </li>
+
+                {% else %}
+
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                            Próxima →
+                        </span>
+                    </li>
+
+                {% endif %}
+
+            </ul>
+
+        </nav>
+
+    {% endif %}
+
+</section>
+
+
+<hr class="my-5">
+
+
+<section id="cidades">
+
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1">
+            Cidades Disponíveis
+        </h2>
+
+        <p class="text-muted">
+            Explore empresas e profissionais por município.
+        </p>
+
+    </div>
+
+
+    <div class="row">
+
+        {% for cidade in cidades %}
+
+            <div class="col-md-4 col-lg-3 mb-4">
+
+                {% include "includes/card_cidade.html" %}
+
+            </div>
+
+        {% empty %}
+
+            <div class="col-12">
+
+                <div class="alert alert-secondary">
+                    Nenhuma cidade disponível.
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+{% endblock %}

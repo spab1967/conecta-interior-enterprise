@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ empresa.nome_fantasia }} | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+
+    <div class="col-lg-8">
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+
+                <div class="d-flex align-items-start gap-4">
+
+                    {% if empresa.logo %}
+
+                        <img
+                            src="{{ empresa.logo.url }}"
+                            alt="{{ empresa.nome_fantasia }}"
+                            class="rounded"
+                            style="width: 120px; height: 120px; object-fit: cover;"
+                        >
+
+                    {% else %}
+
+                        <div
+                            class="rounded bg-light d-flex align-items-center justify-content-center"
+                            style="width: 120px; height: 120px; font-size: 48px;"
+                        >
+                            🏢
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="flex-grow-1">
+
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+
+                            {% if empresa.prioridade_comercial == 3 %}
+
+                                <span class="badge bg-dark">
+                                    ★ PREMIUM
+                                </span>
+
+                            {% elif empresa.prioridade_comercial == 2 %}
+
+                                <span class="badge bg-warning text-dark">
+                                    ★ DESTAQUE
+                                </span>
+
+                            {% endif %}
+
+                            {% if empresa.categoria %}
+                                <span class="badge bg-primary">
+                                    {{ empresa.categoria.nome }}
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+
+                        <h1 class="fw-bold mb-2">
+                            {{ empresa.nome_fantasia }}
+                        </h1>
+
+                        <p class="mb-0">
+                            📍 {{ empresa.cidade.nome }}/{{ empresa.cidade.estado }}
+
+                            {% if empresa.bairro %}
+                                — {{ empresa.bairro }}
+                            {% endif %}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+        {% include "includes/reputacao.html" %}
+
+
+        {% if empresa.descricao %}
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+
+                    <h2 class="h4 fw-bold mb-3">
+                        Sobre
+                    </h2>
+
+                    <p class="mb-0">
+                        {{ empresa.descricao|linebreaksbr }}
+                    </p>
+
+                </div>
+            </div>
+
+        {% endif %}
+
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+
+                <h2 class="h4 fw-bold mb-4">
+                    Contato
+                </h2>
+
+                <div class="d-flex flex-wrap gap-2">
+
+                    {% if empresa.whatsapp %}
+
+                        <a
+                            href="{% url 'metricas:contato_empresa' empresa.id 'whatsapp' %}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-success"
+                        >
+                            💬 WhatsApp
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if empresa.telefone %}
+
+                        <a
+                            href="{% url 'metricas:contato_empresa' empresa.id 'telefone' %}"
+                            class="btn btn-outline-primary"
+                        >
+                            📞 {{ empresa.telefone }}
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if empresa.email %}
+
+                        <a
+                            href="{% url 'metricas:contato_empresa' empresa.id 'email' %}"
+                            class="btn btn-outline-secondary"
+                        >
+                            ✉️ E-mail
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if empresa.site %}
+
+                        <a
+                            href="{% url 'metricas:contato_empresa' empresa.id 'site' %}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-outline-dark"
+                        >
+                            🌐 Site
+                        </a>
+
+                    {% endif %}
+
+
+                    {% if empresa.instagram %}
+
+                        <a
+                            href="{% url 'metricas:contato_empresa' empresa.id 'instagram' %}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="btn btn-outline-danger"
+                        >
+                            📷 Instagram
+                        </a>
+
+                    {% endif %}
+
+                </div>
+
+
+                {% if empresa.endereco %}
+
+                    <hr>
+
+                    <p class="mb-1">
+                        <strong>Endereço:</strong>
+                        {{ empresa.endereco }}
+                    </p>
+
+                    {% if empresa.bairro %}
+                        <p class="mb-1">
+                            <strong>Bairro:</strong>
+                            {{ empresa.bairro }}
+                        </p>
+                    {% endif %}
+
+                {% endif %}
+
+
+                {% if empresa.horario %}
+                    <p class="mb-0 mt-3">
+                        <strong>Horário:</strong>
+                        {{ empresa.horario }}
+                    </p>
+                {% endif %}
+
+            </div>
+        </div>
+
+
+        {% if empresa.endereco %}
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+
+                    <h2 class="h4 fw-bold mb-3">
+                        Localização
+                    </h2>
+
+                    <div class="ratio ratio-16x9">
+
+                        <iframe
+                            src="https://www.google.com/maps?q={{ empresa.endereco|urlencode }},{{ empresa.cidade.nome|urlencode }},{{ empresa.cidade.estado|urlencode }}&output=embed"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                        ></iframe>
+
+                    </div>
+
+                </div>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="col-lg-4">
+
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+
+                <h2 class="h5 fw-bold mb-3">
+                    ★ Favoritos
+                </h2>
+
+                <p class="text-muted">
+                    Salve esta empresa para encontrá-la novamente com facilidade.
+                </p>
+
+                <form
+                    method="post"
+                    action="{% url 'favoritos:alternar_empresa' empresa.cidade.slug empresa.slug %}"
+                >
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-outline-warning w-100"
+                    >
+                        ★ Adicionar ou remover dos favoritos
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+
+        {% if relacionadas %}
+
+            <h2 class="h4 fw-bold mb-3">
+                Empresas relacionadas
+            </h2>
+
+            {% for relacionada in relacionadas %}
+
+                <div class="mb-3">
+
+                    {% with empresa=relacionada %}
+                        {% include "includes/card_empresa.html" %}
+                    {% endwith %}
+
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+
+
+<style>
+.ci-reputacao{margin-top:32px;padding:24px;border:1px solid #e3e8ef;border-radius:16px;background:#fff;box-shadow:0 4px 16px rgba(15,35,60,.05)}
+.ci-reputacao-topo{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:18px}
+.ci-reputacao-titulo{margin:0;font-weight:800}
+.ci-reputacao-resumo{display:flex;align-items:center;gap:10px;margin-top:6px}
+.ci-reputacao-nota{font-size:1.7rem;font-weight:800;color:#172033}
+.ci-reputacao-estrelas{color:#f4b400;letter-spacing:2px}
+.ci-reputacao-total{color:#667085;font-size:.86rem}
+.ci-avaliacao{padding:16px 0;border-top:1px solid #edf1f5}
+.ci-avaliacao:first-of-type{border-top:0}
+.ci-avaliacao-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px}
+.ci-avaliacao-nome{font-weight:700}
+.ci-avaliacao-nota{color:#f4b400;white-space:nowrap}
+.ci-avaliacao-comentario{margin:0;color:#475467;line-height:1.55}
+.ci-avaliacao-data{margin-top:6px;color:#98a2b3;font-size:.78rem}
+.ci-sem-avaliacao{padding:14px 0 4px;color:#667085}
+</style>
+
+<section class="ci-reputacao">
+    <div class="ci-reputacao-topo">
+        <div>
+            <h2 class="ci-reputacao-titulo">Avaliações</h2>
+            <div class="ci-reputacao-resumo">
+                <span class="ci-reputacao-nota">{{ media_avaliacoes|floatformat:1 }}</span>
+                <span class="ci-reputacao-estrelas">★★★★★</span>
+                <span class="ci-reputacao-total">{{ total_avaliacoes }} avaliação(ões)</span>
+            </div>
+        </div>
+        <a href="{% url 'avaliacoes:avaliar_empresa' empresa.cidade.slug empresa.slug %}" class="btn btn-primary">
+            Avaliar esta empresa
+        </a>
+    </div>
+
+    {% for avaliacao in avaliacoes_aprovadas %}
+        <article class="ci-avaliacao">
+            <div class="ci-avaliacao-head">
+                <span class="ci-avaliacao-nome">{{ avaliacao.nome }}</span>
+                <span class="ci-avaliacao-nota">{{ avaliacao.nota }}/5 ★</span>
+            </div>
+            <p class="ci-avaliacao-comentario">{{ avaliacao.comentario }}</p>
+            <div class="ci-avaliacao-data">{{ avaliacao.criado_em|date:"d/m/Y" }}</div>
+        </article>
+    {% empty %}
+        <div class="ci-sem-avaliacao">Ainda não há avaliações publicadas. Seja o primeiro a avaliar.</div>
+    {% endfor %}
+</section>
+
+
+<section class="card border-0 shadow-sm mt-4 ci-servicos-publicos">
+    <div class="card-body p-4">
+        <h2 class="h4 fw-bold mb-3">Serviços</h2>
+        <div class="row g-3">
+            {% for servico in empresa.servicos.all %}
+                {% if servico.ativo %}
+                <div class="col-md-6">
+                    <div class="border rounded p-3 h-100">
+                        <strong>{{ servico.nome }}</strong>
+                        <div class="text-primary mt-1">
+                            {% if servico.valor != None %}R$ {{ servico.valor|floatformat:2 }}{% else %}Sob consulta{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% empty %}
+                <div class="text-muted">Nenhum serviço informado.</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}

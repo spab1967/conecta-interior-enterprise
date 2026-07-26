@@ -1,0 +1,70 @@
+<a class="cartao empresa-card"
+   href="/{{ empresa.cidade.slug }}/empresa/{{ empresa.slug }}/">
+
+    <div class="empresa-topo">
+
+        <div class="empresa-logo">
+
+            {% if empresa.logo %}
+
+                <img
+                    src="{{ empresa.logo.url }}"
+                    alt="{{ empresa.nome_fantasia }}">
+
+            {% else %}
+
+                <span>
+
+                    {{ empresa.nome_fantasia|slice:":1"|upper }}
+
+                </span>
+
+            {% endif %}
+
+        </div>
+
+        <div class="empresa-info">
+
+            <small>
+
+                {{ empresa.categoria.nome }}
+
+            </small>
+
+            <h3>
+
+                {{ empresa.nome_fantasia }}
+
+            </h3>
+
+            <p>
+
+                {{ empresa.bairro|default:empresa.cidade.nome }}
+
+            </p>
+
+        </div>
+
+    </div>
+
+    {% if empresa.destaque %}
+
+    <div class="empresa-destaque">
+
+        ⭐ Destaque
+
+    </div>
+
+    {% endif %}
+
+    <div class="empresa-acoes">
+
+        <span>
+
+            Ver Perfil →
+
+        </span>
+
+    </div>
+
+</a>

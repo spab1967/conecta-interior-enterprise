@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}
+Histórico Financeiro | Conecta Interior
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="h2 fw-bold mb-1">
+                Histórico Financeiro
+            </h1>
+
+            <p class="text-muted mb-0">
+                Consulte suas contratações e pagamentos.
+            </p>
+        </div>
+
+        <a
+            href="{% url 'core:minha_conta' %}"
+            class="btn btn-outline-secondary"
+        >
+            Minha Conta
+        </a>
+
+    </div>
+
+    {% for pedido in pedidos %}
+
+        <div class="card shadow-sm border-0 mb-4">
+
+            <div class="card-body p-4">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <small class="text-muted">
+                            Titular
+                        </small>
+                        <div class="fw-semibold">
+                            {{ pedido.titular }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <small class="text-muted">
+                            Plano
+                        </small>
+                        <div class="fw-semibold">
+                            {{ pedido.plano.nome }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <small class="text-muted">
+                            Valor
+                        </small>
+                        <div class="fw-semibold">
+                            R$ {{ pedido.valor }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <small class="text-muted">
+                            Pedido
+                        </small>
+                        <div>
+                            {{ pedido.get_status_display }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <small class="text-muted">
+                            Data
+                        </small>
+                        <div>
+                            {{ pedido.criado_em|date:"d/m/Y H:i" }}
+                        </div>
+                    </div>
+
+                </div>
+
+                {% for pagamento in pedido.pagamentos.all %}
+
+                    <hr>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <small class="text-muted">
+                                Pagamento
+                            </small>
+                            <div>
+                                {{ pagamento.get_status_display }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <small class="text-muted">
+                                Forma
+                            </small>
+                            <div>
+                                {{ pagamento.get_tipo_display }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <small class="text-muted">
+                                Valor pago
+                            </small>
+                            <div>
+                                R$ {{ pagamento.valor }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <small class="text-muted">
+                                Pago em
+                            </small>
+                            <div>
+                                {% if pagamento.pago_em %}
+                                    {{ pagamento.pago_em|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+
+                {% empty %}
+
+                    <hr>
+
+                    <div class="text-muted">
+                        Nenhum pagamento registrado.
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    {% empty %}
+
+        <div class="alert alert-info">
+            Nenhuma movimentação financeira encontrada.
+        </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

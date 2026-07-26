@@ -1,0 +1,148 @@
+<div
+    class="card h-100
+    {% if profissional.prioridade_comercial == 3 %}
+        border-dark shadow
+    {% elif profissional.prioridade_comercial == 2 %}
+        border-warning shadow-sm
+    {% else %}
+        border-0 shadow-sm
+    {% endif %}"
+>
+
+    {% if profissional.prioridade_comercial == 3 %}
+
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+
+            <span class="fw-bold">
+                ★ PREMIUM
+            </span>
+
+            <small>
+                Perfil Premium
+            </small>
+
+        </div>
+
+    {% elif profissional.prioridade_comercial == 2 %}
+
+        <div class="card-header bg-warning text-dark">
+
+            <span class="fw-bold">
+                ★ DESTAQUE
+            </span>
+
+        </div>
+
+    {% endif %}
+
+
+    <div class="card-body">
+
+        <div class="d-flex align-items-start gap-3 mb-3">
+
+            {% if profissional.foto %}
+
+                <img
+                    src="{{ profissional.foto.url }}"
+                    alt="{{ profissional.nome }}"
+                    class="rounded-circle"
+                    style="width: 64px; height: 64px; object-fit: cover;"
+                >
+
+            {% else %}
+
+                <div
+                    class="rounded-circle bg-light d-flex align-items-center justify-content-center flex-shrink-0"
+                    style="width: 64px; height: 64px; font-size: 28px;"
+                >
+                    👤
+                </div>
+
+            {% endif %}
+
+
+            <div class="flex-grow-1">
+
+                <h5 class="fw-bold mb-1">
+                    {{ profissional.nome }}
+                </h5>
+
+                {% if profissional.especialidade %}
+
+                    <p class="mb-1">
+                        {{ profissional.especialidade }}
+                    </p>
+
+                {% endif %}
+
+                <div class="small text-muted">
+
+                    📍 {{ profissional.cidade.nome }}
+
+                    {% if profissional.bairro %}
+                        — {{ profissional.bairro }}
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        {% if profissional.descricao %}
+
+            <p class="text-muted mb-3">
+                {{ profissional.descricao|truncatewords:20 }}
+            </p>
+
+        {% endif %}
+
+
+        {% if profissional.atendimento_domiciliar %}
+
+            <div class="small mb-2">
+                🏠 Atendimento domiciliar
+            </div>
+
+        {% endif %}
+
+
+        {% if profissional.prioridade_comercial == 3 %}
+
+            <div class="small mb-2">
+                <strong>✓ Perfil Premium</strong>
+            </div>
+
+        {% elif profissional.prioridade_comercial == 2 %}
+
+            <div class="small mb-2">
+                <strong>✓ Profissional em destaque</strong>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="card-footer bg-white border-0 pt-0">
+
+        <a
+            href="{% url 'core:profissional_detalhe' profissional.cidade.slug profissional.slug %}"
+            class="
+                btn w-100
+                {% if profissional.prioridade_comercial == 3 %}
+                    btn-dark
+                {% elif profissional.prioridade_comercial == 2 %}
+                    btn-warning
+                {% else %}
+                    btn-outline-primary
+                {% endif %}
+            "
+        >
+            Ver Perfil
+        </a>
+
+    </div>
+
+</div>

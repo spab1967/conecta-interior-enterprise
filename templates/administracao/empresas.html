@@ -1,0 +1,202 @@
+{% extends "base_enterprise.html" %}
+
+{% block title %}
+Empresas | Administração Enterprise
+{% endblock %}
+
+{% block content %}
+
+<div class="enterprise-page-header">
+
+    <div>
+        <h1 class="enterprise-page-title">Empresas</h1>
+
+        <p class="enterprise-page-subtitle">
+            Administração dos cadastros empresariais da plataforma
+        </p>
+    </div>
+
+    <div class="enterprise-page-date">
+        {{ empresas_ativas }} ativa{{ empresas_ativas|pluralize }} de {{ total_empresas }}
+    </div>
+
+</div>
+
+<section class="enterprise-panel">
+
+    <div class="enterprise-panel-header enterprise-panel-header-wrap">
+
+        <div>
+            <h2 class="enterprise-panel-title">
+                Empresas cadastradas
+            </h2>
+
+            <span class="enterprise-panel-subtitle">
+                {{ total_empresas }} resultado{{ total_empresas|pluralize }}
+            </span>
+        </div>
+
+        <form method="get"
+              class="enterprise-search-form">
+
+            <input
+                type="search"
+                class="form-control"
+                name="q"
+                value="{{ pesquisa }}"
+                placeholder="Empresa, cidade ou categoria"
+                aria-label="Pesquisar empresas"
+            >
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+                Pesquisar
+            </button>
+
+            {% if pesquisa %}
+            <a href="{% url 'administracao:empresas' %}"
+               class="btn btn-outline-secondary">
+                Limpar
+            </a>
+            {% endif %}
+
+        </form>
+
+    </div>
+
+    <div class="enterprise-panel-body p-0">
+
+        <div class="table-responsive">
+
+            <table class="table enterprise-table align-middle mb-0">
+
+                <thead>
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Empresa</th>
+                        <th>Cidade</th>
+                        <th>Categoria</th>
+                        <th>Status</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for empresa in page_obj %}
+
+                    <tr>
+
+                        <td>
+                            #{{ empresa.id }}
+                        </td>
+
+                        <td>
+                            <strong>{{ empresa.nome_fantasia }}</strong>
+
+                            {% if empresa.destaque %}
+                            <span class="badge text-bg-warning ms-2">
+                                Destaque
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ empresa.cidade.nome }}
+                        </td>
+
+                        <td>
+                            {{ empresa.categoria.nome }}
+                        </td>
+
+                        <td>
+
+                            {% if empresa.ativa %}
+
+                            <span class="enterprise-status enterprise-status-success">
+                                Ativa
+                            </span>
+
+                            {% else %}
+
+                            <span class="enterprise-status enterprise-status-muted">
+                                Inativa
+                            </span>
+
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="5"
+                            class="text-center py-5 text-muted">
+                            Nenhuma empresa encontrada.
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% if page_obj.paginator.num_pages > 1 %}
+
+<nav class="enterprise-pagination"
+     aria-label="Paginação de empresas">
+
+    <ul class="pagination mb-0">
+
+        {% if page_obj.has_previous %}
+
+        <li class="page-item">
+
+            <a class="page-link"
+               href="?page={{ page_obj.previous_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">
+                Anterior
+            </a>
+
+        </li>
+
+        {% endif %}
+
+        <li class="page-item active">
+
+            <span class="page-link">
+                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+
+        </li>
+
+        {% if page_obj.has_next %}
+
+        <li class="page-item">
+
+            <a class="page-link"
+               href="?page={{ page_obj.next_page_number }}{% if pesquisa %}&q={{ pesquisa|urlencode }}{% endif %}">
+                Próxima
+            </a>
+
+        </li>
+
+        {% endif %}
+
+    </ul>
+
+</nav>
+
+{% endif %}
+
+{% endblock %}

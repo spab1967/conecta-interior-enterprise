@@ -1,0 +1,128 @@
+{% extends "base_enterprise.html" %}
+{% block title %}Financeiro | Administração Enterprise{% endblock %}
+{% block content %}
+<div class="enterprise-page-header">
+  <div>
+    <h1 class="enterprise-page-title">Financeiro</h1>
+    <p class="enterprise-page-subtitle">Controle de pedidos, pagamentos e receitas da plataforma</p>
+  </div>
+  <div class="enterprise-page-date">{{ pagamentos_aprovados }} pagamentos aprovados</div>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-3">
+    <div class="enterprise-metric-card">
+      <p class="enterprise-metric-label">Pedidos</p>
+      <div class="enterprise-metric-value">{{ total_pedidos }}</div>
+      <span class="enterprise-metric-note">{{ pedidos_pendentes }} pendentes</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="enterprise-metric-card">
+      <p class="enterprise-metric-label">Pagamentos</p>
+      <div class="enterprise-metric-value">{{ total_pagamentos }}</div>
+      <span class="enterprise-metric-note">{{ pagamentos_aprovados }} aprovados</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="enterprise-metric-card">
+      <p class="enterprise-metric-label">Receita aprovada</p>
+      <div class="enterprise-metric-value">R$ {{ receita_total|floatformat:2 }}</div>
+      <span class="enterprise-metric-note">Total confirmado</span>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="enterprise-metric-card">
+      <p class="enterprise-metric-label">Receita do mês</p>
+      <div class="enterprise-metric-value">R$ {{ receita_mes|floatformat:2 }}</div>
+      <span class="enterprise-metric-note">Pagamentos aprovados no mês</span>
+    </div>
+  </div>
+</div>
+
+<section class="enterprise-panel mb-4">
+  <div class="enterprise-panel-header enterprise-panel-header-wrap">
+    <div>
+      <h2 class="enterprise-panel-title">Pedidos financeiros</h2>
+      <span class="enterprise-panel-subtitle">{{ total_pedidos }} registro{{ total_pedidos|pluralize }}</span>
+    </div>
+    <form method="get" class="enterprise-search-form">
+      <input type="search" class="form-control" name="q" value="{{ pesquisa }}"
+             placeholder="Titular, plano ou status">
+      <button type="submit" class="btn btn-primary">Pesquisar</button>
+      {% if pesquisa %}<a href="{% url 'administracao:financeiro' %}" class="btn btn-outline-secondary">Limpar</a>{% endif %}
+    </form>
+  </div>
+  <div class="enterprise-panel-body p-0">
+    <div class="table-responsive">
+      <table class="table enterprise-table align-middle mb-0">
+        <thead><tr><th>ID</th><th>Titular</th><th>Tipo</th><th>Plano</th><th>Valor</th><th>Status</th><th>Criado em</th></tr></thead>
+        <tbody>
+        {% for pedido in pedidos %}
+          <tr>
+            <td>#{{ pedido.id }}</td>
+            <td><strong>{{ pedido.titular }}</strong></td>
+            <td>{{ pedido.tipo_titular }}</td>
+            <td>{{ pedido.plano.nome }}</td>
+            <td>R$ {{ pedido.valor|floatformat:2 }}</td>
+            <td>
+              {% if pedido.status == "pago" %}
+                <span class="enterprise-status enterprise-status-success">Pago</span>
+              {% elif pedido.status == "pendente" %}
+                <span class="enterprise-status enterprise-status-warning">Pendente</span>
+              {% else %}
+                <span class="enterprise-status enterprise-status-danger">Cancelado</span>
+              {% endif %}
+            </td>
+            <td>{{ pedido.criado_em|date:"d/m/Y H:i" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-center py-5 text-muted">Nenhum pedido financeiro encontrado.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="enterprise-panel">
+  <div class="enterprise-panel-header">
+    <div>
+      <h2 class="enterprise-panel-title">Últimos pagamentos</h2>
+      <span class="enterprise-panel-subtitle">{{ total_pagamentos }} pagamento{{ total_pagamentos|pluralize }}</span>
+    </div>
+  </div>
+  <div class="enterprise-panel-body p-0">
+    <div class="table-responsive">
+      <table class="table enterprise-table align-middle mb-0">
+        <thead><tr><th>ID</th><th>Titular</th><th>Forma</th><th>Valor</th><th>Status</th><th>Pago em</th><th>Transação</th></tr></thead>
+        <tbody>
+        {% for pagamento in pagamentos %}
+          <tr>
+            <td>#{{ pagamento.id }}</td>
+            <td><strong>{{ pagamento.pedido.titular }}</strong></td>
+            <td>{{ pagamento.get_tipo_display }}</td>
+            <td>R$ {{ pagamento.valor|floatformat:2 }}</td>
+            <td>
+              {% if pagamento.status == "aprovado" %}
+                <span class="enterprise-status enterprise-status-success">Aprovado</span>
+              {% elif pagamento.status == "pendente" %}
+                <span class="enterprise-status enterprise-status-warning">Pendente</span>
+              {% elif pagamento.status == "recusado" %}
+                <span class="enterprise-status enterprise-status-danger">Recusado</span>
+              {% else %}
+                <span class="enterprise-status enterprise-status-muted">Estornado</span>
+              {% endif %}
+            </td>
+            <td>{% if pagamento.pago_em %}{{ pagamento.pago_em|date:"d/m/Y H:i" }}{% else %}—{% endif %}</td>
+            <td>{% if pagamento.codigo_transacao %}{{ pagamento.codigo_transacao }}{% else %}—{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="text-center py-5 text-muted">Nenhum pagamento encontrado.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+{% endblock %}

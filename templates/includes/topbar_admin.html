@@ -1,0 +1,15 @@
+<header class="enterprise-topbar">
+    <div class="enterprise-topbar-title">
+        <span class="enterprise-topbar-product">Conecta Interior</span>
+        <span class="enterprise-topbar-separator">/</span>
+        <span class="enterprise-topbar-area">Administração</span>
+    </div>
+    <div class="enterprise-topbar-user">
+        <span class="enterprise-topbar-user-label">
+            {% if request.user.get_full_name %}{{ request.user.get_full_name }}{% else %}{{ request.user.username }}{% endif %}
+        </span>
+        <span class="enterprise-topbar-avatar">
+            {% if request.user.first_name %}{{ request.user.first_name|slice:":1"|upper }}{% else %}{{ request.user.username|slice:":1"|upper }}{% endif %}
+        </span>
+    </div>
+</header>
