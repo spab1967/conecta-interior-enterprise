@@ -158,6 +158,39 @@ def dashboard(request):
         or 0
     )
 
+    eventos_contato = EventoContato.objects.all()
+
+    total_contatos = eventos_contato.count()
+
+    contatos_mes = eventos_contato.filter(
+        criado_em__gte=inicio_mes,
+    ).count()
+
+    contatos_whatsapp = eventos_contato.filter(
+        tipo="whatsapp",
+    ).count()
+
+    contatos_telefone = eventos_contato.filter(
+        tipo="telefone",
+    ).count()
+
+    contatos_email = eventos_contato.filter(
+        tipo="email",
+    ).count()
+
+    novas_empresas_mes = Empresa.objects.filter(
+        criada_em__gte=inicio_mes,
+    ).count()
+
+    novos_profissionais_mes = Profissional.objects.filter(
+        criado_em__gte=inicio_mes,
+    ).count()
+
+    cadastros_mes = (
+        novas_empresas_mes
+        + novos_profissionais_mes
+    )
+
     contexto = {
         "total_empresas": Empresa.objects.count(),
         "empresas_ativas": Empresa.objects.filter(
@@ -182,6 +215,16 @@ def dashboard(request):
         "total_cidades": Cidade.objects.count(),
         "total_categorias": Categoria.objects.count(),
         "total_pedidos": PedidoFinanceiro.objects.count(),
+
+        "total_contatos": total_contatos,
+        "contatos_mes": contatos_mes,
+        "contatos_whatsapp": contatos_whatsapp,
+        "contatos_telefone": contatos_telefone,
+        "contatos_email": contatos_email,
+
+        "novas_empresas_mes": novas_empresas_mes,
+        "novos_profissionais_mes": novos_profissionais_mes,
+        "cadastros_mes": cadastros_mes,
 
         "ultimas_empresas": (
             Empresa.objects
