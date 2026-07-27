@@ -31,6 +31,7 @@ from apps.planos.services import (
 from apps.planos.vigencia import calcular_vencimento_plano
 from apps.profissionais.forms import ProfissionalClienteForm
 from apps.profissionais.models import Profissional
+from apps.servicos.models import Servico
 
 
 def _ids_por_prioridade_comercial(
@@ -291,50 +292,40 @@ def home(request):
 
     if busca:
 
-        empresas = empresas.filter(
-            Q(
-                nome_fantasia__icontains=busca
-            )
-            | Q(
-                descricao__icontains=busca
-            )
-            | Q(
-                endereco__icontains=busca
-            )
-            | Q(
-                bairro__icontains=busca
-            )
-            | Q(
-                categoria__nome__icontains=busca
-            )
-            | Q(
-                cidade__nome__icontains=busca
-            )
-        )
+        termos = [
+            termo
+            for termo in busca.split()
+            if termo.strip()
+        ]
 
-        profissionais = profissionais.filter(
-            Q(
-                nome__icontains=busca
-            )
-            | Q(
-                especialidade__icontains=busca
-            )
-            | Q(
-                descricao__icontains=busca
-            )
-            | Q(
-                endereco__icontains=busca
-            )
-            | Q(
-                bairro__icontains=busca
-            )
-            | Q(
-                categoria__nome__icontains=busca
-            )
-            | Q(
-                cidade__nome__icontains=busca
-            )
-        )
+        for termo in termos:
+
+            empresas = empresas.filter(
+                Q(nome_fantasia__icontains=termo)
+                | Q(descricao__icontains=termo)
+                | Q(endereco__icontains=termo)
+                | Q(bairro__icontains=termo)
+                | Q(categoria__nome__icontains=termo)
+                | Q(cidade__nome__icontains=termo)
+                | Q(
+                    servicos__nome__icontains=termo,
+                    servicos__ativo=True,
+                )
+            ).distinct()
+
+            profissionais = profissionais.filter(
+                Q(nome__icontains=termo)
+                | Q(especialidade__icontains=termo)
+                | Q(descricao__icontains=termo)
+                | Q(endereco__icontains=termo)
+                | Q(bairro__icontains=termo)
+                | Q(categoria__nome__icontains=termo)
+                | Q(cidade__nome__icontains=termo)
+                | Q(
+                    servicos__nome__icontains=termo,
+                    servicos__ativo=True,
+                )
+            ).distinct()
 
     if cidade_slug:
 
