@@ -247,6 +247,12 @@ class Pagamento(models.Model):
         max_length=200,
         blank=True,
     )
+    
+    comprovante = models.FileField(
+        upload_to="comprovantes/%Y/%m/",
+        null=True,
+        blank=True,
+    )
 
     pago_em = models.DateTimeField(
         null=True,

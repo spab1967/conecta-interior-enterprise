@@ -23,6 +23,7 @@ from apps.categorias.models import Categoria
 from apps.cidades.models import Cidade
 from apps.empresas.models import Empresa
 from apps.financeiro.models import Pagamento, PedidoFinanceiro
+from apps.financeiro.services import aprovar_pagamento
 from apps.planos.models import Assinatura
 from apps.profissionais.models import Profissional
 
@@ -461,6 +462,108 @@ def financeiro(request):
             "receita_mes": receita_mes,
         },
     )
+
+
+@staff_member_required
+@require_POST
+def aprovar_pagamento_admin(
+    request,
+    pagamento_id,
+):
+    pagamento_obj = get_object_or_404(
+        Pagamento.objects.select_related(
+            "pedido",
+            "pedido__empresa",
+            "pedido__profissional",
+            "pedido__plano",
+        ),
+        pk=pagamento_id,
+    )
+
+    if (
+        pagamento_obj.status
+        != Pagamento.STATUS_PENDENTE
+    ):
+        messages.warning(
+            request,
+            "Este pagamento já foi processado.",
+        )
+        return redirect(
+            "administracao:financeiro"
+        )
+
+    if not pagamento_obj.comprovante:
+        messages.error(
+            request,
+            "Este pagamento não possui comprovante anexado.",
+        )
+        return redirect(
+            "administracao:financeiro"
+        )
+
+    aprovar_pagamento(
+        pagamento_obj
+    )
+
+    messages.success(
+        request,
+        (
+            f"Pagamento #{pagamento_obj.pk} "
+            "aprovado. A assinatura foi "
+            "ativada com sucesso."
+        ),
+    )
+
+    return redirect(
+        "administracao:financeiro"
+    )
+
+
+@staff_member_required
+@require_POST
+def recusar_pagamento_admin(
+    request,
+    pagamento_id,
+):
+    pagamento_obj = get_object_or_404(
+        Pagamento.objects.select_related(
+            "pedido",
+        ),
+        pk=pagamento_id,
+    )
+
+    if (
+        pagamento_obj.status
+        != Pagamento.STATUS_PENDENTE
+    ):
+        messages.warning(
+            request,
+            "Este pagamento já foi processado.",
+        )
+        return redirect(
+            "administracao:financeiro"
+        )
+
+    pagamento_obj.status = (
+        Pagamento.STATUS_RECUSADO
+    )
+
+    pagamento_obj.save(
+        update_fields=[
+            "status",
+            "atualizado_em",
+        ]
+    )
+
+    messages.success(
+        request,
+        f"Pagamento #{pagamento_obj.pk} recusado.",
+    )
+
+    return redirect(
+        "administracao:financeiro"
+    )
+
 
 @staff_member_required
 def pagamentos(request):

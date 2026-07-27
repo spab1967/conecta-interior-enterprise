@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
@@ -91,6 +92,7 @@ class EnterpriseBusinessFlowTests(TestCase):
 
     def test_aprovar_pagamento_empresa_cria_assinatura(self):
         pedido = self._pedido_empresa()
+
         pagamento = Pagamento.objects.create(
             pedido=pedido,
             tipo=Pagamento.TIPO_PIX,
@@ -107,15 +109,21 @@ class EnterpriseBusinessFlowTests(TestCase):
             pagamento.status,
             Pagamento.STATUS_APROVADO,
         )
+
         self.assertEqual(
             pedido.status,
             PedidoFinanceiro.STATUS_PAGO,
         )
-        self.assertIsNotNone(pedido.assinatura_id)
+
+        self.assertIsNotNone(
+            pedido.assinatura_id
+        )
+
         self.assertEqual(
             pedido.assinatura.empresa_id,
             self.empresa.pk,
         )
+
         self.assertEqual(
             pedido.assinatura.plano_id,
             self.plano.pk,
@@ -123,6 +131,7 @@ class EnterpriseBusinessFlowTests(TestCase):
 
     def test_aprovar_pagamento_profissional_cria_assinatura(self):
         pedido = self._pedido_profissional()
+
         pagamento = Pagamento.objects.create(
             pedido=pedido,
             tipo=Pagamento.TIPO_PIX,
@@ -139,11 +148,16 @@ class EnterpriseBusinessFlowTests(TestCase):
             pagamento.status,
             Pagamento.STATUS_APROVADO,
         )
+
         self.assertEqual(
             pedido.status,
             PedidoFinanceiro.STATUS_PAGO,
         )
-        self.assertIsNotNone(pedido.assinatura_id)
+
+        self.assertIsNotNone(
+            pedido.assinatura_id
+        )
+
         self.assertEqual(
             pedido.assinatura.profissional_id,
             self.profissional.pk,
@@ -151,6 +165,7 @@ class EnterpriseBusinessFlowTests(TestCase):
 
     def test_aprovar_pagamento_e_idempotente(self):
         pedido = self._pedido_empresa()
+
         pagamento = Pagamento.objects.create(
             pedido=pedido,
             tipo=Pagamento.TIPO_PIX,
@@ -159,9 +174,11 @@ class EnterpriseBusinessFlowTests(TestCase):
         )
 
         aprovar_pagamento(pagamento)
+
         primeira = Assinatura.objects.count()
 
         pagamento.refresh_from_db()
+
         aprovar_pagamento(pagamento)
 
         self.assertEqual(
@@ -176,32 +193,47 @@ class EnterpriseBusinessFlowTests(TestCase):
             username="intruso_financeiro",
             password="Teste@123",
         )
+
         self.client.force_login(outro)
 
         response = self.client.get(
             reverse(
                 "financeiro:pagamento",
-                kwargs={"pedido_id": pedido.pk},
+                kwargs={
+                    "pedido_id": pedido.pk,
+                },
             )
         )
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(
+            response.status_code,
+            404,
+        )
 
     def test_pagamento_empresa_proprietario_acessa(self):
         pedido = self._pedido_empresa()
-        self.client.force_login(self.cliente)
+
+        self.client.force_login(
+            self.cliente
+        )
 
         response = self.client.get(
             reverse(
                 "financeiro:pagamento",
-                kwargs={"pedido_id": pedido.pk},
+                kwargs={
+                    "pedido_id": pedido.pk,
+                },
             )
         )
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
 
     def test_confirmar_pagamento_via_interface(self):
         pedido = self._pedido_empresa()
+
         pagamento = Pagamento.objects.create(
             pedido=pedido,
             tipo=Pagamento.TIPO_PIX,
@@ -209,16 +241,71 @@ class EnterpriseBusinessFlowTests(TestCase):
             valor=pedido.valor,
         )
 
-        self.client.force_login(self.cliente)
+        comprovante = SimpleUploadedFile(
+            "comprovante_teste.pdf",
+            b"%PDF-1.4 comprovante de teste",
+            content_type="application/pdf",
+        )
+
+        self.client.force_login(
+            self.cliente
+        )
 
         response = self.client.post(
             reverse(
                 "financeiro:confirmar",
-                kwargs={"pagamento_id": pagamento.pk},
+                kwargs={
+                    "pagamento_id": pagamento.pk,
+                },
+            ),
+            {
+                "comprovante": comprovante,
+            },
+        )
+
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
+
+        pedido.refresh_from_db()
+        pagamento.refresh_from_db()
+
+        self.assertTrue(
+            bool(pagamento.comprovante)
+        )
+
+        self.assertEqual(
+            pagamento.status,
+            Pagamento.STATUS_PENDENTE,
+        )
+
+        self.assertEqual(
+            pedido.status,
+            PedidoFinanceiro.STATUS_PENDENTE,
+        )
+
+        self.assertIsNone(
+            pedido.assinatura_id
+        )
+
+        self.client.force_login(
+            self.staff
+        )
+
+        response = self.client.post(
+            reverse(
+                "administracao:aprovar_pagamento",
+                kwargs={
+                    "pagamento_id": pagamento.pk,
+                },
             )
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
 
         pedido.refresh_from_db()
         pagamento.refresh_from_db()
@@ -227,26 +314,55 @@ class EnterpriseBusinessFlowTests(TestCase):
             pagamento.status,
             Pagamento.STATUS_APROVADO,
         )
+
         self.assertEqual(
             pedido.status,
             PedidoFinanceiro.STATUS_PAGO,
         )
 
+        self.assertIsNotNone(
+            pedido.assinatura_id
+        )
+
+        self.assertEqual(
+            pedido.assinatura.empresa_id,
+            self.empresa.pk,
+        )
+
+        self.assertEqual(
+            pedido.assinatura.plano_id,
+            self.plano.pk,
+        )
+
     def test_historico_financeiro_exige_login(self):
         response = self.client.get(
-            reverse("financeiro:historico")
+            reverse(
+                "financeiro:historico"
+            )
         )
-        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
 
     def test_historico_financeiro_cliente_responde_200(self):
         self._pedido_empresa()
-        self.client.force_login(self.cliente)
 
-        response = self.client.get(
-            reverse("financeiro:historico")
+        self.client.force_login(
+            self.cliente
         )
 
-        self.assertEqual(response.status_code, 200)
+        response = self.client.get(
+            reverse(
+                "financeiro:historico"
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
 
     def test_contato_whatsapp_empresa_registra_metrica(self):
         response = self.client.get(
@@ -259,7 +375,11 @@ class EnterpriseBusinessFlowTests(TestCase):
             )
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
+
         self.assertTrue(
             EventoContato.objects.filter(
                 empresa=self.empresa,
@@ -278,7 +398,11 @@ class EnterpriseBusinessFlowTests(TestCase):
             )
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
+
         self.assertTrue(
             EventoContato.objects.filter(
                 profissional=self.profissional,
@@ -288,7 +412,9 @@ class EnterpriseBusinessFlowTests(TestCase):
 
     def test_solicitacao_publica_empresa_e_pendente(self):
         response = self.client.post(
-            reverse("cadastros:anuncie"),
+            reverse(
+                "cadastros:anuncie"
+            ),
             {
                 "plano": self.plano.pk,
                 "tipo": SolicitacaoCadastro.TIPO_EMPRESA,
@@ -297,7 +423,9 @@ class EnterpriseBusinessFlowTests(TestCase):
                 "cidade": self.cidade.pk,
                 "categoria": self.categoria.pk,
                 "especialidade": "",
-                "descricao": "Descricao valida de empresa solicitada.",
+                "descricao": (
+                    "Descricao valida de empresa solicitada."
+                ),
                 "endereco": "",
                 "bairro": "",
                 "telefone": "",
@@ -309,16 +437,22 @@ class EnterpriseBusinessFlowTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
 
-        solicitacao = SolicitacaoCadastro.objects.get(
-            nome="Empresa Solicitada"
+        solicitacao = (
+            SolicitacaoCadastro.objects.get(
+                nome="Empresa Solicitada"
+            )
         )
 
         self.assertEqual(
             solicitacao.status,
             SolicitacaoCadastro.STATUS_PENDENTE,
         )
+
         self.assertEqual(
             solicitacao.plano_id,
             self.plano.pk,
@@ -326,7 +460,9 @@ class EnterpriseBusinessFlowTests(TestCase):
 
     def test_solicitacao_profissional_exige_especialidade(self):
         response = self.client.post(
-            reverse("cadastros:anuncie"),
+            reverse(
+                "cadastros:anuncie"
+            ),
             {
                 "plano": self.plano.pk,
                 "tipo": SolicitacaoCadastro.TIPO_PROFISSIONAL,
@@ -347,7 +483,10 @@ class EnterpriseBusinessFlowTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
 
         self.assertFalse(
             SolicitacaoCadastro.objects.filter(
@@ -356,28 +495,39 @@ class EnterpriseBusinessFlowTests(TestCase):
         )
 
     def test_staff_aprova_solicitacao_empresa(self):
-        solicitacao = SolicitacaoCadastro.objects.create(
-            plano=self.plano,
-            tipo=SolicitacaoCadastro.TIPO_EMPRESA,
-            nome="Empresa Aprovacao",
-            responsavel="Responsavel",
-            cidade=self.cidade,
-            categoria=self.categoria,
-            descricao="Descricao da empresa para aprovacao.",
-            whatsapp="37955555555",
-            status=SolicitacaoCadastro.STATUS_PENDENTE,
+        solicitacao = (
+            SolicitacaoCadastro.objects.create(
+                plano=self.plano,
+                tipo=SolicitacaoCadastro.TIPO_EMPRESA,
+                nome="Empresa Aprovacao",
+                responsavel="Responsavel",
+                cidade=self.cidade,
+                categoria=self.categoria,
+                descricao=(
+                    "Descricao da empresa para aprovacao."
+                ),
+                whatsapp="37955555555",
+                status=SolicitacaoCadastro.STATUS_PENDENTE,
+            )
         )
 
-        self.client.force_login(self.staff)
+        self.client.force_login(
+            self.staff
+        )
 
         response = self.client.post(
             reverse(
                 "administracao:aprovar_solicitacao",
-                kwargs={"solicitacao_id": solicitacao.pk},
+                kwargs={
+                    "solicitacao_id": solicitacao.pk,
+                },
             )
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
 
         solicitacao.refresh_from_db()
 
@@ -385,6 +535,7 @@ class EnterpriseBusinessFlowTests(TestCase):
             solicitacao.status,
             SolicitacaoCadastro.STATUS_APROVADO,
         )
+
         self.assertTrue(
             Empresa.objects.filter(
                 nome_fantasia="Empresa Aprovacao",
@@ -393,27 +544,36 @@ class EnterpriseBusinessFlowTests(TestCase):
         )
 
     def test_staff_recusa_solicitacao(self):
-        solicitacao = SolicitacaoCadastro.objects.create(
-            plano=self.plano,
-            tipo=SolicitacaoCadastro.TIPO_PROFISSIONAL,
-            nome="Profissional Recusa",
-            cidade=self.cidade,
-            categoria=self.categoria,
-            especialidade="Teste",
-            whatsapp="37944444444",
-            status=SolicitacaoCadastro.STATUS_PENDENTE,
+        solicitacao = (
+            SolicitacaoCadastro.objects.create(
+                plano=self.plano,
+                tipo=SolicitacaoCadastro.TIPO_PROFISSIONAL,
+                nome="Profissional Recusa",
+                cidade=self.cidade,
+                categoria=self.categoria,
+                especialidade="Teste",
+                whatsapp="37944444444",
+                status=SolicitacaoCadastro.STATUS_PENDENTE,
+            )
         )
 
-        self.client.force_login(self.staff)
+        self.client.force_login(
+            self.staff
+        )
 
         response = self.client.post(
             reverse(
                 "administracao:recusar_solicitacao",
-                kwargs={"solicitacao_id": solicitacao.pk},
+                kwargs={
+                    "solicitacao_id": solicitacao.pk,
+                },
             )
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
 
         solicitacao.refresh_from_db()
 
@@ -421,6 +581,7 @@ class EnterpriseBusinessFlowTests(TestCase):
             solicitacao.status,
             SolicitacaoCadastro.STATUS_RECUSADO,
         )
+
         self.assertFalse(
             Profissional.objects.filter(
                 nome="Profissional Recusa",
@@ -429,26 +590,35 @@ class EnterpriseBusinessFlowTests(TestCase):
         )
 
     def test_nao_staff_nao_aprova_solicitacao(self):
-        solicitacao = SolicitacaoCadastro.objects.create(
-            plano=self.plano,
-            tipo=SolicitacaoCadastro.TIPO_EMPRESA,
-            nome="Empresa Protegida",
-            cidade=self.cidade,
-            categoria=self.categoria,
-            whatsapp="37933333333",
-            status=SolicitacaoCadastro.STATUS_PENDENTE,
+        solicitacao = (
+            SolicitacaoCadastro.objects.create(
+                plano=self.plano,
+                tipo=SolicitacaoCadastro.TIPO_EMPRESA,
+                nome="Empresa Protegida",
+                cidade=self.cidade,
+                categoria=self.categoria,
+                whatsapp="37933333333",
+                status=SolicitacaoCadastro.STATUS_PENDENTE,
+            )
         )
 
-        self.client.force_login(self.cliente)
+        self.client.force_login(
+            self.cliente
+        )
 
         response = self.client.post(
             reverse(
                 "administracao:aprovar_solicitacao",
-                kwargs={"solicitacao_id": solicitacao.pk},
+                kwargs={
+                    "solicitacao_id": solicitacao.pk,
+                },
             )
         )
 
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
 
         solicitacao.refresh_from_db()
 
@@ -456,6 +626,7 @@ class EnterpriseBusinessFlowTests(TestCase):
             solicitacao.status,
             SolicitacaoCadastro.STATUS_PENDENTE,
         )
+
         self.assertFalse(
             Empresa.objects.filter(
                 nome_fantasia="Empresa Protegida"

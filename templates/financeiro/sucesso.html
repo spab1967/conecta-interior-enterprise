@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Pagamento confirmado | Conecta Interior
+Comprovante enviado | Conecta Interior
 {% endblock %}
 
 {% block content %}
@@ -21,13 +21,69 @@ Pagamento confirmado | Conecta Interior
                     </div>
 
                     <h1 class="h2 fw-bold">
-                        Pagamento confirmado
+                        Comprovante enviado
                     </h1>
 
                     <p class="lead text-muted">
-                        Seu pagamento foi aprovado e o novo plano
-                        foi ativado.
+                        Recebemos seu comprovante de pagamento.
                     </p>
+
+                    <div class="alert alert-warning text-start mt-4">
+
+                        <strong>Status: Aguardando análise</strong>
+
+                        <br><br>
+
+                        Seu pagamento será conferido pelo administrador.
+                        Após a aprovação, o plano contratado será ativado.
+
+                    </div>
+
+                    {% if pagamento %}
+
+                    <div class="border rounded p-3 mt-4 text-start">
+
+                        <div class="row mb-2">
+
+                            <div class="col-5 text-muted">
+                                Plano
+                            </div>
+
+                            <div class="col-7 text-end fw-semibold">
+                                {{ pagamento.pedido.plano.nome }}
+                            </div>
+
+                        </div>
+
+                        <div class="row mb-2">
+
+                            <div class="col-5 text-muted">
+                                Valor
+                            </div>
+
+                            <div class="col-7 text-end fw-semibold">
+                                R$ {{ pagamento.valor }}
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-5 text-muted">
+                                Situação
+                            </div>
+
+                            <div class="col-7 text-end">
+                                <span class="badge bg-warning text-dark">
+                                    Pendente
+                                </span>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    {% endif %}
 
                     <div class="d-grid gap-2 mt-4">
 

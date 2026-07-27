@@ -59,6 +59,17 @@ urlpatterns = [
         views.pagamentos,
         name="pagamentos",
     ),
+    path(
+        "financeiro/pagamentos/<int:pagamento_id>/aprovar/",
+        views.aprovar_pagamento_admin,
+        name="aprovar_pagamento",
+    ),
+
+    path(
+        "financeiro/pagamentos/<int:pagamento_id>/recusar/",
+        views.recusar_pagamento_admin,
+        name="recusar_pagamento",
+    ),
 
     path(
         "avaliacoes/",

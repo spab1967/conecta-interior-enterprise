@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Pagamento | Conecta Interior
+Pagamento via PIX | Conecta Interior
 {% endblock %}
 
 {% block content %}
@@ -10,7 +10,7 @@ Pagamento | Conecta Interior
 
     <div class="row justify-content-center">
 
-        <div class="col-lg-7">
+        <div class="col-lg-8">
 
             <div class="card shadow-sm border-0">
 
@@ -19,16 +19,47 @@ Pagamento | Conecta Interior
                     <div class="text-center mb-4">
 
                         <h1 class="h2 fw-bold">
-                            Finalizar contratação
+                            Pagamento via PIX
                         </h1>
 
-                        <p class="text-muted">
-                            Confira os dados antes de confirmar o pagamento.
+                        <p class="text-muted mb-0">
+                            Efetue o pagamento e envie o comprovante
+                            para conferência.
                         </p>
 
                     </div>
 
+                    {% if messages %}
+
+                        {% for message in messages %}
+
+                            <div
+                                class="alert alert-{{ message.tags|default:'info' }}"
+                            >
+                                {{ message }}
+                            </div>
+
+                        {% endfor %}
+
+                    {% endif %}
+
                     <div class="border rounded p-4 mb-4">
+
+                        <h2 class="h5 fw-bold mb-4">
+                            Dados do pedido
+                        </h2>
+
+                        <div class="row mb-3">
+
+                            <div class="col-5 text-muted">
+                                Pedido
+                            </div>
+
+                            <div class="col-7 text-end fw-semibold">
+                                #{{ pedido.id }}
+                            </div>
+
+                        </div>
 
                         <div class="row mb-3">
 
@@ -54,26 +85,12 @@ Pagamento | Conecta Interior
 
                         </div>
 
-                        <div class="row mb-3">
-
-                            <div class="col-5 text-muted">
-                                Status
-                            </div>
-
-                            <div class="col-7 text-end">
-                                <span class="badge bg-warning text-dark">
-                                    Pendente
-                                </span>
-                            </div>
-
-                        </div>
-
                         <hr>
 
                         <div class="row align-items-center">
 
                             <div class="col-5 fw-bold">
-                                Total
+                                Valor
                             </div>
 
                             <div class="col-7 text-end">
@@ -88,35 +105,183 @@ Pagamento | Conecta Interior
 
                     </div>
 
-                    <div class="alert alert-info">
+                    <div class="border rounded p-4 mb-4 bg-light">
 
-                        <strong>Ambiente de validação financeira.</strong>
+                        <h2 class="h5 fw-bold mb-4">
+                            Dados para pagamento
+                        </h2>
 
-                        <br>
+                        {% if dados_pix.chave %}
 
-                        Nesta etapa, o botão abaixo simula a confirmação
-                        do pagamento. A integração com o gateway de
-                        pagamento será realizada na próxima etapa.
+                            <div class="row mb-3">
+
+                                <div class="col-md-4 text-muted">
+                                    Favorecido
+                                </div>
+
+                                <div class="col-md-8 fw-semibold">
+                                    {{ dados_pix.favorecido }}
+                                </div>
+
+                            </div>
+
+                            <div class="row mb-3">
+
+                                <div class="col-md-4 text-muted">
+                                    Instituição
+                                </div>
+
+                                <div class="col-md-8 fw-semibold">
+                                    {{ dados_pix.banco }}
+                                </div>
+
+                            </div>
+
+                            <div class="row mb-3">
+
+                                <div class="col-md-4 text-muted">
+                                    Chave PIX
+                                </div>
+
+                                <div class="col-md-8">
+
+                                    <div class="input-group">
+
+                                        <input
+                                            id="chavePix"
+                                            type="text"
+                                            class="form-control"
+                                            value="{{ dados_pix.chave }}"
+                                            readonly
+                                        >
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-primary"
+                                            onclick="copiarPix()"
+                                        >
+                                            Copiar
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="alert alert-warning mb-0">
+
+                                <strong>Importante:</strong>
+                                faça o PIX no valor exato de
+                                <strong>R$ {{ pedido.valor }}</strong>
+                                e envie o comprovante abaixo.
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="alert alert-danger mb-0">
+
+                                Os dados PIX ainda não estão
+                                configurados. Entre em contato com
+                                a administração do Conecta Interior.
+
+                            </div>
+
+                        {% endif %}
 
                     </div>
 
-                    <div class="d-grid gap-2">
+                    {% if dados_pix.chave %}
 
-                        <form
-                            method="post"
-                            action="{% url 'financeiro:confirmar' pagamento.id %}"
-                        >
+                        <div class="border rounded p-4 mb-4">
 
-                            {% csrf_token %}
+                            <h2 class="h5 fw-bold mb-3">
+                                Enviar comprovante
+                            </h2>
 
-                            <button
-                                type="submit"
-                                class="btn btn-success btn-lg w-100"
-                            >
-                                Confirmar pagamento
-                            </button>
+                            {% if pagamento.comprovante %}
 
-                        </form>
+                                <div class="alert alert-success">
+
+                                    <strong>
+                                        Comprovante recebido.
+                                    </strong>
+
+                                    <br>
+
+                                    Seu pagamento está aguardando
+                                    conferência do administrador.
+
+                                </div>
+
+                            {% else %}
+
+                                <p class="text-muted">
+                                    Após realizar o PIX, envie o
+                                    comprovante em PDF ou imagem.
+                                    Tamanho máximo: 5 MB.
+                                </p>
+
+                                <form
+                                    method="post"
+                                    enctype="multipart/form-data"
+                                    action="{% url 'financeiro:confirmar' pagamento.id %}"
+                                >
+
+                                    {% csrf_token %}
+
+                                    <div class="mb-3">
+
+                                        <label
+                                            for="comprovante"
+                                            class="form-label fw-semibold"
+                                        >
+                                            Comprovante do pagamento
+                                        </label>
+
+                                        <input
+                                            id="comprovante"
+                                            name="comprovante"
+                                            type="file"
+                                            class="form-control"
+                                            accept=".pdf,.png,.jpg,.jpeg,.webp"
+                                            required
+                                        >
+
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-success btn-lg w-100"
+                                    >
+                                        Enviar comprovante para análise
+                                    </button>
+
+                                </form>
+
+                            {% endif %}
+
+                        </div>
+
+                    {% endif %}
+
+                    <div class="alert alert-info">
+
+                        <strong>
+                            Como funciona a confirmação?
+                        </strong>
+
+                        <br>
+
+                        O envio do comprovante não ativa o plano
+                        automaticamente. O pagamento será conferido
+                        pela administração. Após a aprovação, a
+                        assinatura será ativada.
+
+                    </div>
+
+                    <div class="d-grid">
 
                         <a
                             href="{% url 'core:minha_conta' %}"
@@ -136,5 +301,31 @@ Pagamento | Conecta Interior
     </div>
 
 </div>
+
+<script>
+function copiarPix() {
+    const campo = document.getElementById("chavePix");
+
+    if (!campo) {
+        return;
+    }
+
+    navigator.clipboard.writeText(campo.value).then(
+        function () {
+            const botao = campo.nextElementSibling;
+
+            if (botao) {
+                const textoOriginal = botao.innerText;
+
+                botao.innerText = "Copiado!";
+
+                setTimeout(function () {
+                    botao.innerText = textoOriginal;
+                }, 2000);
+            }
+        }
+    );
+}
+</script>
 
 {% endblock %}

@@ -1,4 +1,6 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import (
@@ -11,7 +13,6 @@ from .models import (
     Pagamento,
     PedidoFinanceiro,
 )
-from .services import aprovar_pagamento
 
 
 def _pedido_pertence_ao_usuario(
@@ -69,12 +70,31 @@ def pagamento(
         )
     )
 
+    dados_pix = {
+        "favorecido": getattr(
+            settings,
+            "CONECTA_PIX_FAVORECIDO",
+            "",
+        ),
+        "chave": getattr(
+            settings,
+            "CONECTA_PIX_CHAVE",
+            "",
+        ),
+        "banco": getattr(
+            settings,
+            "CONECTA_PIX_BANCO",
+            "",
+        ),
+    }
+
     return render(
         request,
         "financeiro/pagamento.html",
         {
             "pedido": pedido,
             "pagamento": pagamento_obj,
+            "dados_pix": dados_pix,
         },
     )
 
@@ -97,6 +117,7 @@ def confirmar_pagamento(
             "pedido__plano",
         ),
         pk=pagamento_id,
+        status=Pagamento.STATUS_PENDENTE,
     )
 
     pedido = pagamento_obj.pedido
@@ -115,13 +136,78 @@ def confirmar_pagamento(
             "core:minha_conta"
         )
 
-    aprovar_pagamento(
-        pagamento_obj
+    comprovante = request.FILES.get(
+        "comprovante"
+    )
+
+    if not comprovante:
+        messages.error(
+            request,
+            "Selecione o comprovante do pagamento.",
+        )
+
+        return redirect(
+            "financeiro:pagamento",
+            pedido_id=pedido.pk,
+        )
+
+    extensoes_permitidas = (
+        ".pdf",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".webp",
+    )
+
+    nome_arquivo = comprovante.name.lower()
+
+    if not nome_arquivo.endswith(
+        extensoes_permitidas
+    ):
+        messages.error(
+            request,
+            "Formato inválido. Envie PDF, PNG, JPG, JPEG ou WEBP.",
+        )
+
+        return redirect(
+            "financeiro:pagamento",
+            pedido_id=pedido.pk,
+        )
+
+    limite = 5 * 1024 * 1024
+
+    if comprovante.size > limite:
+        messages.error(
+            request,
+            "O comprovante deve ter no máximo 5 MB.",
+        )
+
+        return redirect(
+            "financeiro:pagamento",
+            pedido_id=pedido.pk,
+        )
+
+    pagamento_obj.comprovante = comprovante
+
+    pagamento_obj.save(
+        update_fields=[
+            "comprovante",
+            "atualizado_em",
+        ]
     )
 
     request.session[
         "ultimo_pagamento_confirmado"
     ] = pagamento_obj.pk
+
+    messages.success(
+        request,
+        (
+            "Comprovante enviado com sucesso. "
+            "O pagamento ficará pendente até "
+            "a conferência pelo administrador."
+        ),
+    )
 
     return redirect(
         "financeiro:sucesso"
@@ -169,6 +255,8 @@ def sucesso(request):
                 pagamento_obj,
         },
     )
+
+
 @login_required
 def historico(request):
 

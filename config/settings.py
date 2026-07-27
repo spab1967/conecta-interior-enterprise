@@ -1,21 +1,29 @@
 from pathlib import Path
 import os
-from dotenv import load_dotenv
+
 import dj_database_url
+from dotenv import load_dotenv
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / ".env")
 
+
+# ============================================================
+# CONFIGURACAO PRINCIPAL
+# ============================================================
+
 SECRET_KEY = os.getenv(
     "SECRET_KEY",
-    "desenvolvimento-conecta-interior",
+    "desenvolvimento-conecta-interior-chave-local-segura-2026",
 )
 
 DEBUG = os.getenv(
     "DEBUG",
     "True",
 ).lower() == "true"
+
 
 ALLOWED_HOSTS = [
     host.strip()
@@ -25,6 +33,11 @@ ALLOWED_HOSTS = [
     ).split(",")
     if host.strip()
 ]
+
+
+# ============================================================
+# APLICACOES
+# ============================================================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -50,6 +63,11 @@ INSTALLED_APPS = [
     "apps.financeiro",
 ]
 
+
+# ============================================================
+# MIDDLEWARE
+# ============================================================
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -61,12 +79,20 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
 ROOT_URLCONF = "config.urls"
+
+
+# ============================================================
+# TEMPLATES
+# ============================================================
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        "DIRS": [
+            BASE_DIR / "templates",
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -78,13 +104,24 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = "config.wsgi.application"
 
 ASGI_APPLICATION = "config.asgi.application"
 
-DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+
+# ============================================================
+# BANCO DE DADOS
+# ============================================================
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "",
+).strip()
+
 
 if DATABASE_URL:
+
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
@@ -93,7 +130,9 @@ if DATABASE_URL:
             ssl_require=True,
         )
     }
+
 else:
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -101,20 +140,42 @@ else:
         }
     }
 
+
+# ============================================================
+# VALIDACAO DE SENHAS
+# ============================================================
+
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "UserAttributeSimilarityValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "MinimumLengthValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "CommonPasswordValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation."
+            "NumericPasswordValidator"
+        ),
     },
 ]
+
+
+# ============================================================
+# INTERNACIONALIZACAO
+# ============================================================
 
 LANGUAGE_CODE = "pt-br"
 
@@ -124,6 +185,11 @@ USE_I18N = True
 
 USE_TZ = True
 
+
+# ============================================================
+# ARQUIVOS ESTATICOS
+# ============================================================
+
 STATIC_URL = "static/"
 
 STATICFILES_DIRS = [
@@ -132,11 +198,33 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+STATICFILES_STORAGE = (
+    "whitenoise.storage."
+    "CompressedManifestStaticFilesStorage"
+)
+
+
+# ============================================================
+# ARQUIVOS DE MIDIA
+# ============================================================
+
 MEDIA_URL = "media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ============================================================
+# DJANGO
+# ============================================================
+
+DEFAULT_AUTO_FIELD = (
+    "django.db.models.BigAutoField"
+)
+
+
+# ============================================================
+# AUTENTICACAO
+# ============================================================
 
 LOGIN_URL = "core:login"
 
@@ -144,79 +232,133 @@ LOGIN_REDIRECT_URL = "core:minha_conta"
 
 LOGOUT_REDIRECT_URL = "core:home"
 
-# ------------------------------------------------------------------
-# SEGURANCA / PRODUCAO
-# Valores controlados pelo .env para preservar o ambiente local.
-# ------------------------------------------------------------------
+
+# ============================================================
+# SEGURANCA
+#
+# DESENVOLVIMENTO:
+# valores permanecem False/0 no .env local.
+#
+# PRODUCAO:
+# os valores sao ativados pelo ambiente de hospedagem.
+# ============================================================
 
 SECURE_SSL_REDIRECT = os.getenv(
-    "SECURE_SSL_REDIRECT", "False"
+    "SECURE_SSL_REDIRECT",
+    "False",
 ).lower() == "true"
+
 
 SESSION_COOKIE_SECURE = os.getenv(
-    "SESSION_COOKIE_SECURE", "False"
+    "SESSION_COOKIE_SECURE",
+    "False",
 ).lower() == "true"
+
 
 CSRF_COOKIE_SECURE = os.getenv(
-    "CSRF_COOKIE_SECURE", "False"
+    "CSRF_COOKIE_SECURE",
+    "False",
 ).lower() == "true"
+
 
 SECURE_HSTS_SECONDS = int(
-    os.getenv("SECURE_HSTS_SECONDS", "0")
+    os.getenv(
+        "SECURE_HSTS_SECONDS",
+        "0",
+    )
 )
 
+
 SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv(
-    "SECURE_HSTS_INCLUDE_SUBDOMAINS", "False"
+    "SECURE_HSTS_INCLUDE_SUBDOMAINS",
+    "False",
 ).lower() == "true"
+
 
 SECURE_HSTS_PRELOAD = os.getenv(
-    "SECURE_HSTS_PRELOAD", "False"
+    "SECURE_HSTS_PRELOAD",
+    "False",
 ).lower() == "true"
 
-if os.getenv(
-    "USE_X_FORWARDED_PROTO", "False"
-).lower() == "true":
-    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+USE_X_FORWARDED_PROTO = os.getenv(
+    "USE_X_FORWARDED_PROTO",
+    "False",
+).lower() == "true"
+
+
+if USE_X_FORWARDED_PROTO:
+    SECURE_PROXY_SSL_HEADER = (
+        "HTTP_X_FORWARDED_PROTO",
+        "https",
+    )
 
 
 # ============================================================
-# CONECTA INTERIOR ENTERPRISE - PRODUCAO
+# CSRF
 # ============================================================
 
 CSRF_TRUSTED_ORIGINS = [
     origem.strip()
-    for origem in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    for origem in os.getenv(
+        "CSRF_TRUSTED_ORIGINS",
+        "",
+    ).split(",")
     if origem.strip()
 ]
 
-SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False").lower() == "true"
-SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv(
-    "SECURE_HSTS_INCLUDE_SUBDOMAINS", "False"
-).lower() == "true"
-SECURE_HSTS_PRELOAD = os.getenv(
-    "SECURE_HSTS_PRELOAD", "False"
-).lower() == "true"
-SESSION_COOKIE_SECURE = os.getenv(
-    "SESSION_COOKIE_SECURE", "False"
-).lower() == "true"
-CSRF_COOKIE_SECURE = os.getenv(
-    "CSRF_COOKIE_SECURE", "False"
-).lower() == "true"
 
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+# ============================================================
+# RENDER
+# ============================================================
 
-STATICFILES_STORAGE = (
-    "whitenoise.storage.CompressedManifestStaticFilesStorage"
+RENDER_EXTERNAL_HOSTNAME = os.getenv(
+    "RENDER_EXTERNAL_HOSTNAME",
+    "",
+).strip()
+
+
+if RENDER_EXTERNAL_HOSTNAME:
+
+    if (
+        RENDER_EXTERNAL_HOSTNAME
+        not in ALLOWED_HOSTS
+    ):
+        ALLOWED_HOSTS.append(
+            RENDER_EXTERNAL_HOSTNAME
+        )
+
+    render_origin = (
+        f"https://{RENDER_EXTERNAL_HOSTNAME}"
+    )
+
+    if (
+        render_origin
+        not in CSRF_TRUSTED_ORIGINS
+    ):
+        CSRF_TRUSTED_ORIGINS.append(
+            render_origin
+        )
+
+
+# ============================================================
+# CONECTA INTERIOR
+# CONFIGURACAO FINANCEIRA / PIX
+# ============================================================
+
+CONECTA_PIX_FAVORECIDO = os.getenv(
+    "CONECTA_PIX_FAVORECIDO",
+    "",
 )
 
-RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
-if RENDER_EXTERNAL_HOSTNAME:
-    if RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
-    render_origin = f"https://{RENDER_EXTERNAL_HOSTNAME}"
-    if "CSRF_TRUSTED_ORIGINS" not in globals():
-        CSRF_TRUSTED_ORIGINS = []
-    if render_origin not in CSRF_TRUSTED_ORIGINS:
-        CSRF_TRUSTED_ORIGINS.append(render_origin)
 
+CONECTA_PIX_CHAVE = os.getenv(
+    "CONECTA_PIX_CHAVE",
+    "",
+)
+
+
+CONECTA_PIX_BANCO = os.getenv(
+    "CONECTA_PIX_BANCO",
+    "",
+)
