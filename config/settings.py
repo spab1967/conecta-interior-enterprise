@@ -200,27 +200,24 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-STATICFILES_STORAGE = (
-    "whitenoise.storage."
-    "CompressedManifestStaticFilesStorage"
-)
-
 
 # ============================================================
 # ARQUIVOS DE MIDIA
 # ============================================================
 
-# ============================================================
-# CLOUDINARY
-# ============================================================
-
-CLOUDINARY_STORAGE = {}
-
-DEFAULT_FILE_STORAGE = (
-    "cloudinary_storage.storage.MediaCloudinaryStorage"
-)
-
 MEDIA_URL = "/media/"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "whitenoise.storage."
+            "CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
 # ============================================================
 # DJANGO
 # ============================================================
