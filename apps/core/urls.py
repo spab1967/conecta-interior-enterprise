@@ -54,6 +54,10 @@ urlpatterns = [
         name="alterar_renovacao_automatica",
     ),
 
+    # ========================================================
+    # EMPRESA
+    # ========================================================
+
     path(
         "minha-conta/empresa/<int:empresa_id>/editar/",
         views.editar_empresa,
@@ -61,10 +65,30 @@ urlpatterns = [
     ),
 
     path(
+        "minha-conta/empresa/<int:empresa_id>/galeria/<int:foto_id>/excluir/",
+        views.excluir_foto_empresa,
+        name="excluir_foto_empresa",
+    ),
+
+    # ========================================================
+    # PROFISSIONAL
+    # ========================================================
+
+    path(
         "minha-conta/profissional/<int:profissional_id>/editar/",
         views.editar_profissional,
         name="editar_profissional",
     ),
+
+    path(
+        "minha-conta/profissional/<int:profissional_id>/galeria/<int:foto_id>/excluir/",
+        views.excluir_foto_profissional,
+        name="excluir_foto_profissional",
+    ),
+
+    # ========================================================
+    # PLANOS
+    # ========================================================
 
     path(
         "planos/<int:plano_id>/selecionar/",
@@ -83,6 +107,10 @@ urlpatterns = [
         views.alterar_plano_profissional,
         name="alterar_plano_profissional",
     ),
+
+    # ========================================================
+    # PAGINAS PUBLICAS
+    # ========================================================
 
     path(
         "<slug:cidade_slug>/",

@@ -185,3 +185,37 @@ class Empresa(models.Model):
             f"{self.nome_fantasia} — "
             f"{self.cidade.nome}"
         )
+
+
+class FotoEmpresa(models.Model):
+
+    empresa = models.ForeignKey(
+        Empresa,
+        on_delete=models.CASCADE,
+        related_name="galeria",
+    )
+
+    imagem = models.ImageField(
+        upload_to="empresas/galeria/",
+    )
+
+    ordem = models.PositiveIntegerField(
+        default=0,
+    )
+
+    criada_em = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        ordering = [
+            "ordem",
+            "id",
+        ]
+
+        verbose_name = "Foto da empresa"
+        verbose_name_plural = "Fotos da empresa"
+
+    def __str__(self):
+        return f"Foto de {self.empresa.nome_fantasia}"
+

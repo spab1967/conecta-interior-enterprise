@@ -21,16 +21,17 @@ from django.utils import timezone
 from apps.cidades.models import Cidade
 from apps.categorias.models import Categoria
 from apps.empresas.forms import EmpresaClienteForm
-from apps.empresas.models import Empresa
+from apps.empresas.models import Empresa, FotoEmpresa
 from apps.financeiro.models import PedidoFinanceiro
 from apps.planos.models import Assinatura, Plano
 from apps.planos.services import (
     assinatura_vigente,
     plano_vigente,
+    limite_fotos,
 )
 from apps.planos.vigencia import calcular_vencimento_plano
 from apps.profissionais.forms import ProfissionalClienteForm
-from apps.profissionais.models import Profissional
+from apps.profissionais.models import Profissional, FotoProfissional
 from apps.servicos.models import Servico
 
 
@@ -1157,6 +1158,12 @@ def editar_empresa(
         usuario=request.user,
     )
 
+    limite = limite_fotos(
+        empresa=empresa,
+    )
+
+    fotos = empresa.galeria.all()
+
     if request.method == "POST":
 
         form = EmpresaClienteForm(
@@ -1167,16 +1174,58 @@ def editar_empresa(
 
         if form.is_valid():
 
-            form.save()
-
-            messages.success(
-                request,
-                "Dados da empresa atualizados com sucesso.",
+            novas_fotos = request.FILES.getlist(
+                "fotos_galeria"
             )
 
-            return redirect(
-                "core:minha_conta"
+            quantidade_atual = (
+                empresa.galeria.count()
             )
+
+            quantidade_final = (
+                quantidade_atual
+                + len(novas_fotos)
+            )
+
+            if quantidade_final > limite:
+
+                messages.error(
+                    request,
+                    (
+                        "O seu plano permite no máximo "
+                        f"{limite} foto(s) na galeria. "
+                        f"Atualmente existem "
+                        f"{quantidade_atual} foto(s)."
+                    ),
+                )
+
+            else:
+
+                form.save()
+
+                proxima_ordem = (
+                    empresa.galeria.count()
+                )
+
+                for arquivo in novas_fotos:
+
+                    FotoEmpresa.objects.create(
+                        empresa=empresa,
+                        imagem=arquivo,
+                        ordem=proxima_ordem,
+                    )
+
+                    proxima_ordem += 1
+
+                messages.success(
+                    request,
+                    "Dados da empresa atualizados com sucesso.",
+                )
+
+                return redirect(
+                    "core:editar_empresa",
+                    empresa_id=empresa.pk,
+                )
 
     else:
 
@@ -1190,7 +1239,54 @@ def editar_empresa(
         {
             "form": form,
             "empresa": empresa,
+            "fotos_galeria": fotos,
+            "limite_fotos": limite,
+            "quantidade_fotos":
+                empresa.galeria.count(),
         },
+    )
+
+
+@login_required
+def excluir_foto_empresa(
+    request,
+    empresa_id,
+    foto_id,
+):
+
+    if request.method != "POST":
+
+        return redirect(
+            "core:editar_empresa",
+            empresa_id=empresa_id,
+        )
+
+    empresa = get_object_or_404(
+        Empresa,
+        pk=empresa_id,
+        usuario=request.user,
+    )
+
+    foto = get_object_or_404(
+        FotoEmpresa,
+        pk=foto_id,
+        empresa=empresa,
+    )
+
+    foto.imagem.delete(
+        save=False
+    )
+
+    foto.delete()
+
+    messages.success(
+        request,
+        "Foto removida da galeria.",
+    )
+
+    return redirect(
+        "core:editar_empresa",
+        empresa_id=empresa.pk,
     )
 
 
@@ -1210,6 +1306,12 @@ def editar_profissional(
         usuario=request.user,
     )
 
+    limite = limite_fotos(
+        profissional=profissional,
+    )
+
+    fotos = profissional.galeria.all()
+
     if request.method == "POST":
 
         form = ProfissionalClienteForm(
@@ -1220,16 +1322,61 @@ def editar_profissional(
 
         if form.is_valid():
 
-            form.save()
-
-            messages.success(
-                request,
-                "Dados do perfil profissional atualizados com sucesso.",
+            novas_fotos = request.FILES.getlist(
+                "fotos_galeria"
             )
 
-            return redirect(
-                "core:minha_conta"
+            quantidade_atual = (
+                profissional.galeria.count()
             )
+
+            quantidade_final = (
+                quantidade_atual
+                + len(novas_fotos)
+            )
+
+            if quantidade_final > limite:
+
+                messages.error(
+                    request,
+                    (
+                        "O seu plano permite no máximo "
+                        f"{limite} foto(s) na galeria. "
+                        f"Atualmente existem "
+                        f"{quantidade_atual} foto(s)."
+                    ),
+                )
+
+            else:
+
+                form.save()
+
+                proxima_ordem = (
+                    profissional.galeria.count()
+                )
+
+                for arquivo in novas_fotos:
+
+                    FotoProfissional.objects.create(
+                        profissional=profissional,
+                        imagem=arquivo,
+                        ordem=proxima_ordem,
+                    )
+
+                    proxima_ordem += 1
+
+                messages.success(
+                    request,
+                    (
+                        "Dados do perfil profissional "
+                        "atualizados com sucesso."
+                    ),
+                )
+
+                return redirect(
+                    "core:editar_profissional",
+                    profissional_id=profissional.pk,
+                )
 
     else:
 
@@ -1243,8 +1390,58 @@ def editar_profissional(
         {
             "form": form,
             "profissional": profissional,
+            "fotos_galeria": fotos,
+            "limite_fotos": limite,
+            "quantidade_fotos":
+                profissional.galeria.count(),
         },
-    )@login_required
+    )
+
+
+@login_required
+def excluir_foto_profissional(
+    request,
+    profissional_id,
+    foto_id,
+):
+
+    if request.method != "POST":
+
+        return redirect(
+            "core:editar_profissional",
+            profissional_id=profissional_id,
+        )
+
+    profissional = get_object_or_404(
+        Profissional,
+        pk=profissional_id,
+        usuario=request.user,
+    )
+
+    foto = get_object_or_404(
+        FotoProfissional,
+        pk=foto_id,
+        profissional=profissional,
+    )
+
+    foto.imagem.delete(
+        save=False
+    )
+
+    foto.delete()
+
+    messages.success(
+        request,
+        "Foto removida da galeria.",
+    )
+
+    return redirect(
+        "core:editar_profissional",
+        profissional_id=profissional.pk,
+    )
+
+
+@login_required
 def alterar_renovacao_automatica(
     request,
     assinatura_id,

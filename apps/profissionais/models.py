@@ -209,3 +209,37 @@ class Profissional(models.Model):
             )
 
         return self.nome
+
+
+class FotoProfissional(models.Model):
+
+    profissional = models.ForeignKey(
+        Profissional,
+        on_delete=models.CASCADE,
+        related_name="galeria",
+    )
+
+    imagem = models.ImageField(
+        upload_to="profissionais/galeria/",
+    )
+
+    ordem = models.PositiveIntegerField(
+        default=0,
+    )
+
+    criada_em = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        ordering = [
+            "ordem",
+            "id",
+        ]
+
+        verbose_name = "Foto do profissional"
+        verbose_name_plural = "Fotos do profissional"
+
+    def __str__(self):
+        return f"Foto de {self.profissional.nome}"
+

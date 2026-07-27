@@ -18,24 +18,37 @@ Minha Conta | Conecta Interior
         </p>
     </div>
 
-    <div class="d-flex gap-2">
-        <a href="{% url 'core:alterar_senha' %}" class="btn btn-outline-primary">
+    <div class="d-flex flex-wrap gap-2">
+
+        <a
+            href="{% url 'financeiro:historico' %}"
+            class="btn btn-success"
+        >
+            💳 Pagamentos e Financeiro
+        </a>
+
+        <a
+            href="{% url 'core:alterar_senha' %}"
+            class="btn btn-outline-primary"
+        >
             🔐 Segurança / Alterar senha
         </a>
 
-    <form
-        method="post"
-        action="{% url 'core:logout' %}"
-    >
-        {% csrf_token %}
-
-        <button
-            type="submit"
-            class="btn btn-outline-secondary"
+        <form
+            method="post"
+            action="{% url 'core:logout' %}"
+            class="m-0"
         >
-            Sair
-        </button>
-    </form>
+            {% csrf_token %}
+
+            <button
+                type="submit"
+                class="btn btn-outline-secondary"
+            >
+                Sair
+            </button>
+        </form>
+
     </div>
 
 </div>
@@ -228,6 +241,7 @@ Minha Conta | Conecta Interior
 
                                 {% endif %}
 
+
                                 {% if item.pedido_pendente %}
 
                                     <div class="alert alert-warning mt-3 mb-3">
@@ -362,12 +376,13 @@ Minha Conta | Conecta Interior
                             >
                                 💳 Ver planos
                             </a>
+
                             <a
-                            href="{% url 'financeiro:historico' %}"
-                            class="btn btn-outline-success"
+                                href="{% url 'financeiro:historico' %}"
+                                class="btn btn-outline-success"
                             >
-                           Histórico Financeiro
-                           </a>
+                                Histórico Financeiro
+                            </a>
 
                         </div>
 
@@ -557,6 +572,7 @@ Minha Conta | Conecta Interior
                                     </div>
 
                                 {% endif %}
+
 
                                 {% if item.pedido_pendente %}
 

@@ -8,7 +8,7 @@ Editar Empresa | Conecta Interior
 
 <div class="row justify-content-center">
 
-    <div class="col-lg-9">
+    <div class="col-lg-10">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
 
@@ -32,13 +32,57 @@ Editar Empresa | Conecta Interior
         </div>
 
 
-        <div class="card border-0 shadow-sm">
+        {% if messages %}
+
+            {% for message in messages %}
+
+                <div
+                    class="alert
+                    {% if message.tags == 'error' %}
+                        alert-danger
+                    {% elif message.tags == 'success' %}
+                        alert-success
+                    {% else %}
+                        alert-info
+                    {% endif %}
+                    alert-dismissible fade show"
+                    role="alert"
+                >
+                    {{ message }}
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Fechar"
+                    ></button>
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+
+        <div class="card border-0 shadow-sm mb-4">
+
+            <div class="card-header bg-white border-0 pt-4 px-4">
+
+                <h4 class="fw-bold mb-1">
+                    Dados da empresa
+                </h4>
+
+                <p class="text-muted mb-0">
+                    Atualize as informações públicas da empresa.
+                </p>
+
+            </div>
 
             <div class="card-body p-4">
 
                 <form
                     method="post"
                     enctype="multipart/form-data"
+                    id="form-editar-empresa"
                 >
 
                     {% csrf_token %}
@@ -83,6 +127,15 @@ Editar Empresa | Conecta Interior
 
                                 {{ field }}
 
+                                {% if field.name == "logo" %}
+
+                                    <div class="form-text mt-2">
+                                        Esta imagem é a logo principal da empresa.
+                                        Ela é independente da galeria abaixo.
+                                    </div>
+
+                                {% endif %}
+
                             {% endif %}
 
 
@@ -106,6 +159,176 @@ Editar Empresa | Conecta Interior
                         </div>
 
                     {% endfor %}
+
+
+                    <hr class="my-4">
+
+
+                    <div class="mb-4">
+
+                        <div
+                            class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3"
+                        >
+
+                            <div>
+
+                                <h4 class="fw-bold mb-1">
+                                    Galeria de fotos
+                                </h4>
+
+                                <p class="text-muted mb-0">
+                                    Adicione fotos do estabelecimento,
+                                    produtos, serviços, equipa ou ambiente.
+                                </p>
+
+                            </div>
+
+
+                            <div class="text-end">
+
+                                <span class="badge text-bg-primary fs-6">
+
+                                    {{ quantidade_fotos }}
+                                    /
+                                    {{ limite_fotos }}
+
+                                    foto{% if limite_fotos != 1 %}s{% endif %}
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        {% if quantidade_fotos < limite_fotos %}
+
+                            <div class="border rounded p-4 bg-light mb-3">
+
+                                <label
+                                    for="id_fotos_galeria"
+                                    class="form-label fw-semibold"
+                                >
+                                    Adicionar fotos à galeria
+                                </label>
+
+                                <input
+                                    type="file"
+                                    name="fotos_galeria"
+                                    id="id_fotos_galeria"
+                                    class="form-control"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    multiple
+                                >
+
+                                <div class="form-text">
+
+                                    Pode selecionar várias imagens de uma vez.
+
+                                    Restam
+
+                                    <strong>
+                                        {{ limite_fotos|add:"-"|add:quantidade_fotos }}
+                                    </strong>
+
+                                    vaga(s) no seu plano.
+
+                                </div>
+
+                                <div
+                                    id="aviso-selecao-fotos"
+                                    class="small mt-2"
+                                ></div>
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="alert alert-info">
+
+                                <strong>Limite da galeria atingido.</strong>
+
+                                O seu plano permite
+                                {{ limite_fotos }}
+                                foto{% if limite_fotos != 1 %}s{% endif %}.
+
+                                Para adicionar uma nova imagem,
+                                exclua uma foto existente ou altere o plano.
+
+                            </div>
+
+                        {% endif %}
+
+
+                        {% if fotos_galeria %}
+
+                            <div class="row g-3 mt-1">
+
+                                {% for foto in fotos_galeria %}
+
+                                    <div class="col-6 col-md-4 col-lg-3">
+
+                                        <div class="card h-100 border-0 shadow-sm">
+
+                                            <a
+                                                href="{{ foto.imagem.url }}"
+                                                target="_blank"
+                                                class="text-decoration-none"
+                                            >
+
+                                                <img
+                                                    src="{{ foto.imagem.url }}"
+                                                    alt="Foto da galeria de {{ empresa.nome_fantasia }}"
+                                                    class="card-img-top"
+                                                    style="
+                                                        height: 180px;
+                                                        object-fit: cover;
+                                                    "
+                                                >
+
+                                            </a>
+
+                                            <div class="card-body p-2">
+
+                                                <div class="small text-muted mb-2">
+                                                    Foto {{ forloop.counter }}
+                                                </div>
+
+                                                <button
+                                                    type="submit"
+                                                    form="excluir-foto-empresa-{{ foto.pk }}"
+                                                    class="btn btn-outline-danger btn-sm w-100"
+                                                    onclick="return confirm('Deseja realmente excluir esta foto?');"
+                                                >
+                                                    Excluir
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="border rounded text-center p-4">
+
+                                <p class="text-muted mb-0">
+                                    A empresa ainda não possui fotos na galeria.
+                                </p>
+
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <hr class="my-4">
 
 
                     <div class="d-flex flex-wrap gap-2">
@@ -136,6 +359,20 @@ Editar Empresa | Conecta Interior
 
                 </form>
 
+
+                {% for foto in fotos_galeria %}
+
+                    <form
+                        method="post"
+                        action="{% url 'core:excluir_foto_empresa' empresa.pk foto.pk %}"
+                        id="excluir-foto-empresa-{{ foto.pk }}"
+                        class="d-none"
+                    >
+                        {% csrf_token %}
+                    </form>
+
+                {% endfor %}
+
             </div>
 
         </div>
@@ -143,5 +380,87 @@ Editar Empresa | Conecta Interior
     </div>
 
 </div>
+
+
+<script>
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        const input = document.getElementById(
+            "id_fotos_galeria"
+        );
+
+        if (!input) {
+            return;
+        }
+
+        const limiteTotal =
+            Number("{{ limite_fotos }}");
+
+        const quantidadeAtual =
+            Number("{{ quantidade_fotos }}");
+
+        const disponiveis =
+            limiteTotal - quantidadeAtual;
+
+        const aviso = document.getElementById(
+            "aviso-selecao-fotos"
+        );
+
+        input.addEventListener(
+            "change",
+            function () {
+
+                const quantidadeSelecionada =
+                    input.files.length;
+
+                if (
+                    quantidadeSelecionada
+                    > disponiveis
+                ) {
+
+                    aviso.className =
+                        "text-danger small mt-2";
+
+                    aviso.textContent =
+                        "Foram selecionadas "
+                        + quantidadeSelecionada
+                        + " fotos, mas existem apenas "
+                        + disponiveis
+                        + " vaga(s) disponíveis.";
+
+                    input.value = "";
+
+                    return;
+                }
+
+                aviso.className =
+                    "text-success small mt-2";
+
+                if (
+                    quantidadeSelecionada === 0
+                ) {
+
+                    aviso.textContent = "";
+
+                } else {
+
+                    aviso.textContent =
+                        quantidadeSelecionada
+                        + " foto(s) selecionada(s). "
+                        + "Clique em Salvar alterações "
+                        + "para enviar.";
+
+                }
+
+            }
+        );
+
+    }
+);
+
+</script>
 
 {% endblock %}
