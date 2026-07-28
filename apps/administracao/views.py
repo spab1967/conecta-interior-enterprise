@@ -277,7 +277,7 @@ def empresas(request):
     pesquisa = request.GET.get(
         "q",
         "",
-    ).strip()
+    ).strip()[:100]
 
     empresas_cadastradas = (
         Empresa.objects
@@ -329,7 +329,7 @@ def empresas(request):
 
 @staff_member_required
 def profissionais(request):
-    pesquisa = request.GET.get("q", "").strip()
+    pesquisa = request.GET.get("q", "").strip()[:100]
 
     profissionais_cadastrados = (
         Profissional.objects
@@ -365,7 +365,7 @@ def profissionais(request):
 
 @staff_member_required
 def assinaturas(request):
-    pesquisa = request.GET.get("q", "").strip()
+    pesquisa = request.GET.get("q", "").strip()[:100]
 
     assinaturas_cadastradas = (
         Assinatura.objects
@@ -402,7 +402,7 @@ def assinaturas(request):
 
 @staff_member_required
 def financeiro(request):
-    pesquisa = request.GET.get("q", "").strip()
+    pesquisa = request.GET.get("q", "").strip()[:100]
 
     pedidos_qs = (
         PedidoFinanceiro.objects
@@ -597,7 +597,7 @@ def pagamentos(request):
 
 @staff_member_required
 def avaliacoes(request):
-    pesquisa = request.GET.get("q", "").strip()
+    pesquisa = request.GET.get("q", "").strip()[:100]
 
     avaliacoes_qs = (
         Avaliacao.objects
@@ -642,7 +642,7 @@ def avaliacoes(request):
 
 @staff_member_required
 def metricas(request):
-    busca = request.GET.get("q", "").strip()
+    busca = request.GET.get("q", "").strip()[:100]
     tipo = request.GET.get("tipo", "").strip()
     eventos = EventoContato.objects.select_related("empresa","empresa__cidade","profissional","profissional__cidade").all()
     total_eventos = eventos.count()
@@ -661,6 +661,8 @@ def metricas(request):
     tipos_validos = {valor for valor, rotulo in EventoContato.TIPOS}
     if tipo in tipos_validos:
         eventos = eventos.filter(tipo=tipo)
+    else:
+        tipo = ""
 
     distribuicao = []
     for valor, rotulo in EventoContato.TIPOS:
@@ -951,7 +953,7 @@ def recusar_solicitacao(request, solicitacao_id):
 @staff_member_required
 def servicos(request):
 
-    pesquisa = request.GET.get("q", "").strip()
+    pesquisa = request.GET.get("q", "").strip()[:100]
 
     servicos_qs = (
         Servico.objects
