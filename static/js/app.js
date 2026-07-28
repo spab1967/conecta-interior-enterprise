@@ -160,3 +160,73 @@ document.addEventListener("click", (evento) => {
         compartilharPagina(botao);
     }
 });
+
+let avisoConectividade = null;
+let aplicativoEsteveOffline = !navigator.onLine;
+let temporizadorConectividade = null;
+
+function removerAvisoConectividade() {
+    if (temporizadorConectividade) {
+        window.clearTimeout(temporizadorConectividade);
+        temporizadorConectividade = null;
+    }
+
+    if (avisoConectividade) {
+        avisoConectividade.remove();
+        avisoConectividade = null;
+    }
+}
+
+function mostrarEstadoConectividade(online) {
+    removerAvisoConectividade();
+
+    avisoConectividade = document.createElement("div");
+    avisoConectividade.className = [
+        "ci-connection-status",
+        "alert",
+        online ? "alert-success" : "alert-warning",
+        "shadow"
+    ].join(" ");
+    avisoConectividade.setAttribute("role", "status");
+    avisoConectividade.setAttribute("aria-live", "polite");
+
+    if (online) {
+        avisoConectividade.innerHTML = [
+            "<strong>Internet restabelecida</strong>",
+            "<span>O aplicativo voltou a funcionar normalmente.</span>"
+        ].join("");
+    } else {
+        avisoConectividade.innerHTML = [
+            "<strong>Você está sem internet</strong>",
+            "<span>O conteúdo já aberto continua disponível, mas algumas ações podem aguardar a conexão.</span>"
+        ].join("");
+    }
+
+    document.body.appendChild(avisoConectividade);
+
+    if (online) {
+        temporizadorConectividade = window.setTimeout(
+            removerAvisoConectividade,
+            4000
+        );
+    }
+}
+
+window.addEventListener("offline", () => {
+    aplicativoEsteveOffline = true;
+    mostrarEstadoConectividade(false);
+});
+
+window.addEventListener("online", () => {
+    if (aplicativoEsteveOffline) {
+        mostrarEstadoConectividade(true);
+    }
+
+    aplicativoEsteveOffline = false;
+});
+
+if (!navigator.onLine) {
+    window.addEventListener("DOMContentLoaded", () => {
+        mostrarEstadoConectividade(false);
+    });
+}
