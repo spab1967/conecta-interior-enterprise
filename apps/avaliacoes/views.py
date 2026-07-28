@@ -26,9 +26,13 @@ def avaliar_empresa(request, cidade_slug, empresa_slug):
 
         if not nome:
             erros.append("Informe seu nome.")
+        elif len(nome) > 120:
+            erros.append("O nome deve ter no máximo 120 caracteres.")
 
         if not comentario:
             erros.append("Escreva um comentário.")
+        elif len(comentario) > 2000:
+            erros.append("O comentário deve ter no máximo 2.000 caracteres.")
 
         try:
             nota_int = int(nota)
@@ -101,9 +105,13 @@ def avaliar_profissional(request, cidade_slug, profissional_slug):
 
         if not nome:
             erros.append("Informe seu nome.")
+        elif len(nome) > 120:
+            erros.append("O nome deve ter no máximo 120 caracteres.")
 
         if not comentario:
             erros.append("Escreva um comentário.")
+        elif len(comentario) > 2000:
+            erros.append("O comentário deve ter no máximo 2.000 caracteres.")
 
         try:
             nota_int = int(nota)
