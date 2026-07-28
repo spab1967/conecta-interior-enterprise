@@ -10,11 +10,13 @@ from .models import Empresa
 @login_required
 def listar_empresas(request):
 
-    pesquisa = request.GET.get("q", "").strip()
+    pesquisa = request.GET.get("q", "").strip()[:100]
 
     empresas = Empresa.objects.select_related(
         "cidade",
         "categoria",
+    ).filter(
+        usuario=request.user,
     )
 
     if pesquisa:
@@ -59,6 +61,7 @@ def visualizar_empresa(request, pk):
             "categoria",
         ),
         pk=pk,
+        usuario=request.user,
     )
 
     return render(
@@ -76,6 +79,7 @@ def editar_empresa(request, pk):
     empresa = get_object_or_404(
         Empresa,
         pk=pk,
+        usuario=request.user,
     )
 
     form = EmpresaClienteForm(

@@ -679,8 +679,9 @@ def metricas(request):
         "tipos":EventoContato.TIPOS,
     })
 
+@staff_member_required
 def solicitacoes(request):
-    pesquisa = request.GET.get("q", "").strip()
+    pesquisa = request.GET.get("q", "").strip()[:100]
 
     solicitacoes_cadastradas = (
         SolicitacaoCadastro.objects
