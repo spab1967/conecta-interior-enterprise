@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.test import TestCase
 from django.urls import reverse
 
@@ -10,6 +11,7 @@ from .models import Avaliacao
 
 class AvaliacaoValidationTests(TestCase):
     def setUp(self):
+        cache.clear()
         cidade = Cidade.objects.create(nome="Teste", estado="MG")
         categoria = Categoria.objects.create(nome="Serviços")
         self.empresa = Empresa.objects.create(
@@ -47,3 +49,27 @@ class AvaliacaoValidationTests(TestCase):
 
         self.assertContains(resposta, "no máximo 2.000 caracteres")
         self.assertFalse(Avaliacao.objects.exists())
+
+    def test_limita_envios_repetidos_de_avaliacao(self):
+        dados = {
+            "nome": "Cliente",
+            "nota": "5",
+            "comentario": "Atendimento excelente.",
+        }
+
+        for _ in range(5):
+            resposta = self.client.post(
+                self.url,
+                dados,
+                REMOTE_ADDR="203.0.113.10",
+            )
+            self.assertEqual(resposta.status_code, 302)
+
+        resposta = self.client.post(
+            self.url,
+            dados,
+            REMOTE_ADDR="203.0.113.10",
+        )
+
+        self.assertEqual(resposta.status_code, 403)
+        self.assertEqual(Avaliacao.objects.count(), 5)

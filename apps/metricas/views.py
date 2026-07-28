@@ -9,6 +9,7 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
+from django_ratelimit.decorators import ratelimit
 
 from apps.empresas.models import Empresa
 from apps.planos.services import possui_acesso_metricas
@@ -60,6 +61,12 @@ def _redirecionar_contato(destino):
     )
 
 
+@ratelimit(
+    key="ip",
+    rate="120/h",
+    method="GET",
+    block=True,
+)
 def contato_empresa(
     request,
     empresa_id,
@@ -128,6 +135,12 @@ def contato_empresa(
     )
 
 
+@ratelimit(
+    key="ip",
+    rate="120/h",
+    method="GET",
+    block=True,
+)
 def contato_profissional(
     request,
     profissional_id,

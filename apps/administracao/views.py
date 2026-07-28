@@ -780,13 +780,10 @@ def configuracoes(request):
         },
     )
 
+@staff_member_required
 @require_POST
 @transaction.atomic
 def aprovar_solicitacao(request, solicitacao_id):
-
-    if not request.user.is_authenticated or not request.user.is_staff:
-        messages.error(request, "Acesso administrativo necessario.")
-        return redirect("administracao:solicitacoes")
 
     solicitacao = get_object_or_404(
         SolicitacaoCadastro.objects.select_for_update().select_related(
@@ -912,13 +909,10 @@ def aprovar_solicitacao(request, solicitacao_id):
     return redirect("administracao:solicitacoes")
 
 
+@staff_member_required
 @require_POST
 @transaction.atomic
 def recusar_solicitacao(request, solicitacao_id):
-
-    if not request.user.is_authenticated or not request.user.is_staff:
-        messages.error(request, "Acesso administrativo necessario.")
-        return redirect("administracao:solicitacoes")
 
     solicitacao = get_object_or_404(
         SolicitacaoCadastro.objects.select_for_update(),
