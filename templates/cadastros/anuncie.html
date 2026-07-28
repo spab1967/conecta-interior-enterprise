@@ -423,10 +423,15 @@ Anuncie | Conecta Interior
                                 for="{{ form.email.id_for_label }}"
                                 class="form-label fw-semibold"
                             >
-                                E-mail
+                                E-mail de acesso *
                             </label>
 
                             {{ form.email }}
+
+                            <div class="form-text">
+                                Este e-mail será utilizado para entrar
+                                e administrar sua página.
+                            </div>
 
                             {% for erro in form.email.errors %}
 
@@ -506,6 +511,67 @@ Anuncie | Conecta Interior
 
                     </div>
 
+                    <hr class="my-5">
+
+
+                    <h2 class="h4 fw-bold mb-4">
+                        Acesso à Minha Conta
+                    </h2>
+
+
+                    <div class="alert alert-info border-0">
+                        Crie agora sua senha. O acesso será liberado
+                        automaticamente após a aprovação do cadastro.
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.senha.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Senha *
+                            </label>
+
+                            {{ form.senha }}
+
+                            {% for erro in form.senha.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-4">
+
+                            <label
+                                for="{{ form.confirmar_senha.id_for_label }}"
+                                class="form-label fw-semibold"
+                            >
+                                Confirmar senha *
+                            </label>
+
+                            {{ form.confirmar_senha }}
+
+                            {% for erro in form.confirmar_senha.errors %}
+
+                                <div class="text-danger small mt-1">
+                                    {{ erro }}
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    </div>
+
 
                     <div class="alert alert-light border mt-3">
 
@@ -515,7 +581,8 @@ Anuncie | Conecta Interior
 
                         o envio desta solicitação não publica
                         automaticamente o cadastro. As informações
-                        passarão por análise administrativa.
+                        passarão por análise administrativa e o login
+                        permanecerá bloqueado até a aprovação.
 
                     </div>
 
