@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
+from django_ratelimit.decorators import ratelimit
 
 from apps.empresas.models import Empresa
 from apps.profissionais.models import Profissional
@@ -7,6 +8,12 @@ from apps.profissionais.models import Profissional
 from .models import Avaliacao
 
 
+@ratelimit(
+    key="ip",
+    rate="5/h",
+    method="POST",
+    block=True,
+)
 def avaliar_empresa(request, cidade_slug, empresa_slug):
 
     empresa = get_object_or_404(
@@ -86,6 +93,12 @@ def avaliar_empresa(request, cidade_slug, empresa_slug):
     )
 
 
+@ratelimit(
+    key="ip",
+    rate="5/h",
+    method="POST",
+    block=True,
+)
 def avaliar_profissional(request, cidade_slug, profissional_slug):
 
     profissional = get_object_or_404(
