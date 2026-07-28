@@ -1,6 +1,7 @@
 Django>=6.0,<6.1
 python-dotenv>=1.1,<2.0
 argon2-cffi>=25.1,<26.0
+django-ratelimit>=4.1,<5.0
 Pillow>=11.3
 
 cloudinary>=1.44.1
