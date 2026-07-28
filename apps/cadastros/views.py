@@ -1,4 +1,5 @@
-from django.contrib.auth import get_user_model
+from django.contrib import messages
+from django.contrib.auth import get_user_model, login
 from django.db import transaction
 from django.shortcuts import (
     redirect,
@@ -44,15 +45,13 @@ def anuncie(request):
 
             solicitacao.status = "pendente"
 
-            solicitacao.save()
-
             User = get_user_model()
 
             limite_primeiro_nome = User._meta.get_field(
                 "first_name"
             ).max_length
 
-            User.objects.create_user(
+            usuario = User.objects.create_user(
                 username=solicitacao.email,
                 email=solicitacao.email,
                 password=form.cleaned_data["senha"],
@@ -60,15 +59,42 @@ def anuncie(request):
                     solicitacao.responsavel
                     or solicitacao.nome
                 )[:limite_primeiro_nome],
-                is_active=False,
+                is_active=True,
             )
 
-            request.session[
-                "ultima_solicitacao_cadastro"
-            ] = solicitacao.pk
+            solicitacao.status = (
+                solicitacao.STATUS_APROVADO
+            )
+
+            solicitacao.observacao_admin = (
+                "Cadastro criado automaticamente pelo cliente."
+            )
+
+            solicitacao.save()
+
+            solicitacao.criar_cadastro(
+                usuario=usuario,
+            )
+
+            login(
+                request,
+                usuario,
+                backend=(
+                    "django.contrib.auth.backends."
+                    "ModelBackend"
+                ),
+            )
+
+            messages.success(
+                request,
+                (
+                    "Cadastro concluído. Agora você pode "
+                    "administrar sua página e escolher seu plano."
+                ),
+            )
 
             return redirect(
-                "cadastros:sucesso"
+                "core:minha_conta"
             )
 
     else:
