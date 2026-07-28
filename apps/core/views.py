@@ -21,6 +21,7 @@ from django.shortcuts import (
     render,
 )
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from apps.cidades.models import Cidade
 from apps.categorias.models import Categoria
@@ -1077,6 +1078,7 @@ def selecionar_plano(
 
 
 @login_required
+@require_POST
 def alterar_plano_empresa(
     request,
     plano_id,
@@ -1190,6 +1192,7 @@ def alterar_plano_empresa(
     )
 
 @login_required
+@require_POST
 def alterar_plano_profissional(
     request,
     plano_id,
@@ -1422,6 +1425,7 @@ def editar_empresa(
 
 
 @login_required
+@require_POST
 def excluir_foto_empresa(
     request,
     empresa_id,
@@ -1588,6 +1592,7 @@ def editar_profissional(
 
 
 @login_required
+@require_POST
 def excluir_foto_profissional(
     request,
     profissional_id,
@@ -1631,6 +1636,7 @@ def excluir_foto_profissional(
 
 
 @login_required
+@require_POST
 def alterar_renovacao_automatica(
     request,
     assinatura_id,
