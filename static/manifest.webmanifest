@@ -4,7 +4,7 @@
   "short_name": "ConectaInterior",
   "description": "Encontre empresas, profissionais e serviços do interior.",
   "lang": "pt-BR",
-  "start_url": "/",
+  "start_url": "/minha-conta/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
