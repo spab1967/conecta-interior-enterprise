@@ -92,3 +92,24 @@
         width: 100%;
     }
 }
+
+.ci-connection-status {
+    position: fixed;
+    top: 82px;
+    right: 18px;
+    z-index: 1090;
+    display: flex;
+    max-width: 440px;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+}
+
+@media (max-width: 991.98px) {
+    .ci-connection-status {
+        top: 72px;
+        right: 12px;
+        left: 12px;
+        max-width: none;
+    }
+}
