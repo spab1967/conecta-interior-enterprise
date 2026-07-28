@@ -1,0 +1,20 @@
+{
+  "id": "/minha-conta/",
+  "name": "ConectaInterior Minha Conta",
+  "short_name": "Minha Conta",
+  "description": "Administre sua página, seus planos e pagamentos no ConectaInterior.",
+  "lang": "pt-BR",
+  "start_url": "/minha-conta/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#198754",
+  "icons": [
+    {
+      "src": "/static/img/conecta-interior-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
