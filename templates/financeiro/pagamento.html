@@ -128,7 +128,7 @@ Pagamento PIX | Conecta Interior
                                         <button
                                             type="button"
                                             class="btn btn-outline-primary w-100 mt-2"
-                                            onclick="copiarCodigoPix()"
+                                            id="copiar-codigo-pix"
                                         >
                                             Copiar código PIX
                                         </button>
@@ -274,8 +274,8 @@ Pagamento PIX | Conecta Interior
 
 {% if mercado_pago_ativo and pix_mercado_pago.qr_code %}
 
-<script>
-function copiarCodigoPix() {
+<script nonce="{{ csp_nonce }}">
+document.getElementById("copiar-codigo-pix").addEventListener("click", function () {
     const campo = document.getElementById("pix-copia-cola");
     const mensagem = document.getElementById("mensagem-copia");
 
@@ -286,7 +286,7 @@ function copiarCodigoPix() {
         document.execCommand("copy");
         mensagem.textContent = "Código PIX copiado.";
     });
-}
+});
 </script>
 
 {% endif %}

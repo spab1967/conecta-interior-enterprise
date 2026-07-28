@@ -290,7 +290,7 @@ Editar Perfil Profissional | Conecta Interior
                                                     type="submit"
                                                     form="excluir-foto-profissional-{{ foto.pk }}"
                                                     class="btn btn-outline-danger btn-sm w-100"
-                                                    onclick="return confirm('Deseja realmente excluir esta foto?');"
+                                                    data-confirm="Deseja realmente excluir esta foto?"
                                                 >
                                                     Excluir
                                                 </button>
@@ -374,7 +374,7 @@ Editar Perfil Profissional | Conecta Interior
 </div>
 
 
-<script>
+<script nonce="{{ csp_nonce }}">
 
 document.addEventListener(
     "DOMContentLoaded",
