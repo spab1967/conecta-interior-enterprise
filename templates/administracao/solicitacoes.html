@@ -64,14 +64,14 @@
                 <form method="post" action="{% url 'administracao:aprovar_solicitacao' solicitacao.id %}">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-sm btn-success"
-                          onclick="return confirm('Aprovar esta solicitação e criar o cadastro?');">
+                          data-confirm="Aprovar esta solicitação e criar o cadastro?">
                     Aprovar
                   </button>
                 </form>
                 <form method="post" action="{% url 'administracao:recusar_solicitacao' solicitacao.id %}">
                   {% csrf_token %}
                   <button type="submit" class="btn btn-sm btn-outline-danger"
-                          onclick="return confirm('Recusar esta solicitação?');">
+                          data-confirm="Recusar esta solicitação?">
                     Recusar
                   </button>
                 </form>
