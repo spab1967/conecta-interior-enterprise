@@ -73,9 +73,27 @@ if ("serviceWorker" in navigator) {
 
 let eventoInstalacao = null;
 
+const dispositivoIOS = (
+    /iphone|ipad|ipod/i.test(navigator.userAgent)
+    || (
+        navigator.platform === "MacIntel"
+        && navigator.maxTouchPoints > 1
+    )
+);
+const aplicativoInstalado = (
+    window.matchMedia("(display-mode: standalone)").matches
+    || navigator.standalone === true
+);
+
 function alternarBotoesInstalacao(visivel) {
     document.querySelectorAll(".js-install-app").forEach((botao) => {
         botao.hidden = !visivel;
+    });
+}
+
+if (dispositivoIOS && !aplicativoInstalado) {
+    window.addEventListener("DOMContentLoaded", () => {
+        alternarBotoesInstalacao(true);
     });
 }
 
@@ -90,10 +108,72 @@ window.addEventListener("appinstalled", () => {
     alternarBotoesInstalacao(false);
 });
 
+function fecharOrientacaoIOS() {
+    const orientacao = document.querySelector(".ci-ios-install");
+    if (orientacao) {
+        orientacao.remove();
+    }
+}
+
+function mostrarOrientacaoIOS() {
+    if (document.querySelector(".ci-ios-install")) {
+        return;
+    }
+
+    const orientacao = document.createElement("div");
+    orientacao.className = "ci-ios-install";
+    orientacao.setAttribute("role", "dialog");
+    orientacao.setAttribute("aria-modal", "true");
+    orientacao.setAttribute(
+        "aria-labelledby",
+        "ci-ios-install-title"
+    );
+    orientacao.innerHTML = [
+        '<div class="ci-ios-install__card shadow-lg">',
+        '<button type="button" class="ci-ios-install__close" aria-label="Fechar">×</button>',
+        '<span class="ci-ios-install__icon" aria-hidden="true">📲</span>',
+        '<h2 id="ci-ios-install-title">Instalar no iPhone ou iPad</h2>',
+        '<p>1. Toque no botão <strong>Compartilhar</strong> do Safari.</p>',
+        '<p>2. Escolha <strong>Adicionar à Tela de Início</strong>.</p>',
+        '<p>3. Confirme em <strong>Adicionar</strong>.</p>',
+        '<button type="button" class="btn btn-primary ci-ios-install__done">Entendi</button>',
+        "</div>"
+    ].join("");
+
+    orientacao.addEventListener("click", (evento) => {
+        if (
+            evento.target === orientacao
+            || evento.target.closest(
+                ".ci-ios-install__close, .ci-ios-install__done"
+            )
+        ) {
+            fecharOrientacaoIOS();
+        }
+    });
+
+    document.body.appendChild(orientacao);
+    orientacao.querySelector(".ci-ios-install__close").focus();
+}
+
+document.addEventListener("keydown", (evento) => {
+    if (evento.key === "Escape") {
+        fecharOrientacaoIOS();
+    }
+});
+
 document.addEventListener("click", async (evento) => {
     const botao = evento.target.closest(".js-install-app");
 
-    if (!botao || !eventoInstalacao) {
+    if (!botao) {
+        return;
+    }
+
+    if (!eventoInstalacao && dispositivoIOS) {
+        mostrarOrientacaoIOS();
+        return;
+    }
+
+    if (!eventoInstalacao) {
         return;
     }
 
