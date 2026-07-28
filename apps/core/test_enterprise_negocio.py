@@ -1,8 +1,12 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import (
+    TestCase,
+    override_settings,
+)
 from django.urls import reverse
 
 from apps.avaliacoes.models import Avaliacao
@@ -1057,5 +1061,216 @@ class EnterpriseBusinessFlowTests(TestCase):
         self.assertEqual(
             ativas.get().plano_id,
             self.plano.pk,
+        )
+
+    @override_settings(
+        MERCADO_PAGO_ACCESS_TOKEN="TEST-ACCESS-TOKEN",
+        MERCADO_PAGO_ATIVO=True,
+    )
+    @patch(
+        "apps.financeiro.views."
+        "criar_ou_obter_pix_mercado_pago"
+    )
+    def test_pagamento_exibe_qr_code_mercado_pago(
+        self,
+        criar_pix,
+    ):
+        pedido = self._pedido_empresa()
+
+        criar_pix.return_value = {
+            "id": 123456789,
+            "status": "pending",
+            "status_detail": "pending_waiting_transfer",
+            "point_of_interaction": {
+                "transaction_data": {
+                    "qr_code": "PIX-COPIA-E-COLA-TESTE",
+                    "qr_code_base64": "aW1hZ2VtLXRlc3Rl",
+                    "ticket_url": "https://www.mercadopago.com.br/teste",
+                }
+            },
+        }
+
+        self.client.force_login(
+            self.cliente
+        )
+
+        response = self.client.get(
+            reverse(
+                "financeiro:pagamento",
+                kwargs={
+                    "pedido_id": pedido.pk,
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertContains(
+            response,
+            "PIX-COPIA-E-COLA-TESTE",
+        )
+
+        self.assertContains(
+            response,
+            "QR Code PIX do Mercado Pago",
+        )
+
+        self.assertNotContains(
+            response,
+            "Favorecido:",
+        )
+
+    @override_settings(
+        MERCADO_PAGO_ACCESS_TOKEN="TEST-ACCESS-TOKEN",
+        MERCADO_PAGO_WEBHOOK_SECRET="TEST-WEBHOOK-SECRET",
+        MERCADO_PAGO_ATIVO=True,
+    )
+    @patch(
+        "apps.financeiro.views."
+        "consultar_pagamento_mercado_pago"
+    )
+    @patch(
+        "apps.financeiro.views."
+        "WebhookSignatureValidator.validate"
+    )
+    def test_webhook_aprovado_ativa_plano(
+        self,
+        validar_assinatura,
+        consultar_pagamento,
+    ):
+        pedido = self._pedido_empresa()
+
+        pagamento = Pagamento.objects.create(
+            pedido=pedido,
+            tipo=Pagamento.TIPO_PIX,
+            status=Pagamento.STATUS_PENDENTE,
+            valor=pedido.valor,
+            codigo_transacao="123456789",
+        )
+
+        consultar_pagamento.return_value = {
+            "id": 123456789,
+            "status": "approved",
+            "external_reference": str(
+                pedido.pk
+            ),
+            "transaction_amount": str(
+                pedido.valor
+            ),
+            "payment_method_id": "pix",
+        }
+
+        response = self.client.post(
+            (
+                reverse(
+                    "financeiro:webhook_mercado_pago"
+                )
+                + "?type=payment&data.id=123456789"
+            ),
+            data=(
+                '{"type":"payment",'
+                '"data":{"id":"123456789"}}'
+            ),
+            content_type="application/json",
+            HTTP_X_SIGNATURE="ts=1,v1=teste",
+            HTTP_X_REQUEST_ID="request-teste",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        validar_assinatura.assert_called_once()
+        pagamento.refresh_from_db()
+        pedido.refresh_from_db()
+
+        self.assertEqual(
+            pagamento.status,
+            Pagamento.STATUS_APROVADO,
+        )
+
+        self.assertEqual(
+            pedido.status,
+            PedidoFinanceiro.STATUS_PAGO,
+        )
+
+        self.assertIsNotNone(
+            pedido.assinatura_id
+        )
+
+    @override_settings(
+        MERCADO_PAGO_ACCESS_TOKEN="TEST-ACCESS-TOKEN",
+        MERCADO_PAGO_WEBHOOK_SECRET="TEST-WEBHOOK-SECRET",
+        MERCADO_PAGO_ATIVO=True,
+    )
+    @patch(
+        "apps.financeiro.views."
+        "consultar_pagamento_mercado_pago"
+    )
+    @patch(
+        "apps.financeiro.views."
+        "WebhookSignatureValidator.validate"
+    )
+    def test_webhook_rejeita_valor_divergente(
+        self,
+        validar_assinatura,
+        consultar_pagamento,
+    ):
+        pedido = self._pedido_empresa()
+
+        pagamento = Pagamento.objects.create(
+            pedido=pedido,
+            tipo=Pagamento.TIPO_PIX,
+            status=Pagamento.STATUS_PENDENTE,
+            valor=pedido.valor,
+            codigo_transacao="987654321",
+        )
+
+        consultar_pagamento.return_value = {
+            "id": 987654321,
+            "status": "approved",
+            "external_reference": str(
+                pedido.pk
+            ),
+            "transaction_amount": "1.00",
+            "payment_method_id": "pix",
+        }
+
+        response = self.client.post(
+            (
+                reverse(
+                    "financeiro:webhook_mercado_pago"
+                )
+                + "?type=payment&data.id=987654321"
+            ),
+            data=(
+                '{"type":"payment",'
+                '"data":{"id":"987654321"}}'
+            ),
+            content_type="application/json",
+            HTTP_X_SIGNATURE="ts=1,v1=teste",
+            HTTP_X_REQUEST_ID="request-teste",
+        )
+
+        self.assertEqual(
+            response.status_code,
+            400,
+        )
+
+        pagamento.refresh_from_db()
+        pedido.refresh_from_db()
+
+        self.assertEqual(
+            pagamento.status,
+            Pagamento.STATUS_PENDENTE,
+        )
+
+        self.assertEqual(
+            pedido.status,
+            PedidoFinanceiro.STATUS_PENDENTE,
         )
 
