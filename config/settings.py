@@ -338,6 +338,14 @@ SECURE_REFERRER_POLICY = "same-origin"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 X_FRAME_OPTIONS = "DENY"
 
+# Evita consumo excessivo de memória e formulários maliciosamente grandes.
+# Arquivos maiores são enviados para armazenamento temporário e continuam
+# sujeitos à validação individual de 5 MB nas views.
+DATA_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 200
+DATA_UPLOAD_MAX_NUMBER_FILES = 10
+
 
 # ============================================================
 # CSRF
