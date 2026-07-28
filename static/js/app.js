@@ -12,6 +12,39 @@ if ("serviceWorker" in navigator) {
 }
 
 
+let eventoInstalacao = null;
+
+function alternarBotoesInstalacao(visivel) {
+    document.querySelectorAll(".js-install-app").forEach((botao) => {
+        botao.hidden = !visivel;
+    });
+}
+
+window.addEventListener("beforeinstallprompt", (evento) => {
+    evento.preventDefault();
+    eventoInstalacao = evento;
+    alternarBotoesInstalacao(true);
+});
+
+window.addEventListener("appinstalled", () => {
+    eventoInstalacao = null;
+    alternarBotoesInstalacao(false);
+});
+
+document.addEventListener("click", async (evento) => {
+    const botao = evento.target.closest(".js-install-app");
+
+    if (!botao || !eventoInstalacao) {
+        return;
+    }
+
+    eventoInstalacao.prompt();
+    await eventoInstalacao.userChoice;
+    eventoInstalacao = null;
+    alternarBotoesInstalacao(false);
+});
+
+
 async function copiarLink(url) {
     if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(url);
