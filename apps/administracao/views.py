@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect
 from apps.servicos.models import Servico
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import SetPasswordForm
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError, transaction
@@ -797,6 +798,22 @@ def aprovar_solicitacao(request, solicitacao_id):
         messages.warning(request, "Esta solicitacao ja foi processada.")
         return redirect("administracao:solicitacoes")
 
+    User = get_user_model()
+
+    usuario_solicitante = None
+
+    if solicitacao.email:
+        usuario_solicitante = (
+            User.objects
+            .select_for_update()
+            .filter(
+                username__iexact=solicitacao.email,
+                email__iexact=solicitacao.email,
+                is_staff=False,
+            )
+            .first()
+        )
+
     try:
         if solicitacao.tipo == SolicitacaoCadastro.TIPO_EMPRESA:
 
@@ -815,6 +832,7 @@ def aprovar_solicitacao(request, solicitacao_id):
             ).max_length
 
             cadastro = Empresa(
+                usuario=usuario_solicitante,
                 cidade=solicitacao.cidade,
                 categoria=solicitacao.categoria,
                 nome_fantasia=(solicitacao.nome or "")[:limite_nome],
@@ -832,6 +850,7 @@ def aprovar_solicitacao(request, solicitacao_id):
 
         elif solicitacao.tipo == SolicitacaoCadastro.TIPO_PROFISSIONAL:
             cadastro = Profissional(
+                usuario=usuario_solicitante,
                 cidade=solicitacao.cidade,
                 categoria=solicitacao.categoria,
                 nome=solicitacao.nome,
@@ -854,6 +873,14 @@ def aprovar_solicitacao(request, solicitacao_id):
 
         cadastro.full_clean()
         cadastro.save()
+
+        if usuario_solicitante and not usuario_solicitante.is_active:
+            usuario_solicitante.is_active = True
+            usuario_solicitante.save(
+                update_fields=[
+                    "is_active",
+                ]
+            )
 
     except ValidationError as erro:
         detalhes = "; ".join(
@@ -911,7 +938,24 @@ def aprovar_solicitacao(request, solicitacao_id):
         ]
     )
 
-    messages.success(request, "Solicitacao aprovada e cadastro criado.")
+    if usuario_solicitante:
+        messages.success(
+            request,
+            (
+                "Solicitacao aprovada, cadastro criado e "
+                "acesso do cliente liberado."
+            ),
+        )
+    else:
+        messages.success(
+            request,
+            (
+                "Solicitacao aprovada e cadastro criado. "
+                "Esta solicitacao antiga nao possuia usuario "
+                "automatico para vinculacao."
+            ),
+        )
+
     return redirect("administracao:solicitacoes")
 
 
