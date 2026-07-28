@@ -5,7 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.http import Http404, HttpResponse
-from django.db import transaction
+from django.db import DatabaseError, connection, transaction
+from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.db.models import (
     Avg,
@@ -42,6 +43,23 @@ from apps.servicos.models import Servico
 
 TAMANHO_MAXIMO_IMAGEM = 5 * 1024 * 1024
 FORMATOS_IMAGEM_PERMITIDOS = {"JPEG", "PNG", "WEBP"}
+
+
+def health(request):
+    try:
+        connection.ensure_connection()
+    except DatabaseError:
+        response = JsonResponse(
+            {"status": "indisponivel"},
+            status=503,
+        )
+    else:
+        response = JsonResponse(
+            {"status": "ok"},
+        )
+
+    response["Cache-Control"] = "no-store"
+    return response
 
 
 def _validar_imagem_upload(arquivo):
