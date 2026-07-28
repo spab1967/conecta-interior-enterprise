@@ -60,3 +60,35 @@
         z-index: 1030;
     }
 }
+
+
+.ci-app-update {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 1090;
+    display: flex;
+    max-width: 440px;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+}
+
+.ci-app-update span {
+    flex: 1;
+}
+
+@media (max-width: 991.98px) {
+    .ci-app-update {
+        right: 12px;
+        bottom: calc(82px + env(safe-area-inset-bottom));
+        left: 12px;
+        max-width: none;
+        flex-wrap: wrap;
+    }
+
+    .ci-app-update strong,
+    .ci-app-update span {
+        width: 100%;
+    }
+}

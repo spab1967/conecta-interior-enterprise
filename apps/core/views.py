@@ -271,7 +271,7 @@ def _aplicar_plano_profissional(
 
 def service_worker(request):
     script = """
-const CACHE_NAME = "conecta-interior-static-v2";
+const CACHE_NAME = "conecta-interior-static-v3";
 const OFFLINE_URL = "/static/offline.html";
 
 self.addEventListener("install", (event) => {
@@ -280,7 +280,12 @@ self.addEventListener("install", (event) => {
             cache.add(OFFLINE_URL)
         ))
     );
-    self.skipWaiting();
+});
+
+self.addEventListener("message", (event) => {
+    if (event.data === "SKIP_WAITING") {
+        self.skipWaiting();
+    }
 });
 
 self.addEventListener("activate", (event) => {
