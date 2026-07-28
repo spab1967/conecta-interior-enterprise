@@ -19,6 +19,7 @@ class SolicitacaoCadastroForm(forms.ModelForm):
             attrs={
                 "class": "form-control",
                 "autocomplete": "new-password",
+                "minlength": "8",
                 "placeholder": "Crie uma senha segura",
             }
         ),
@@ -31,6 +32,7 @@ class SolicitacaoCadastroForm(forms.ModelForm):
             attrs={
                 "class": "form-control",
                 "autocomplete": "new-password",
+                "minlength": "8",
                 "placeholder": "Digite novamente a senha",
             }
         ),
@@ -289,6 +291,10 @@ class SolicitacaoCadastroForm(forms.ModelForm):
             "especialidade"
         )
 
+        categoria = cleaned_data.get(
+            "categoria"
+        )
+
         plano = cleaned_data.get(
             "plano"
         )
@@ -310,6 +316,17 @@ class SolicitacaoCadastroForm(forms.ModelForm):
             self.add_error(
                 "especialidade",
                 "Informe a especialidade do profissional.",
+            )
+
+        if (
+            tipo
+            == SolicitacaoCadastro.TIPO_EMPRESA
+            and not categoria
+        ):
+
+            self.add_error(
+                "categoria",
+                "Informe a categoria da empresa.",
             )
 
         if plano and not plano.ativo:
