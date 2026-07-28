@@ -113,3 +113,61 @@
         max-width: none;
     }
 }
+
+.ci-ios-install {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.68);
+}
+
+.ci-ios-install__card {
+    position: relative;
+    width: min(100%, 430px);
+    padding: 30px;
+    border-radius: 20px;
+    background: #ffffff;
+    color: #1e293b;
+}
+
+.ci-ios-install__card h2 {
+    margin: 8px 0 18px;
+    font-size: 1.5rem;
+}
+
+.ci-ios-install__card p {
+    margin-bottom: 12px;
+}
+
+.ci-ios-install__icon {
+    font-size: 2.2rem;
+}
+
+.ci-ios-install__close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #475569;
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.ci-ios-install__close:hover,
+.ci-ios-install__close:focus-visible {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.ci-ios-install__done {
+    width: 100%;
+    margin-top: 10px;
+}
