@@ -60,7 +60,11 @@ Histórico Financeiro | Conecta Interior
                             Valor
                         </small>
                         <div class="fw-semibold">
-                            R$ {{ pedido.valor }}
+                            {% if pedido.valor > 0 %}
+                                R$ {{ pedido.valor|floatformat:2 }}
+                            {% else %}
+                                Gratuito
+                            {% endif %}
                         </div>
                     </div>
 
@@ -69,7 +73,11 @@ Histórico Financeiro | Conecta Interior
                             Pedido
                         </small>
                         <div>
-                            {{ pedido.get_status_display }}
+                            {% if pedido.valor > 0 %}
+                                {{ pedido.get_status_display }}
+                            {% else %}
+                                Gratuito — sem cobrança
+                            {% endif %}
                         </div>
                     </div>
 
@@ -83,6 +91,8 @@ Histórico Financeiro | Conecta Interior
                     </div>
 
                 </div>
+
+                {% if pedido.valor > 0 %}
 
                 {% for pagamento in pedido.pagamentos.all %}
 
@@ -141,6 +151,16 @@ Histórico Financeiro | Conecta Interior
                     </div>
 
                 {% endfor %}
+
+                {% else %}
+
+                    <hr>
+
+                    <div class="text-success">
+                        Plano gratuito — nenhum pagamento necessário.
+                    </div>
+
+                {% endif %}
 
             </div>
 

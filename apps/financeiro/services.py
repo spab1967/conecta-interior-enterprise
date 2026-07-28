@@ -154,38 +154,22 @@ def aprovar_pagamento(pagamento):
 
     if pedido.empresa:
 
-        atual = (
-            Assinatura.objects
-            .filter(
-                empresa=pedido.empresa,
-                status=Assinatura.STATUS_ATIVA,
-                inicio__lte=hoje,
-            )
-            .first()
+        Assinatura.objects.filter(
+            empresa=pedido.empresa,
+            profissional__isnull=True,
+            status=Assinatura.STATUS_ATIVA,
+        ).update(
+            status=Assinatura.STATUS_CANCELADA,
         )
 
     else:
 
-        atual = (
-            Assinatura.objects
-            .filter(
-                profissional=pedido.profissional,
-                status=Assinatura.STATUS_ATIVA,
-                inicio__lte=hoje,
-            )
-            .first()
-        )
-
-    if atual:
-
-        atual.status = (
-            Assinatura.STATUS_CANCELADA
-        )
-
-        atual.save(
-            update_fields=[
-                "status",
-            ]
+        Assinatura.objects.filter(
+            profissional=pedido.profissional,
+            empresa__isnull=True,
+            status=Assinatura.STATUS_ATIVA,
+        ).update(
+            status=Assinatura.STATUS_CANCELADA,
         )
 
     nova = Assinatura.objects.create(

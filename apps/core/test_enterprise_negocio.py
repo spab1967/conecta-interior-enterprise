@@ -804,3 +804,258 @@ class EnterpriseBusinessFlowTests(TestCase):
             response,
             "Comentario ainda pendente.",
         )
+
+    def test_plano_gratis_ativa_sem_cobranca_para_empresa(self):
+        plano_gratis = Plano.objects.create(
+            nome="Plano Gratis",
+            descricao="Plano gratuito para testes",
+            preco_mensal=Decimal("0.00"),
+            ativo=True,
+            ordem=1,
+        )
+
+        assinatura_anterior = Assinatura.objects.create(
+            empresa=self.empresa,
+            profissional=None,
+            plano=self.plano,
+            status=Assinatura.STATUS_ATIVA,
+        )
+
+        pedido_antigo = PedidoFinanceiro.objects.create(
+            empresa=self.empresa,
+            profissional=None,
+            plano=plano_gratis,
+            valor=Decimal("0.00"),
+            status=PedidoFinanceiro.STATUS_PENDENTE,
+        )
+
+        self.client.force_login(
+            self.cliente
+        )
+
+        response = self.client.post(
+            reverse(
+                "core:alterar_plano_empresa",
+                kwargs={
+                    "plano_id": plano_gratis.pk,
+                    "empresa_id": self.empresa.pk,
+                },
+            )
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("core:minha_conta"),
+        )
+
+        assinatura_anterior.refresh_from_db()
+        pedido_antigo.refresh_from_db()
+
+        self.assertEqual(
+            assinatura_anterior.status,
+            Assinatura.STATUS_CANCELADA,
+        )
+
+        self.assertEqual(
+            pedido_antigo.status,
+            PedidoFinanceiro.STATUS_CANCELADO,
+        )
+
+        self.assertFalse(
+            PedidoFinanceiro.objects.filter(
+                empresa=self.empresa,
+                status=PedidoFinanceiro.STATUS_PENDENTE,
+            ).exists()
+        )
+
+        assinatura_atual = Assinatura.objects.get(
+            empresa=self.empresa,
+            profissional__isnull=True,
+            status=Assinatura.STATUS_ATIVA,
+        )
+
+        self.assertEqual(
+            assinatura_atual.plano_id,
+            plano_gratis.pk,
+        )
+
+        response = self.client.get(
+            reverse("core:minha_conta")
+        )
+
+        self.assertContains(
+            response,
+            "Mudar de plano",
+        )
+
+        self.assertNotContains(
+            response,
+            "Cobrança pendente",
+        )
+
+    def test_plano_gratis_ativa_sem_cobranca_para_profissional(self):
+        plano_gratis = Plano.objects.create(
+            nome="Plano Gratis Profissional",
+            descricao="Plano gratuito para profissional",
+            preco_mensal=Decimal("0.00"),
+            ativo=True,
+            ordem=2,
+        )
+
+        self.client.force_login(
+            self.cliente
+        )
+
+        response = self.client.post(
+            reverse(
+                "core:alterar_plano_profissional",
+                kwargs={
+                    "plano_id": plano_gratis.pk,
+                    "profissional_id": self.profissional.pk,
+                },
+            )
+        )
+
+        self.assertRedirects(
+            response,
+            reverse("core:minha_conta"),
+        )
+
+        self.assertFalse(
+            PedidoFinanceiro.objects.filter(
+                profissional=self.profissional,
+                status=PedidoFinanceiro.STATUS_PENDENTE,
+            ).exists()
+        )
+
+        assinatura_atual = Assinatura.objects.get(
+            profissional=self.profissional,
+            empresa__isnull=True,
+            status=Assinatura.STATUS_ATIVA,
+        )
+
+        self.assertEqual(
+            assinatura_atual.plano_id,
+            plano_gratis.pk,
+        )
+
+    def test_nova_escolha_cancela_cobranca_pendente_anterior(self):
+        plano_anterior = Plano.objects.create(
+            nome="Plano Pendente Anterior",
+            preco_mensal=Decimal("19.90"),
+            ativo=True,
+            ordem=20,
+        )
+
+        pedido_anterior = PedidoFinanceiro.objects.create(
+            empresa=self.empresa,
+            profissional=None,
+            plano=plano_anterior,
+            valor=plano_anterior.preco_mensal,
+            status=PedidoFinanceiro.STATUS_PENDENTE,
+        )
+
+        self.client.force_login(
+            self.cliente
+        )
+
+        response = self.client.post(
+            reverse(
+                "core:alterar_plano_empresa",
+                kwargs={
+                    "plano_id": self.plano.pk,
+                    "empresa_id": self.empresa.pk,
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
+
+        pedido_anterior.refresh_from_db()
+
+        self.assertEqual(
+            pedido_anterior.status,
+            PedidoFinanceiro.STATUS_CANCELADO,
+        )
+
+        pendentes = PedidoFinanceiro.objects.filter(
+            empresa=self.empresa,
+            profissional__isnull=True,
+            status=PedidoFinanceiro.STATUS_PENDENTE,
+        )
+
+        self.assertEqual(
+            pendentes.count(),
+            1,
+        )
+
+        self.assertEqual(
+            pendentes.get().plano_id,
+            self.plano.pk,
+        )
+
+    def test_pagamento_aprovado_remove_todos_os_planos_antigos(self):
+        plano_antigo = Plano.objects.create(
+            nome="Plano Antigo",
+            preco_mensal=Decimal("10.00"),
+            ativo=True,
+            ordem=30,
+        )
+
+        primeira = Assinatura.objects.create(
+            empresa=self.empresa,
+            profissional=None,
+            plano=plano_antigo,
+            status=Assinatura.STATUS_ATIVA,
+        )
+
+        segunda = Assinatura.objects.create(
+            empresa=self.empresa,
+            profissional=None,
+            plano=plano_antigo,
+            status=Assinatura.STATUS_ATIVA,
+        )
+
+        pedido = self._pedido_empresa()
+
+        pagamento = Pagamento.objects.create(
+            pedido=pedido,
+            tipo=Pagamento.TIPO_PIX,
+            status=Pagamento.STATUS_PENDENTE,
+            valor=pedido.valor,
+        )
+
+        aprovar_pagamento(pagamento)
+
+        primeira.refresh_from_db()
+        segunda.refresh_from_db()
+
+        self.assertEqual(
+            primeira.status,
+            Assinatura.STATUS_CANCELADA,
+        )
+
+        self.assertEqual(
+            segunda.status,
+            Assinatura.STATUS_CANCELADA,
+        )
+
+        ativas = Assinatura.objects.filter(
+            empresa=self.empresa,
+            profissional__isnull=True,
+            status=Assinatura.STATUS_ATIVA,
+        )
+
+        self.assertEqual(
+            ativas.count(),
+            1,
+        )
+
+        self.assertEqual(
+            ativas.get().plano_id,
+            self.plano.pk,
+        )
+
