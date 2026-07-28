@@ -2,10 +2,12 @@ from django.shortcuts import get_object_or_404, redirect
 from apps.servicos.models import Servico
 from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
-from django.db import transaction
+from django.core.exceptions import ValidationError
+from django.db import DatabaseError, transaction
 from django.views.decorators.http import require_POST
 from django.conf import settings
 import django
+import logging
 import platform
 from apps.metricas.models import EventoContato
 from django.db.models import Q
@@ -26,6 +28,9 @@ from apps.financeiro.models import Pagamento, PedidoFinanceiro
 from apps.financeiro.services import aprovar_pagamento
 from apps.planos.models import Assinatura
 from apps.profissionais.models import Profissional
+
+
+logger = logging.getLogger(__name__)
 
 
 def _contar_assinaturas_ativas():
@@ -792,62 +797,109 @@ def aprovar_solicitacao(request, solicitacao_id):
         messages.warning(request, "Esta solicitacao ja foi processada.")
         return redirect("administracao:solicitacoes")
 
-    if solicitacao.tipo == SolicitacaoCadastro.TIPO_EMPRESA:
+    try:
+        if solicitacao.tipo == SolicitacaoCadastro.TIPO_EMPRESA:
 
-        if not solicitacao.categoria:
-            messages.error(request, "A solicitacao de empresa nao possui categoria.")
+            if not solicitacao.categoria:
+                messages.error(
+                    request,
+                    "A solicitacao de empresa nao possui categoria.",
+                )
+                return redirect("administracao:solicitacoes")
+
+            limite_nome = Empresa._meta.get_field(
+                "nome_fantasia"
+            ).max_length
+            limite_bairro = Empresa._meta.get_field(
+                "bairro"
+            ).max_length
+
+            cadastro = Empresa(
+                cidade=solicitacao.cidade,
+                categoria=solicitacao.categoria,
+                nome_fantasia=(solicitacao.nome or "")[:limite_nome],
+                descricao=solicitacao.descricao,
+                endereco=solicitacao.endereco,
+                bairro=(solicitacao.bairro or "")[:limite_bairro],
+                telefone=solicitacao.telefone,
+                whatsapp=solicitacao.whatsapp,
+                email=solicitacao.email,
+                instagram=solicitacao.instagram,
+                site=solicitacao.site,
+                horario=solicitacao.horario,
+                ativa=True,
+            )
+
+        elif solicitacao.tipo == SolicitacaoCadastro.TIPO_PROFISSIONAL:
+            cadastro = Profissional(
+                cidade=solicitacao.cidade,
+                categoria=solicitacao.categoria,
+                nome=solicitacao.nome,
+                especialidade=solicitacao.especialidade,
+                descricao=solicitacao.descricao,
+                endereco=solicitacao.endereco,
+                bairro=solicitacao.bairro,
+                telefone=solicitacao.telefone,
+                whatsapp=solicitacao.whatsapp,
+                email=solicitacao.email,
+                instagram=solicitacao.instagram,
+                site=solicitacao.site,
+                horario=solicitacao.horario,
+                ativo=True,
+            )
+
+        else:
+            messages.error(request, "Tipo de solicitacao invalido.")
             return redirect("administracao:solicitacoes")
 
-        Empresa.objects.create(
-            cidade=solicitacao.cidade,
-            categoria=solicitacao.categoria,
-            nome_fantasia=solicitacao.nome,
-            descricao=solicitacao.descricao,
-            endereco=solicitacao.endereco,
-            bairro=solicitacao.bairro,
-            telefone=solicitacao.telefone,
-            whatsapp=solicitacao.whatsapp,
-            email=solicitacao.email,
-            instagram=solicitacao.instagram,
-            site=solicitacao.site,
-            horario=solicitacao.horario,
-            ativa=True,
+        cadastro.full_clean()
+        cadastro.save()
+
+    except ValidationError as erro:
+        detalhes = "; ".join(
+            mensagem
+            for mensagens in erro.message_dict.values()
+            for mensagem in mensagens
         )
-
-    elif solicitacao.tipo == SolicitacaoCadastro.TIPO_PROFISSIONAL:
-
-        Profissional.objects.create(
-            cidade=solicitacao.cidade,
-            categoria=solicitacao.categoria,
-            nome=solicitacao.nome,
-            especialidade=solicitacao.especialidade,
-            descricao=solicitacao.descricao,
-            endereco=solicitacao.endereco,
-            bairro=solicitacao.bairro,
-            telefone=solicitacao.telefone,
-            whatsapp=solicitacao.whatsapp,
-            email=solicitacao.email,
-            instagram=solicitacao.instagram,
-            site=solicitacao.site,
-            horario=solicitacao.horario,
-            ativo=True,
+        messages.error(
+            request,
+            "Nao foi possivel aprovar o cadastro: " + detalhes,
         )
+        return redirect("administracao:solicitacoes")
 
-    else:
-        messages.error(request, "Tipo de solicitacao invalido.")
+    except DatabaseError:
+        logger.exception(
+            "Erro de banco ao aprovar a solicitacao %s.",
+            solicitacao.pk,
+        )
+        messages.error(
+            request,
+            (
+                "Nao foi possivel aprovar o cadastro devido a uma "
+                "inconsistencia nos dados. A solicitacao permanece pendente."
+            ),
+        )
         return redirect("administracao:solicitacoes")
 
     solicitacao.status = SolicitacaoCadastro.STATUS_APROVADO
 
     plano_texto = ""
     if solicitacao.plano:
-        plano_texto = " Plano solicitado preservado: " + solicitacao.plano.nome + "."
+        plano_texto = (
+            " Plano solicitado preservado: "
+            + solicitacao.plano.nome
+            + "."
+        )
 
     observacao_anterior = (solicitacao.observacao_admin or "").strip()
     complemento = "Cadastro criado pela aprovacao administrativa." + plano_texto
 
     if observacao_anterior:
-        solicitacao.observacao_admin = observacao_anterior + chr(10) + complemento
+        solicitacao.observacao_admin = (
+            observacao_anterior
+            + chr(10)
+            + complemento
+        )
     else:
         solicitacao.observacao_admin = complemento
 
