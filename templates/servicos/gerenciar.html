@@ -109,7 +109,7 @@ Serviços | {{ titular }} | Conecta Interior
 
                                         <form method="post" action="{% url 'servicos:excluir' servico.pk %}">
                                             {% csrf_token %}
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir este serviço?');">Excluir</button>
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" data-confirm="Excluir este serviço?">Excluir</button>
                                         </form>
                                     </div>
                                 </td>
