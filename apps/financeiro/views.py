@@ -2,6 +2,8 @@ import json
 import logging
 from decimal import Decimal, InvalidOperation
 
+from PIL import Image, UnidentifiedImageError
+
 from mercadopago.webhook import (
     InvalidWebhookSignatureError,
     WebhookSignatureValidator,
@@ -38,6 +40,21 @@ from .services import (
 
 
 logger = logging.getLogger(__name__)
+
+
+def _conteudo_comprovante_valido(arquivo, nome_arquivo):
+    try:
+        if nome_arquivo.endswith(".pdf"):
+            return arquivo.read(5) == b"%PDF-"
+
+        imagem = Image.open(arquivo)
+        formato = imagem.format
+        imagem.verify()
+        return formato in {"JPEG", "PNG", "WEBP"}
+    except (UnidentifiedImageError, OSError, ValueError):
+        return False
+    finally:
+        arquivo.seek(0)
 
 
 def _pedido_pertence_ao_usuario(
@@ -469,6 +486,23 @@ def confirmar_pagamento(
         messages.error(
             request,
             "O comprovante deve ter no máximo 5 MB.",
+        )
+
+        return redirect(
+            "financeiro:pagamento",
+            pedido_id=pedido.pk,
+        )
+
+    if not _conteudo_comprovante_valido(
+        comprovante,
+        nome_arquivo,
+    ):
+        messages.error(
+            request,
+            (
+                "O conteúdo do comprovante não corresponde "
+                "a um PDF ou imagem válida."
+            ),
         )
 
         return redirect(
