@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 
 from django.core.exceptions import ImproperlyConfigured
+from django.utils.csp import CSP
 
 import dj_database_url
 from dotenv import load_dotenv
@@ -84,6 +85,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -343,6 +345,53 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 X_FRAME_OPTIONS = "DENY"
+
+# Restringe as origens que podem fornecer conteúdo ao navegador.
+# Scripts e estilos inline permanecem temporariamente permitidos porque
+# algumas telas validadas ainda os utilizam. As demais origens são bloqueadas.
+SECURE_CSP = {
+    "default-src": [CSP.SELF],
+    "base-uri": [CSP.SELF],
+    "object-src": [CSP.NONE],
+    "frame-ancestors": [CSP.NONE],
+    "form-action": [CSP.SELF],
+    "script-src": [
+        CSP.SELF,
+        CSP.UNSAFE_INLINE,
+        "https://cdn.jsdelivr.net",
+    ],
+    "style-src": [
+        CSP.SELF,
+        CSP.UNSAFE_INLINE,
+        "https://cdn.jsdelivr.net",
+    ],
+    "img-src": [
+        CSP.SELF,
+        "data:",
+        "blob:",
+        "https:",
+    ],
+    "font-src": [
+        CSP.SELF,
+        "data:",
+        "https:",
+    ],
+    "connect-src": [CSP.SELF],
+    "manifest-src": [CSP.SELF],
+    "worker-src": [
+        CSP.SELF,
+        "blob:",
+    ],
+    "frame-src": [
+        CSP.SELF,
+        "https://www.google.com",
+        "https://maps.google.com",
+    ],
+    "media-src": [
+        CSP.SELF,
+        "https:",
+    ],
+}
 
 # Evita consumo excessivo de memória e formulários maliciosamente grandes.
 # Arquivos maiores são enviados para armazenamento temporário e continuam
