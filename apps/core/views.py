@@ -1,9 +1,12 @@
+from PIL import Image, UnidentifiedImageError
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.http import Http404
 from django.db import transaction
+from django.core.exceptions import ValidationError
 from django.db.models import (
     Avg,
     Case,
@@ -34,6 +37,36 @@ from apps.planos.vigencia import calcular_vencimento_plano
 from apps.profissionais.forms import ProfissionalClienteForm
 from apps.profissionais.models import Profissional, FotoProfissional
 from apps.servicos.models import Servico
+
+
+TAMANHO_MAXIMO_IMAGEM = 5 * 1024 * 1024
+FORMATOS_IMAGEM_PERMITIDOS = {"JPEG", "PNG", "WEBP"}
+
+
+def _validar_imagem_upload(arquivo):
+    if not arquivo:
+        return
+
+    if arquivo.size > TAMANHO_MAXIMO_IMAGEM:
+        raise ValidationError(
+            "Cada imagem deve ter no máximo 5 MB."
+        )
+
+    try:
+        imagem = Image.open(arquivo)
+        formato = imagem.format
+        imagem.verify()
+    except (UnidentifiedImageError, OSError, ValueError):
+        raise ValidationError(
+            "O arquivo enviado não é uma imagem válida."
+        )
+    finally:
+        arquivo.seek(0)
+
+    if formato not in FORMATOS_IMAGEM_PERMITIDOS:
+        raise ValidationError(
+            "Envie imagens nos formatos JPG, PNG ou WEBP."
+        )
 
 
 def _ids_por_prioridade_comercial(
@@ -1292,6 +1325,21 @@ def editar_empresa(
 
     if request.method == "POST":
 
+        try:
+            _validar_imagem_upload(
+                request.FILES.get("logo")
+            )
+            for arquivo in request.FILES.getlist(
+                "fotos_galeria"
+            ):
+                _validar_imagem_upload(arquivo)
+        except ValidationError as erro:
+            messages.error(request, erro.message)
+            return redirect(
+                "core:editar_empresa",
+                empresa_id=empresa.pk,
+            )
+
         form = EmpresaClienteForm(
             request.POST,
             request.FILES,
@@ -1439,6 +1487,21 @@ def editar_profissional(
     fotos = profissional.galeria.all()
 
     if request.method == "POST":
+
+        try:
+            _validar_imagem_upload(
+                request.FILES.get("foto")
+            )
+            for arquivo in request.FILES.getlist(
+                "fotos_galeria"
+            ):
+                _validar_imagem_upload(arquivo)
+        except ValidationError as erro:
+            messages.error(request, erro.message)
+            return redirect(
+                "core:editar_profissional",
+                profissional_id=profissional.pk,
+            )
 
         form = ProfissionalClienteForm(
             request.POST,
