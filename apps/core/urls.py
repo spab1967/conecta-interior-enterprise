@@ -1,10 +1,26 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
+from django_ratelimit.decorators import ratelimit
 
 from . import views
 
 
 app_name = "core"
+
+
+# Limite por identificador protege cada conta contra força bruta sem
+# depender do endereço do proxy reverso do Render.
+login_cliente = ratelimit(
+    key="post:username",
+    rate="5/5m",
+    method="POST",
+    block=True,
+)(
+    auth_views.LoginView.as_view(
+        template_name="core/login.html",
+        redirect_authenticated_user=True,
+    )
+)
 
 
 urlpatterns = [
@@ -23,10 +39,7 @@ urlpatterns = [
 
     path(
         "entrar/",
-        auth_views.LoginView.as_view(
-            template_name="core/login.html",
-            redirect_authenticated_user=True,
-        ),
+        login_cliente,
         name="login",
     ),
 
