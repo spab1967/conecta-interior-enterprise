@@ -547,5 +547,10 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "apps.administracao": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }

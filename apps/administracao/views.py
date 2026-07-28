@@ -511,6 +511,12 @@ def aprovar_pagamento_admin(
         pagamento_obj
     )
 
+    logger.info(
+        "Pagamento %s aprovado pelo administrador %s.",
+        pagamento_obj.pk,
+        request.user.pk,
+    )
+
     messages.success(
         request,
         (
@@ -559,6 +565,12 @@ def recusar_pagamento_admin(
             "status",
             "atualizado_em",
         ]
+    )
+
+    logger.info(
+        "Pagamento %s recusado pelo administrador %s.",
+        pagamento_obj.pk,
+        request.user.pk,
     )
 
     messages.success(
@@ -888,6 +900,12 @@ def aprovar_solicitacao(request, solicitacao_id):
         ]
     )
 
+    logger.info(
+        "Solicitacao %s aprovada pelo administrador %s.",
+        solicitacao.pk,
+        request.user.pk,
+    )
+
     if usuario_solicitante:
         messages.success(
             request,
@@ -939,6 +957,12 @@ def recusar_solicitacao(request, solicitacao_id):
             "observacao_admin",
             "atualizado_em",
         ]
+    )
+
+    logger.info(
+        "Solicitacao %s recusada pelo administrador %s.",
+        solicitacao.pk,
+        request.user.pk,
     )
 
     messages.success(request, "Solicitacao recusada.")
