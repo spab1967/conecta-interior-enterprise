@@ -134,6 +134,12 @@ DATABASE_URL = os.getenv(
 ).strip()
 
 
+if not DATABASE_URL and not DEBUG:
+    raise ImproperlyConfigured(
+        "DATABASE_URL deve ser definida em produção."
+    )
+
+
 if DATABASE_URL:
 
     DATABASES = {
@@ -441,13 +447,28 @@ MERCADO_PAGO_ATIVO = bool(
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "security": {
+            "format": (
+                "{asctime} {levelname} "
+                "{name} {message}"
+            ),
+            "style": "{",
+        },
+    },
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
+            "formatter": "security",
         },
     },
     "loggers": {
         "django.security": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.request": {
             "handlers": ["console"],
             "level": "WARNING",
             "propagate": False,
