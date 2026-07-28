@@ -430,10 +430,12 @@ class EnterpriseBusinessFlowTests(TestCase):
                 "bairro": "",
                 "telefone": "",
                 "whatsapp": "37977777777",
-                "email": "",
+                "email": "empresa.solicitada@example.com",
                 "instagram": "",
                 "site": "",
                 "horario": "",
+                "senha": "SenhaForte@123",
+                "confirmar_senha": "SenhaForte@123",
             },
         )
 
@@ -458,6 +460,18 @@ class EnterpriseBusinessFlowTests(TestCase):
             self.plano.pk,
         )
 
+        usuario = get_user_model().objects.get(
+            username="empresa.solicitada@example.com"
+        )
+
+        self.assertFalse(
+            usuario.is_active
+        )
+
+        self.assertTrue(
+            usuario.check_password("SenhaForte@123")
+        )
+
     def test_solicitacao_profissional_exige_especialidade(self):
         response = self.client.post(
             reverse(
@@ -476,10 +490,12 @@ class EnterpriseBusinessFlowTests(TestCase):
                 "bairro": "",
                 "telefone": "",
                 "whatsapp": "37966666666",
-                "email": "",
+                "email": "profissional.sem@example.com",
                 "instagram": "",
                 "site": "",
                 "horario": "",
+                "senha": "SenhaForte@123",
+                "confirmar_senha": "SenhaForte@123",
             },
         )
 
@@ -491,6 +507,12 @@ class EnterpriseBusinessFlowTests(TestCase):
         self.assertFalse(
             SolicitacaoCadastro.objects.filter(
                 nome="Profissional Sem Especialidade"
+            ).exists()
+        )
+
+        self.assertFalse(
+            get_user_model().objects.filter(
+                username="profissional.sem@example.com"
             ).exists()
         )
 
@@ -541,6 +563,62 @@ class EnterpriseBusinessFlowTests(TestCase):
                 nome_fantasia="Empresa Aprovacao",
                 cidade=self.cidade,
             ).exists()
+        )
+
+    def test_aprovacao_vincula_e_ativa_usuario_da_solicitacao(self):
+        User = get_user_model()
+
+        usuario = User.objects.create_user(
+            username="cliente.aprovacao@example.com",
+            email="cliente.aprovacao@example.com",
+            password="SenhaForte@123",
+            is_active=False,
+        )
+
+        solicitacao = SolicitacaoCadastro.objects.create(
+            plano=self.plano,
+            tipo=SolicitacaoCadastro.TIPO_EMPRESA,
+            nome="Empresa Com Acesso",
+            responsavel="Cliente Aprovacao",
+            cidade=self.cidade,
+            categoria=self.categoria,
+            descricao="Descricao valida da empresa com acesso.",
+            whatsapp="37911112222",
+            email="cliente.aprovacao@example.com",
+            status=SolicitacaoCadastro.STATUS_PENDENTE,
+        )
+
+        self.client.force_login(
+            self.staff
+        )
+
+        response = self.client.post(
+            reverse(
+                "administracao:aprovar_solicitacao",
+                kwargs={
+                    "solicitacao_id": solicitacao.pk,
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            302,
+        )
+
+        usuario.refresh_from_db()
+
+        empresa = Empresa.objects.get(
+            nome_fantasia="Empresa Com Acesso",
+        )
+
+        self.assertEqual(
+            empresa.usuario_id,
+            usuario.pk,
+        )
+
+        self.assertTrue(
+            usuario.is_active
         )
 
     def test_staff_recusa_solicitacao(self):
