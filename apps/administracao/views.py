@@ -815,64 +815,9 @@ def aprovar_solicitacao(request, solicitacao_id):
         )
 
     try:
-        if solicitacao.tipo == SolicitacaoCadastro.TIPO_EMPRESA:
-
-            if not solicitacao.categoria:
-                messages.error(
-                    request,
-                    "A solicitacao de empresa nao possui categoria.",
-                )
-                return redirect("administracao:solicitacoes")
-
-            limite_nome = Empresa._meta.get_field(
-                "nome_fantasia"
-            ).max_length
-            limite_bairro = Empresa._meta.get_field(
-                "bairro"
-            ).max_length
-
-            cadastro = Empresa(
-                usuario=usuario_solicitante,
-                cidade=solicitacao.cidade,
-                categoria=solicitacao.categoria,
-                nome_fantasia=(solicitacao.nome or "")[:limite_nome],
-                descricao=solicitacao.descricao,
-                endereco=solicitacao.endereco,
-                bairro=(solicitacao.bairro or "")[:limite_bairro],
-                telefone=solicitacao.telefone,
-                whatsapp=solicitacao.whatsapp,
-                email=solicitacao.email,
-                instagram=solicitacao.instagram,
-                site=solicitacao.site,
-                horario=solicitacao.horario,
-                ativa=True,
-            )
-
-        elif solicitacao.tipo == SolicitacaoCadastro.TIPO_PROFISSIONAL:
-            cadastro = Profissional(
-                usuario=usuario_solicitante,
-                cidade=solicitacao.cidade,
-                categoria=solicitacao.categoria,
-                nome=solicitacao.nome,
-                especialidade=solicitacao.especialidade,
-                descricao=solicitacao.descricao,
-                endereco=solicitacao.endereco,
-                bairro=solicitacao.bairro,
-                telefone=solicitacao.telefone,
-                whatsapp=solicitacao.whatsapp,
-                email=solicitacao.email,
-                instagram=solicitacao.instagram,
-                site=solicitacao.site,
-                horario=solicitacao.horario,
-                ativo=True,
-            )
-
-        else:
-            messages.error(request, "Tipo de solicitacao invalido.")
-            return redirect("administracao:solicitacoes")
-
-        cadastro.full_clean()
-        cadastro.save()
+        solicitacao.criar_cadastro(
+            usuario=usuario_solicitante,
+        )
 
         if usuario_solicitante and not usuario_solicitante.is_active:
             usuario_solicitante.is_active = True
@@ -882,12 +827,17 @@ def aprovar_solicitacao(request, solicitacao_id):
                 ]
             )
 
-    except ValidationError as erro:
-        detalhes = "; ".join(
-            mensagem
-            for mensagens in erro.message_dict.values()
-            for mensagem in mensagens
-        )
+    except (ValidationError, ValueError) as erro:
+
+        if isinstance(erro, ValidationError):
+            detalhes = "; ".join(
+                mensagem
+                for mensagens in erro.message_dict.values()
+                for mensagem in mensagens
+            )
+        else:
+            detalhes = str(erro)
+
         messages.error(
             request,
             "Nao foi possivel aprovar o cadastro: " + detalhes,
