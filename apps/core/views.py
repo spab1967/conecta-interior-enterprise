@@ -271,9 +271,15 @@ def _aplicar_plano_profissional(
 
 def service_worker(request):
     script = """
-const CACHE_NAME = "conecta-interior-static-v1";
+const CACHE_NAME = "conecta-interior-static-v2";
+const OFFLINE_URL = "/static/offline.html";
 
-self.addEventListener("install", () => {
+self.addEventListener("install", (event) => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => (
+            cache.add(OFFLINE_URL)
+        ))
+    );
     self.skipWaiting();
 });
 
@@ -295,8 +301,18 @@ self.addEventListener("fetch", (event) => {
     if (
         request.method !== "GET"
         || url.origin !== self.location.origin
-        || !url.pathname.startsWith("/static/")
     ) {
+        return;
+    }
+
+    if (request.mode === "navigate") {
+        event.respondWith(
+            fetch(request).catch(() => caches.match(OFFLINE_URL))
+        );
+        return;
+    }
+
+    if (!url.pathname.startsWith("/static/")) {
         return;
     }
 
