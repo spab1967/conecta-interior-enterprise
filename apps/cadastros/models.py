@@ -158,3 +158,70 @@ class SolicitacaoCadastro(models.Model):
             f"{self.nome} — "
             f"{self.cidade}"
         )
+
+    def criar_cadastro(self, usuario=None):
+
+        from apps.empresas.models import Empresa
+        from apps.profissionais.models import Profissional
+
+        if self.tipo == self.TIPO_EMPRESA:
+
+            if not self.categoria:
+                raise ValueError(
+                    "A solicitação de empresa não possui categoria."
+                )
+
+            limite_nome = Empresa._meta.get_field(
+                "nome_fantasia"
+            ).max_length
+
+            limite_bairro = Empresa._meta.get_field(
+                "bairro"
+            ).max_length
+
+            cadastro = Empresa(
+                usuario=usuario,
+                cidade=self.cidade,
+                categoria=self.categoria,
+                nome_fantasia=(self.nome or "")[:limite_nome],
+                descricao=self.descricao,
+                endereco=self.endereco,
+                bairro=(self.bairro or "")[:limite_bairro],
+                telefone=self.telefone,
+                whatsapp=self.whatsapp,
+                email=self.email,
+                instagram=self.instagram,
+                site=self.site,
+                horario=self.horario,
+                ativa=True,
+            )
+
+        elif self.tipo == self.TIPO_PROFISSIONAL:
+
+            cadastro = Profissional(
+                usuario=usuario,
+                cidade=self.cidade,
+                categoria=self.categoria,
+                nome=self.nome,
+                especialidade=self.especialidade,
+                descricao=self.descricao,
+                endereco=self.endereco,
+                bairro=self.bairro,
+                telefone=self.telefone,
+                whatsapp=self.whatsapp,
+                email=self.email,
+                instagram=self.instagram,
+                site=self.site,
+                horario=self.horario,
+                ativo=True,
+            )
+
+        else:
+            raise ValueError(
+                "Tipo de solicitação inválido."
+            )
+
+        cadastro.full_clean()
+        cadastro.save()
+
+        return cadastro
