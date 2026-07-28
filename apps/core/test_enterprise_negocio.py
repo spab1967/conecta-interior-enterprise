@@ -29,6 +29,7 @@ class EnterpriseBusinessFlowTests(TestCase):
 
         cls.cliente = User.objects.create_user(
             username="cliente_negocio",
+            email="cliente.negocio@example.com",
             password="Teste@123",
         )
 
@@ -1274,4 +1275,3 @@ class EnterpriseBusinessFlowTests(TestCase):
             pedido.status,
             PedidoFinanceiro.STATUS_PENDENTE,
         )
-
