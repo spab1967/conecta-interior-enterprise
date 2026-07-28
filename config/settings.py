@@ -1,6 +1,8 @@
 from pathlib import Path
 import os
 
+from django.core.exceptions import ImproperlyConfigured
+
 import dj_database_url
 from dotenv import load_dotenv
 
@@ -23,6 +25,16 @@ DEBUG = os.getenv(
     "DEBUG",
     "True",
 ).lower() == "true"
+
+
+if (
+    not DEBUG
+    and SECRET_KEY
+    == "desenvolvimento-conecta-interior-chave-local-segura-2026"
+):
+    raise ImproperlyConfigured(
+        "A SECRET_KEY deve ser definida por variável de ambiente em produção."
+    )
 
 
 ALLOWED_HOSTS = [
@@ -175,6 +187,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+# Novas senhas usam Argon2. Hashes PBKDF2 existentes continuam válidos e
+# são migrados automaticamente após um login bem-sucedido.
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+]
+
+
 # ============================================================
 # INTERNACIONALIZACAO
 # ============================================================
@@ -299,6 +320,25 @@ if USE_X_FORWARDED_PROTO:
     )
 
 
+# Endurecimento de cookies, sessão e cabeçalhos de navegador.
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_AGE = int(
+    os.getenv(
+        "SESSION_COOKIE_AGE",
+        "43200",
+    )
+)
+SESSION_SAVE_EVERY_REQUEST = False
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+X_FRAME_OPTIONS = "DENY"
+
+
 # ============================================================
 # CSRF
 # ============================================================
@@ -384,3 +424,30 @@ MERCADO_PAGO_ATIVO = bool(
     and MERCADO_PAGO_WEBHOOK_SECRET
 )
 
+
+
+# ============================================================
+# LOGS DE SEGURANCA
+# ============================================================
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django.security": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "apps.financeiro": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
