@@ -237,9 +237,27 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 
+CLOUDINARY_CONFIGURADO = bool(
+    os.getenv("CLOUDINARY_URL")
+    or (
+        os.getenv("CLOUDINARY_CLOUD_NAME")
+        and os.getenv("CLOUDINARY_API_KEY")
+        and os.getenv("CLOUDINARY_API_SECRET")
+    )
+)
+
+if not DEBUG and not CLOUDINARY_CONFIGURADO:
+    raise ImproperlyConfigured(
+        "Configure CLOUDINARY_URL para armazenar arquivos de mídia em produção."
+    )
+
 STORAGES = {
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            if CLOUDINARY_CONFIGURADO
+            else "django.core.files.storage.FileSystemStorage"
+        ),
     },
     "staticfiles": {
         "BACKEND": (
