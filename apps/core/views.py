@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.db.models import (
@@ -267,6 +267,66 @@ def _aplicar_plano_profissional(
         profissional.prioridade_comercial = 1
 
     return profissional
+
+
+def service_worker(request):
+    script = """
+const CACHE_NAME = "conecta-interior-static-v1";
+
+self.addEventListener("install", () => {
+    self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+    event.waitUntil(
+        caches.keys().then((keys) => Promise.all(
+            keys
+                .filter((key) => key !== CACHE_NAME)
+                .map((key) => caches.delete(key))
+        ))
+    );
+    self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+    const request = event.request;
+    const url = new URL(request.url);
+
+    if (
+        request.method !== "GET"
+        || url.origin !== self.location.origin
+        || !url.pathname.startsWith("/static/")
+    ) {
+        return;
+    }
+
+    event.respondWith(
+        caches.match(request).then((cached) => {
+            if (cached) {
+                return cached;
+            }
+
+            return fetch(request).then((response) => {
+                if (response.ok) {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(request, copy);
+                    });
+                }
+                return response;
+            });
+        })
+    );
+});
+""".strip()
+
+    response = HttpResponse(
+        script,
+        content_type="application/javascript; charset=utf-8",
+    )
+    response["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response["Service-Worker-Allowed"] = "/"
+    return response
 
 
 def home(request):
