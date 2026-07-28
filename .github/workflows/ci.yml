@@ -1,0 +1,60 @@
+name: Validacao Enterprise
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: enterprise-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validar:
+    name: Seguranca e testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      DEBUG: "True"
+      SECRET_KEY: "chave-exclusiva-do-ambiente-de-testes-automatizados"
+      ALLOWED_HOSTS: "localhost,127.0.0.1"
+
+    steps:
+      - name: Baixar codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -r requirements-render.txt
+          python -m pip install pip-audit
+          python -m pip check
+
+      - name: Auditar vulnerabilidades
+        run: |
+          python -m pip_audit \
+            -r requirements.txt \
+            -r requirements-render.txt
+
+      - name: Verificar configuracao
+        run: python manage.py check
+
+      - name: Preparar arquivos estaticos
+        run: python manage.py collectstatic --noinput
+
+      - name: Executar testes
+        run: python manage.py test
