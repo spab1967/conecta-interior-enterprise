@@ -84,17 +84,41 @@ Anuncie | Conecta Interior
 
             <div class="card-body p-4 p-lg-5">
 
-                {% if form.non_field_errors %}
+                {% if form.errors %}
 
                     <div class="alert alert-danger">
 
-                        {% for erro in form.non_field_errors %}
+                        <strong>
+                            Não foi possível concluir o cadastro.
+                        </strong>
 
-                            <div>
-                                {{ erro }}
-                            </div>
+                        <p class="mb-2 mt-2">
+                            Corrija os campos abaixo. Por segurança,
+                            digite novamente a senha e a confirmação.
+                        </p>
 
-                        {% endfor %}
+                        <ul class="mb-0">
+
+                            {% for campo in form %}
+
+                                {% for erro in campo.errors %}
+
+                                    <li>
+                                        <strong>{{ campo.label }}:</strong>
+                                        {{ erro }}
+                                    </li>
+
+                                {% endfor %}
+
+                            {% endfor %}
+
+                            {% for erro in form.non_field_errors %}
+
+                                <li>{{ erro }}</li>
+
+                            {% endfor %}
+
+                        </ul>
 
                     </div>
 
@@ -538,6 +562,12 @@ Anuncie | Conecta Interior
                             </label>
 
                             {{ form.senha }}
+
+                            <div class="form-text">
+                                Use pelo menos 8 caracteres. Evite
+                                senhas somente numéricas, muito comuns
+                                ou semelhantes ao seu e-mail.
+                            </div>
 
                             {% for erro in form.senha.errors %}
 
