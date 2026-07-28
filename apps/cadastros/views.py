@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.db import transaction
+from django_ratelimit.decorators import ratelimit
 from django.shortcuts import (
     redirect,
     render,
@@ -11,6 +12,12 @@ from apps.planos.models import Plano
 from .forms import SolicitacaoCadastroForm
 
 
+@ratelimit(
+    key="ip",
+    rate="10/h",
+    method="POST",
+    block=True,
+)
 @transaction.atomic
 def anuncie(request):
 
