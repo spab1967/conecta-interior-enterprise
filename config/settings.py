@@ -367,3 +367,19 @@ CONECTA_PIX_BANCO = os.getenv(
     "CONECTA_PIX_BANCO",
     "",
 )
+
+# Mercado Pago — credenciais mantidas exclusivamente no ambiente.
+MERCADO_PAGO_ACCESS_TOKEN = os.getenv(
+    "MERCADO_PAGO_ACCESS_TOKEN",
+    "",
+)
+
+MERCADO_PAGO_WEBHOOK_SECRET = os.getenv(
+    "MERCADO_PAGO_WEBHOOK_SECRET",
+    "",
+)
+
+MERCADO_PAGO_ATIVO = bool(
+    MERCADO_PAGO_ACCESS_TOKEN
+)
+
