@@ -1,4 +1,7 @@
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 from apps.categorias.models import Categoria
 from apps.cidades.models import Cidade
@@ -8,6 +11,30 @@ from .models import SolicitacaoCadastro
 
 
 class SolicitacaoCadastroForm(forms.ModelForm):
+
+    senha = forms.CharField(
+        label="Senha",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "autocomplete": "new-password",
+                "placeholder": "Crie uma senha segura",
+            }
+        ),
+    )
+
+    confirmar_senha = forms.CharField(
+        label="Confirmar senha",
+        strip=False,
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "autocomplete": "new-password",
+                "placeholder": "Digite novamente a senha",
+            }
+        ),
+    )
 
     class Meta:
 
@@ -207,7 +234,7 @@ class SolicitacaoCadastroForm(forms.ModelForm):
         self.fields["endereco"].required = False
         self.fields["bairro"].required = False
         self.fields["telefone"].required = False
-        self.fields["email"].required = False
+        self.fields["email"].required = True
         self.fields["instagram"].required = False
         self.fields["site"].required = False
         self.fields["horario"].required = False
@@ -217,6 +244,38 @@ class SolicitacaoCadastroForm(forms.ModelForm):
             self.fields["plano"].initial = (
                 plano_inicial
             )
+
+    def clean_email(self):
+
+        email = (
+            self.cleaned_data.get("email")
+            or ""
+        ).strip().lower()
+
+        User = get_user_model()
+
+        limite_usuario = User._meta.get_field(
+            User.USERNAME_FIELD
+        ).max_length
+
+        if limite_usuario and len(email) > limite_usuario:
+            raise forms.ValidationError(
+                "O e-mail é muito longo para ser utilizado como acesso."
+            )
+
+        if User.objects.filter(
+            username__iexact=email
+        ).exists() or User.objects.filter(
+            email__iexact=email
+        ).exists():
+            raise forms.ValidationError(
+                (
+                    "Este e-mail já possui acesso cadastrado. "
+                    "Utilize a página de entrada ou outro e-mail."
+                )
+            )
+
+        return email
 
     def clean(self):
 
@@ -232,6 +291,14 @@ class SolicitacaoCadastroForm(forms.ModelForm):
 
         plano = cleaned_data.get(
             "plano"
+        )
+
+        senha = cleaned_data.get(
+            "senha"
+        )
+
+        confirmar_senha = cleaned_data.get(
+            "confirmar_senha"
         )
 
         if (
@@ -251,5 +318,32 @@ class SolicitacaoCadastroForm(forms.ModelForm):
                 "plano",
                 "Este plano não está disponível.",
             )
+
+        if senha and confirmar_senha and senha != confirmar_senha:
+
+            self.add_error(
+                "confirmar_senha",
+                "As senhas informadas não são iguais.",
+            )
+
+        if senha:
+
+            User = get_user_model()
+
+            usuario_temporario = User(
+                username=cleaned_data.get("email", ""),
+                email=cleaned_data.get("email", ""),
+            )
+
+            try:
+                validate_password(
+                    senha,
+                    user=usuario_temporario,
+                )
+            except ValidationError as erro:
+                self.add_error(
+                    "senha",
+                    erro,
+                )
 
         return cleaned_data
