@@ -115,6 +115,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.csp",
             ],
         },
     },
@@ -357,9 +358,10 @@ SECURE_CSP = {
     "form-action": [CSP.SELF],
     "script-src": [
         CSP.SELF,
-        CSP.UNSAFE_INLINE,
+        CSP.NONCE,
         "https://cdn.jsdelivr.net",
     ],
+    "script-src-attr": [CSP.NONE],
     "style-src": [
         CSP.SELF,
         CSP.UNSAFE_INLINE,
