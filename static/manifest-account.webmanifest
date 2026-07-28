@@ -1,14 +1,14 @@
 {
-  "id": "/",
-  "name": "ConectaInterior",
-  "short_name": "ConectaInterior",
-  "description": "Encontre empresas, profissionais e serviços do interior.",
+  "id": "/minha-conta/",
+  "name": "ConectaInterior Minha Conta",
+  "short_name": "Minha Conta",
+  "description": "Administre sua página, seus planos e pagamentos no ConectaInterior.",
   "lang": "pt-BR",
-  "start_url": "/",
+  "start_url": "/minha-conta/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#0d6efd",
+  "theme_color": "#198754",
   "icons": [
     {
       "src": "/static/img/conecta-interior-logo.png",
