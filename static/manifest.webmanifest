@@ -16,5 +16,25 @@
       "type": "image/png",
       "purpose": "any"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Minha Conta",
+      "short_name": "Minha Conta",
+      "description": "Acesse sua área de cliente.",
+      "url": "/minha-conta/"
+    },
+    {
+      "name": "Planos",
+      "short_name": "Planos",
+      "description": "Consulte os planos disponíveis.",
+      "url": "/planos/"
+    },
+    {
+      "name": "Anunciar",
+      "short_name": "Anunciar",
+      "description": "Cadastre sua empresa ou perfil profissional.",
+      "url": "/cadastros/"
+    }
   ]
 }
