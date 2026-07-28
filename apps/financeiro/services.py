@@ -16,63 +16,226 @@ from .models import Pagamento, PedidoFinanceiro
 
 
 class MercadoPagoErro(Exception):
-    pass
+    """Falha segura na comunicação com o processador."""
+
 
 def mercado_pago_ativo():
-    return bool(getattr(settings, "MERCADO_PAGO_ACCESS_TOKEN", ""))
+    return bool(
+        getattr(
+            settings,
+            "MERCADO_PAGO_ACCESS_TOKEN",
+            "",
+        )
+        and getattr(
+            settings,
+            "MERCADO_PAGO_WEBHOOK_SECRET",
+            "",
+        )
+    )
+
 
 def _mercado_pago_sdk():
-    token = getattr(settings, "MERCADO_PAGO_ACCESS_TOKEN", "")
+    token = getattr(
+        settings,
+        "MERCADO_PAGO_ACCESS_TOKEN",
+        "",
+    )
+
     if not token:
-        raise MercadoPagoErro("A integração do Mercado Pago ainda não foi configurada.")
+        raise MercadoPagoErro(
+            "A integração do Mercado Pago ainda não foi configurada."
+        )
+
     return mercadopago.SDK(token)
 
-def _normalizar_retorno_mercado_pago(resultado):
-    codigo_http = resultado.get("status")
-    resposta = resultado.get("response") or {}
-    if codigo_http not in (200, 201):
-        mensagem = resposta.get("message") or resposta.get("error") or "Não foi possível gerar o pagamento PIX."
-        raise MercadoPagoErro(str(mensagem))
+
+def _normalizar_retorno_mercado_pago(
+    resultado,
+):
+    codigo_http = resultado.get(
+        "status"
+    )
+
+    resposta = (
+        resultado.get("response")
+        or {}
+    )
+
+    if codigo_http not in (
+        200,
+        201,
+    ):
+        mensagem = (
+            resposta.get("message")
+            or resposta.get("error")
+            or (
+                "Não foi possível gerar "
+                "o pagamento PIX."
+            )
+        )
+
+        raise MercadoPagoErro(
+            str(mensagem)
+        )
+
     return resposta
 
-def consultar_pagamento_mercado_pago(codigo_transacao):
-    resultado = _mercado_pago_sdk().payment().get(str(codigo_transacao))
-    return _normalizar_retorno_mercado_pago(resultado)
 
-def criar_ou_obter_pix_mercado_pago(pagamento, email_pagador):
+def consultar_pagamento_mercado_pago(
+    codigo_transacao,
+):
+    resultado = (
+        _mercado_pago_sdk()
+        .payment()
+        .get(
+            str(codigo_transacao)
+        )
+    )
+
+    return (
+        _normalizar_retorno_mercado_pago(
+            resultado
+        )
+    )
+
+
+def criar_ou_obter_pix_mercado_pago(
+    pagamento,
+    email_pagador,
+):
     if pagamento.codigo_transacao:
-        return consultar_pagamento_mercado_pago(pagamento.codigo_transacao)
+        return (
+            consultar_pagamento_mercado_pago(
+                pagamento.codigo_transacao
+            )
+        )
+
     pedido = pagamento.pedido
-    chave = str(uuid5(NAMESPACE_URL, f"conecta-interior:pagamento:{pagamento.pk}"))
+
+    chave = str(
+        uuid5(
+            NAMESPACE_URL,
+            (
+                "conecta-interior:"
+                f"pagamento:{pagamento.pk}"
+            ),
+        )
+    )
+
     opcoes = RequestOptions()
-    opcoes.custom_headers = {"x-idempotency-key": chave}
-    dados = {
-        "transaction_amount": float(Decimal(pedido.valor)),
-        "description": f"ConectaInterior — Plano {pedido.plano.nome}"[:255],
-        "payment_method_id": "pix",
-        "external_reference": str(pedido.pk),
-        "payer": {"email": email_pagador},
-        "metadata": {"pedido_financeiro_id": pedido.pk, "pagamento_local_id": pagamento.pk},
+
+    opcoes.custom_headers = {
+        "x-idempotency-key": chave,
     }
-    resultado = _mercado_pago_sdk().payment().create(dados, opcoes)
-    resposta = _normalizar_retorno_mercado_pago(resultado)
+
+    dados = {
+        "transaction_amount": float(
+            Decimal(pedido.valor)
+        ),
+        "description": (
+            f"ConectaInterior — Plano "
+            f"{pedido.plano.nome}"
+        )[:255],
+        "payment_method_id": "pix",
+        "external_reference": str(
+            pedido.pk
+        ),
+        "payer": {
+            "email": email_pagador,
+        },
+        "metadata": {
+            "pedido_financeiro_id":
+                pedido.pk,
+            "pagamento_local_id":
+                pagamento.pk,
+        },
+    }
+
+    resultado = (
+        _mercado_pago_sdk()
+        .payment()
+        .create(
+            dados,
+            opcoes,
+        )
+    )
+
+    resposta = (
+        _normalizar_retorno_mercado_pago(
+            resultado
+        )
+    )
+
     codigo = resposta.get("id")
+
     if not codigo:
-        raise MercadoPagoErro("O Mercado Pago não retornou o identificador da cobrança.")
-    pagamento.codigo_transacao = str(codigo)
-    pagamento.save(update_fields=["codigo_transacao", "atualizado_em"])
+        raise MercadoPagoErro(
+            "O Mercado Pago não retornou "
+            "o identificador da cobrança."
+        )
+
+    pagamento.codigo_transacao = str(
+        codigo
+    )
+
+    pagamento.save(
+        update_fields=[
+            "codigo_transacao",
+            "atualizado_em",
+        ]
+    )
+
     return resposta
 
-def dados_pix_mercado_pago(resposta):
-    transacao = resposta.get("point_of_interaction", {}).get("transaction_data", {})
+
+def dados_pix_mercado_pago(
+    resposta,
+):
+    transacao = (
+        resposta
+        .get(
+            "point_of_interaction",
+            {},
+        )
+        .get(
+            "transaction_data",
+            {},
+        )
+    )
+
     return {
-        "codigo_transacao": str(resposta.get("id") or ""),
-        "status": resposta.get("status", ""),
-        "status_detalhado": resposta.get("status_detail", ""),
-        "qr_code": transacao.get("qr_code", ""),
-        "qr_code_base64": transacao.get("qr_code_base64", ""),
-        "ticket_url": transacao.get("ticket_url", ""),
+        "codigo_transacao":
+            str(
+                resposta.get("id")
+                or ""
+            ),
+        "status":
+            resposta.get(
+                "status",
+                "",
+            ),
+        "status_detalhado":
+            resposta.get(
+                "status_detail",
+                "",
+            ),
+        "qr_code":
+            transacao.get(
+                "qr_code",
+                "",
+            ),
+        "qr_code_base64":
+            transacao.get(
+                "qr_code_base64",
+                "",
+            ),
+        "ticket_url":
+            transacao.get(
+                "ticket_url",
+                "",
+            ),
     }
+
 
 def _assinatura_futura_equivalente(
     assinatura_origem,
