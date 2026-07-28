@@ -15,8 +15,10 @@
         {% endblock %}
     </title>
 
+    {% block app_manifest %}
     <link rel="manifest"
           href="{% static 'manifest.webmanifest' %}">
+    {% endblock %}
 
     <link rel="apple-touch-icon"
           href="{% static 'img/conecta-interior-logo.png' %}">
