@@ -1,7 +1,9 @@
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.db import OperationalError
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -64,6 +66,29 @@ class EnterpriseCriticalFlowTests(TestCase):
         self.client.force_login(self.usuario)
         response = self.client.get(reverse("administracao:dashboard"))
         self.assertIn(response.status_code, (302, 403))
+
+    def test_health_confirma_aplicacao_e_banco(self):
+        response = self.client.get(reverse("core:health"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ok"})
+        self.assertEqual(response["Cache-Control"], "no-store")
+
+    @patch(
+        "apps.core.views.connection.ensure_connection",
+        side_effect=OperationalError,
+    )
+    def test_health_retorna_503_quando_banco_falha(
+        self,
+        ensure_connection,
+    ):
+        response = self.client.get(reverse("core:health"))
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(
+            response.json(),
+            {"status": "indisponivel"},
+        )
 
     def test_admin_enterprise_staff_acessa(self):
         self.client.force_login(self.staff)
