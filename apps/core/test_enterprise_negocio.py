@@ -1065,6 +1065,7 @@ class EnterpriseBusinessFlowTests(TestCase):
 
     @override_settings(
         MERCADO_PAGO_ACCESS_TOKEN="TEST-ACCESS-TOKEN",
+        MERCADO_PAGO_WEBHOOK_SECRET="TEST-WEBHOOK-SECRET",
         MERCADO_PAGO_ATIVO=True,
     )
     @patch(
