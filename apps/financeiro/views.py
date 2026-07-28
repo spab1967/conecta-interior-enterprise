@@ -1,8 +1,22 @@
+import json
+import logging
+from decimal import Decimal, InvalidOperation
+
+from mercadopago.webhook import (
+    InvalidWebhookSignatureError,
+    WebhookSignatureValidator,
+)
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.db.models import Q
-from django.http import Http404
+from django.http import (
+    Http404,
+    HttpResponse,
+)
+from django.views.decorators.csrf import csrf_exempt
+
 from django.shortcuts import (
     get_object_or_404,
     redirect,
@@ -13,6 +27,17 @@ from .models import (
     Pagamento,
     PedidoFinanceiro,
 )
+from .services import (
+    MercadoPagoErro,
+    aprovar_pagamento,
+    criar_ou_obter_pix_mercado_pago,
+    dados_pix_mercado_pago,
+    consultar_pagamento_mercado_pago,
+    mercado_pago_ativo,
+)
+
+
+logger = logging.getLogger(__name__)
 
 
 def _pedido_pertence_ao_usuario(
@@ -70,7 +95,87 @@ def pagamento(
         )
     )
 
-    dados_pix = {
+    integracao_ativa = mercado_pago_ativo()
+    pix_mercado_pago = None
+    erro_mercado_pago = ""
+
+    if integracao_ativa:
+
+        email_pagador = (
+            request.user.email
+            or request.user.username
+        )
+
+        if "@" not in email_pagador:
+            erro_mercado_pago = (
+                "Sua conta precisa possuir um e-mail válido "
+                "para gerar o pagamento PIX."
+            )
+
+        else:
+
+            try:
+
+                resposta = (
+                    criar_ou_obter_pix_mercado_pago(
+                        pagamento_obj,
+                        email_pagador,
+                    )
+                )
+
+                if resposta.get("status") == "approved":
+
+                    aprovar_pagamento(
+                        pagamento_obj
+                    )
+
+                    messages.success(
+                        request,
+                        (
+                            "Pagamento confirmado. "
+                            "Seu plano já está ativo."
+                        ),
+                    )
+
+                    return redirect(
+                        "core:minha_conta"
+                    )
+
+                pix_mercado_pago = (
+                    dados_pix_mercado_pago(
+                        resposta
+                    )
+                )
+
+                if (
+                    not pix_mercado_pago["qr_code"]
+                    and not pix_mercado_pago["ticket_url"]
+                ):
+                    erro_mercado_pago = (
+                        "O PIX foi criado, mas o QR Code "
+                        "ainda não está disponível. "
+                        "Atualize a página em instantes."
+                    )
+
+            except MercadoPagoErro as erro:
+
+                erro_mercado_pago = str(
+                    erro
+                )
+
+            except Exception:
+
+                logger.exception(
+                    "Falha inesperada ao gerar PIX "
+                    "no Mercado Pago."
+                )
+
+                erro_mercado_pago = (
+                    "O Mercado Pago está temporariamente "
+                    "indisponível. Tente novamente em instantes."
+                )
+
+    dados_pix_manual = {
         "favorecido": getattr(
             settings,
             "CONECTA_PIX_FAVORECIDO",
@@ -94,10 +199,194 @@ def pagamento(
         {
             "pedido": pedido,
             "pagamento": pagamento_obj,
-            "dados_pix": dados_pix,
+            "dados_pix": dados_pix_manual,
+            "mercado_pago_ativo":
+                integracao_ativa,
+            "pix_mercado_pago":
+                pix_mercado_pago,
+            "erro_mercado_pago":
+                erro_mercado_pago,
         },
     )
 
+@csrf_exempt
+def webhook_mercado_pago(request):
+
+    if request.method != "POST":
+        return HttpResponse(
+            status=405
+        )
+
+    segredo = getattr(
+        settings,
+        "MERCADO_PAGO_WEBHOOK_SECRET",
+        "",
+    )
+
+    if not segredo:
+        return HttpResponse(
+            status=503
+        )
+
+    try:
+        corpo = json.loads(
+            request.body or b"{}"
+        )
+    except json.JSONDecodeError:
+        return HttpResponse(
+            status=400
+        )
+
+    tipo = (
+        request.GET.get("type")
+        or corpo.get("type")
+    )
+
+    dados = corpo.get("data") or {}
+
+    codigo = (
+        request.GET.get("data.id")
+        or dados.get("id")
+    )
+
+    if (
+        tipo != "payment"
+        or not codigo
+    ):
+        return HttpResponse(
+            status=200
+        )
+
+    try:
+
+        WebhookSignatureValidator.validate(
+            request.headers.get(
+                "x-signature"
+            ),
+            request.headers.get(
+                "x-request-id"
+            ),
+            request.GET.get(
+                "data.id"
+            ),
+            segredo,
+        )
+
+    except (
+        InvalidWebhookSignatureError,
+        TypeError,
+        ValueError,
+    ):
+
+        return HttpResponse(
+            status=401
+        )
+
+    try:
+
+        resposta = (
+            consultar_pagamento_mercado_pago(
+                codigo
+            )
+        )
+
+    except Exception:
+
+        logger.exception(
+            "Falha ao consultar pagamento "
+            "notificado pelo Mercado Pago."
+        )
+
+        return HttpResponse(
+            status=503
+        )
+
+    pagamento_obj = (
+        Pagamento.objects
+        .select_related(
+            "pedido",
+        )
+        .filter(
+            codigo_transacao=str(
+                codigo
+            ),
+            status=Pagamento.STATUS_PENDENTE,
+        )
+        .first()
+    )
+
+    if not pagamento_obj:
+        return HttpResponse(
+            status=200
+        )
+
+    pedido = pagamento_obj.pedido
+
+    try:
+        valor_recebido = Decimal(
+            str(
+                resposta.get(
+                    "transaction_amount"
+                )
+            )
+        ).quantize(
+            Decimal("0.01")
+        )
+    except (
+        InvalidOperation,
+        TypeError,
+    ):
+        return HttpResponse(
+            status=400
+        )
+
+    referencia_valida = (
+        str(
+            resposta.get(
+                "external_reference"
+            )
+        )
+        == str(pedido.pk)
+    )
+
+    valor_valido = (
+        valor_recebido
+        == pedido.valor.quantize(
+            Decimal("0.01")
+        )
+    )
+
+    meio_valido = (
+        resposta.get(
+            "payment_method_id"
+        )
+        == "pix"
+    )
+
+    if not (
+        referencia_valida
+        and valor_valido
+        and meio_valido
+    ):
+        logger.warning(
+            "Webhook Mercado Pago rejeitado "
+            "por divergência no pedido %s.",
+            pedido.pk,
+        )
+
+        return HttpResponse(
+            status=400
+        )
+
+    if resposta.get("status") == "approved":
+
+        aprovar_pagamento(
+            pagamento_obj
+        )
+
+    return HttpResponse(
+        status=200
+    )
 
 @login_required
 def confirmar_pagamento(
