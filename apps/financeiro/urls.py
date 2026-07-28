@@ -17,6 +17,12 @@ urlpatterns = [
         views.confirmar_pagamento,
         name="confirmar",
     ),
+    path(
+        "mercado-pago/webhook/",
+        views.webhook_mercado_pago,
+        name="webhook_mercado_pago",
+    ),
+
    path(
         "historico/",
         views.historico,
