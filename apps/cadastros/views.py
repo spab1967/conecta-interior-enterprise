@@ -1,3 +1,5 @@
+from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.shortcuts import (
     redirect,
     render,
@@ -8,6 +10,7 @@ from apps.planos.models import Plano
 from .forms import SolicitacaoCadastroForm
 
 
+@transaction.atomic
 def anuncie(request):
 
     plano_inicial = None
@@ -42,6 +45,23 @@ def anuncie(request):
             solicitacao.status = "pendente"
 
             solicitacao.save()
+
+            User = get_user_model()
+
+            limite_primeiro_nome = User._meta.get_field(
+                "first_name"
+            ).max_length
+
+            User.objects.create_user(
+                username=solicitacao.email,
+                email=solicitacao.email,
+                password=form.cleaned_data["senha"],
+                first_name=(
+                    solicitacao.responsavel
+                    or solicitacao.nome
+                )[:limite_primeiro_nome],
+                is_active=False,
+            )
 
             request.session[
                 "ultima_solicitacao_cadastro"
