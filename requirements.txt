@@ -4,3 +4,4 @@ Pillow>=11.3
 
 cloudinary>=1.44.1
 django-cloudinary-storage>=0.3.0
+mercadopago==3.3.1
