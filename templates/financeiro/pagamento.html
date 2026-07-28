@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-Pagamento via PIX | Conecta Interior
+Pagamento PIX | Conecta Interior
 {% endblock %}
 
 {% block content %}
@@ -12,250 +12,235 @@ Pagamento via PIX | Conecta Interior
 
         <div class="col-lg-8">
 
-            <div class="card shadow-sm border-0">
+            <div class="d-flex justify-content-between align-items-center mb-4">
 
-                <div class="card-body p-4 p-md-5">
+                <div>
+                    <h1 class="h2 fw-bold mb-1">
+                        Pagamento do plano
+                    </h1>
 
-                    <div class="text-center mb-4">
+                    <p class="text-muted mb-0">
+                        {{ pedido.titular }} — Plano {{ pedido.plano.nome }}
+                    </p>
+                </div>
 
-                        <h1 class="h2 fw-bold">
-                            Pagamento via PIX
-                        </h1>
+                <a
+                    href="{% url 'core:minha_conta' %}"
+                    class="btn btn-outline-secondary"
+                >
+                    Minha Conta
+                </a>
 
-                        <p class="text-muted mb-0">
-                            Efetue o pagamento e envie o comprovante
-                            para conferência.
-                        </p>
+            </div>
 
-                    </div>
+            <div class="card border-0 shadow-sm">
 
-                    {% if messages %}
+                <div class="card-body p-4 p-lg-5">
 
-                        {% for message in messages %}
+                    <div class="row g-4 align-items-start">
 
-                            <div
-                                class="alert alert-{{ message.tags|default:'info' }}"
-                            >
-                                {{ message }}
-                            </div>
+                        <div class="col-md-5">
 
-                        {% endfor %}
+                            <div class="border rounded p-4 bg-light">
 
-                    {% endif %}
+                                <div class="text-muted mb-1">
+                                    Valor
+                                </div>
 
-                    <div class="border rounded p-4 mb-4">
+                                <div class="display-6 fw-bold text-primary">
+                                    R$ {{ pedido.valor|floatformat:2 }}
+                                </div>
 
-                        <h2 class="h5 fw-bold mb-4">
-                            Dados do pedido
-                        </h2>
+                                <hr>
 
-                        <div class="row mb-3">
+                                <div class="small text-muted">
+                                    Pedido #{{ pedido.pk }}
+                                </div>
 
-                            <div class="col-5 text-muted">
-                                Pedido
-                            </div>
-
-                            <div class="col-7 text-end fw-semibold">
-                                #{{ pedido.id }}
-                            </div>
-
-                        </div>
-
-                        <div class="row mb-3">
-
-                            <div class="col-5 text-muted">
-                                Titular
-                            </div>
-
-                            <div class="col-7 text-end fw-semibold">
-                                {{ pedido.titular }}
-                            </div>
-
-                        </div>
-
-                        <div class="row mb-3">
-
-                            <div class="col-5 text-muted">
-                                Plano
-                            </div>
-
-                            <div class="col-7 text-end fw-semibold">
-                                {{ pedido.plano.nome }}
-                            </div>
-
-                        </div>
-
-                        <hr>
-
-                        <div class="row align-items-center">
-
-                            <div class="col-5 fw-bold">
-                                Valor
-                            </div>
-
-                            <div class="col-7 text-end">
-
-                                <span class="h3 fw-bold mb-0">
-                                    R$ {{ pedido.valor }}
-                                </span>
+                                <div class="small text-muted">
+                                    Pagamento protegido pelo Mercado Pago
+                                </div>
 
                             </div>
 
                         </div>
 
-                    </div>
+                        <div class="col-md-7">
 
-                    <div class="border rounded p-4 mb-4 bg-light">
+                            {% if mercado_pago_ativo %}
 
-                        <h2 class="h5 fw-bold mb-4">
-                            Dados para pagamento
-                        </h2>
+                                <h2 class="h4 fw-bold mb-3">
+                                    Pague com PIX
+                                </h2>
 
-                        {% if dados_pix.chave %}
+                                {% if erro_mercado_pago %}
 
-                            <div class="row mb-3">
+                                    <div class="alert alert-warning">
+                                        {{ erro_mercado_pago }}
+                                    </div>
 
-                                <div class="col-md-4 text-muted">
-                                    Favorecido
-                                </div>
+                                    <a
+                                        href="{% url 'financeiro:pagamento' pedido.pk %}"
+                                        class="btn btn-primary"
+                                    >
+                                        Tentar novamente
+                                    </a>
 
-                                <div class="col-md-8 fw-semibold">
-                                    {{ dados_pix.favorecido }}
-                                </div>
+                                {% elif pix_mercado_pago %}
 
-                            </div>
+                                    <p class="text-muted">
+                                        Escaneie o QR Code com o aplicativo
+                                        do seu banco. O plano será ativado
+                                        automaticamente após a confirmação.
+                                    </p>
 
-                            <div class="row mb-3">
+                                    {% if pix_mercado_pago.qr_code_base64 %}
 
-                                <div class="col-md-4 text-muted">
-                                    Instituição
-                                </div>
+                                        <div class="text-center mb-4">
 
-                                <div class="col-md-8 fw-semibold">
-                                    {{ dados_pix.banco }}
-                                </div>
+                                            <img
+                                                src="data:image/png;base64,{{ pix_mercado_pago.qr_code_base64 }}"
+                                                alt="QR Code PIX do Mercado Pago"
+                                                class="img-fluid border rounded p-2 bg-white"
+                                                style="max-width: 280px;"
+                                            >
 
-                            </div>
+                                        </div>
 
-                            <div class="row mb-3">
+                                    {% endif %}
 
-                                <div class="col-md-4 text-muted">
-                                    Chave PIX
-                                </div>
+                                    {% if pix_mercado_pago.qr_code %}
 
-                                <div class="col-md-8">
-
-                                    <div class="input-group">
-
-                                        <input
-                                            id="chavePix"
-                                            type="text"
-                                            class="form-control"
-                                            value="{{ dados_pix.chave }}"
-                                            readonly
+                                        <label
+                                            for="pix-copia-cola"
+                                            class="form-label fw-semibold"
                                         >
+                                            PIX Copia e Cola
+                                        </label>
+
+                                        <textarea
+                                            id="pix-copia-cola"
+                                            class="form-control"
+                                            rows="4"
+                                            readonly
+                                        >{{ pix_mercado_pago.qr_code }}</textarea>
 
                                         <button
                                             type="button"
-                                            class="btn btn-outline-primary"
-                                            onclick="copiarPix()"
+                                            class="btn btn-outline-primary w-100 mt-2"
+                                            onclick="copiarCodigoPix()"
                                         >
-                                            Copiar
+                                            Copiar código PIX
                                         </button>
 
+                                        <div
+                                            id="mensagem-copia"
+                                            class="small text-success mt-2"
+                                            aria-live="polite"
+                                        ></div>
+
+                                    {% endif %}
+
+                                    {% if pix_mercado_pago.ticket_url %}
+
+                                        <a
+                                            href="{{ pix_mercado_pago.ticket_url }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="btn btn-primary w-100 mt-3"
+                                        >
+                                            Abrir pagamento no Mercado Pago
+                                        </a>
+
+                                    {% endif %}
+
+                                    <div class="alert alert-info mt-4 mb-0">
+
+                                        <strong>
+                                            Aguardando pagamento
+                                        </strong>
+
+                                        <div class="small mt-1">
+                                            Depois de pagar, atualize esta página.
+                                            A confirmação também é recebida
+                                            automaticamente.
+                                        </div>
+
+                                    </div>
+
+                                    <a
+                                        href="{% url 'financeiro:pagamento' pedido.pk %}"
+                                        class="btn btn-success w-100 mt-3"
+                                    >
+                                        Já paguei — verificar agora
+                                    </a>
+
+                                {% endif %}
+
+                            {% else %}
+
+                                <div class="alert alert-info">
+
+                                    <strong>
+                                        Pagamento PIX
+                                    </strong>
+
+                                    <div class="small mt-1">
+                                        A integração automática está em fase
+                                        de configuração. Utilize temporariamente
+                                        os dados abaixo.
                                     </div>
 
                                 </div>
 
-                            </div>
-
-                            <div class="alert alert-warning mb-0">
-
-                                <strong>Importante:</strong>
-                                faça o PIX no valor exato de
-                                <strong>R$ {{ pedido.valor }}</strong>
-                                e envie o comprovante abaixo.
-
-                            </div>
-
-                        {% else %}
-
-                            <div class="alert alert-danger mb-0">
-
-                                Os dados PIX ainda não estão
-                                configurados. Entre em contato com
-                                a administração do Conecta Interior.
-
-                            </div>
-
-                        {% endif %}
-
-                    </div>
-
-                    {% if dados_pix.chave %}
-
-                        <div class="border rounded p-4 mb-4">
-
-                            <h2 class="h5 fw-bold mb-3">
-                                Enviar comprovante
-                            </h2>
-
-                            {% if pagamento.comprovante %}
-
-                                <div class="alert alert-success">
-
-                                    <strong>
-                                        Comprovante recebido.
-                                    </strong>
-
-                                    <br>
-
-                                    Seu pagamento está aguardando
-                                    conferência do administrador.
-
+                                <div class="mb-3">
+                                    <span class="text-muted">Favorecido:</span>
+                                    <strong>{{ dados_pix.favorecido|default:"Não informado" }}</strong>
                                 </div>
 
-                            {% else %}
+                                <div class="mb-3">
+                                    <span class="text-muted">Chave PIX:</span>
+                                    <strong>{{ dados_pix.chave|default:"Não informada" }}</strong>
+                                </div>
 
-                                <p class="text-muted">
-                                    Após realizar o PIX, envie o
-                                    comprovante em PDF ou imagem.
-                                    Tamanho máximo: 5 MB.
-                                </p>
+                                <div class="mb-4">
+                                    <span class="text-muted">Banco:</span>
+                                    <strong>{{ dados_pix.banco|default:"Não informado" }}</strong>
+                                </div>
 
                                 <form
                                     method="post"
                                     enctype="multipart/form-data"
-                                    action="{% url 'financeiro:confirmar' pagamento.id %}"
+                                    action="{% url 'financeiro:confirmar' pagamento.pk %}"
                                 >
 
                                     {% csrf_token %}
 
-                                    <div class="mb-3">
+                                    <label
+                                        for="comprovante"
+                                        class="form-label fw-semibold"
+                                    >
+                                        Comprovante do pagamento
+                                    </label>
 
-                                        <label
-                                            for="comprovante"
-                                            class="form-label fw-semibold"
-                                        >
-                                            Comprovante do pagamento
-                                        </label>
+                                    <input
+                                        type="file"
+                                        id="comprovante"
+                                        name="comprovante"
+                                        class="form-control"
+                                        accept=".pdf,.png,.jpg,.jpeg,.webp"
+                                        required
+                                    >
 
-                                        <input
-                                            id="comprovante"
-                                            name="comprovante"
-                                            type="file"
-                                            class="form-control"
-                                            accept=".pdf,.png,.jpg,.jpeg,.webp"
-                                            required
-                                        >
-
+                                    <div class="form-text">
+                                        PDF ou imagem de até 5 MB.
                                     </div>
 
                                     <button
                                         type="submit"
-                                        class="btn btn-success btn-lg w-100"
+                                        class="btn btn-primary w-100 mt-4"
                                     >
-                                        Enviar comprovante para análise
+                                        Enviar comprovante
                                     </button>
 
                                 </form>
@@ -264,35 +249,20 @@ Pagamento via PIX | Conecta Interior
 
                         </div>
 
-                    {% endif %}
-
-                    <div class="alert alert-info">
-
-                        <strong>
-                            Como funciona a confirmação?
-                        </strong>
-
-                        <br>
-
-                        O envio do comprovante não ativa o plano
-                        automaticamente. O pagamento será conferido
-                        pela administração. Após a aprovação, a
-                        assinatura será ativada.
-
-                    </div>
-
-                    <div class="d-grid">
-
-                        <a
-                            href="{% url 'core:minha_conta' %}"
-                            class="btn btn-outline-secondary"
-                        >
-                            Voltar para Minha Conta
-                        </a>
-
                     </div>
 
                 </div>
+
+            </div>
+
+            <div class="text-center mt-4">
+
+                <a
+                    href="{% url 'financeiro:historico' %}"
+                    class="btn btn-link"
+                >
+                    Ver histórico financeiro
+                </a>
 
             </div>
 
@@ -302,30 +272,23 @@ Pagamento via PIX | Conecta Interior
 
 </div>
 
+{% if mercado_pago_ativo and pix_mercado_pago.qr_code %}
+
 <script>
-function copiarPix() {
-    const campo = document.getElementById("chavePix");
+function copiarCodigoPix() {
+    const campo = document.getElementById("pix-copia-cola");
+    const mensagem = document.getElementById("mensagem-copia");
 
-    if (!campo) {
-        return;
-    }
-
-    navigator.clipboard.writeText(campo.value).then(
-        function () {
-            const botao = campo.nextElementSibling;
-
-            if (botao) {
-                const textoOriginal = botao.innerText;
-
-                botao.innerText = "Copiado!";
-
-                setTimeout(function () {
-                    botao.innerText = textoOriginal;
-                }, 2000);
-            }
-        }
-    );
+    navigator.clipboard.writeText(campo.value).then(function () {
+        mensagem.textContent = "Código PIX copiado.";
+    }).catch(function () {
+        campo.select();
+        document.execCommand("copy");
+        mensagem.textContent = "Código PIX copiado.";
+    });
 }
 </script>
+
+{% endif %}
 
 {% endblock %}
