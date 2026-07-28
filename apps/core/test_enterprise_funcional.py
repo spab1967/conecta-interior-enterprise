@@ -67,6 +67,19 @@ class EnterpriseFunctionalFlowTests(TestCase):
         response = self.client.get(reverse("core:home"))
         self.assertEqual(response.status_code, 200)
 
+    def test_home_limita_busca_e_ignora_tipo_invalido(self):
+        response = self.client.get(
+            reverse("core:home"),
+            {
+                "q": "A" * 150,
+                "tipo": "valor-invalido",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["busca"], "A" * 100)
+        self.assertEqual(response.context["tipo_selecionado"], "")
+
     def test_planos_responde_200(self):
         response = self.client.get(reverse("core:planos"))
         self.assertEqual(response.status_code, 200)

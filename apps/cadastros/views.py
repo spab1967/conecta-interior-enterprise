@@ -27,12 +27,12 @@ def anuncie(request):
         "plano"
     )
 
-    if plano_id:
+    if plano_id and plano_id.isdecimal():
 
         plano_inicial = (
             Plano.objects
             .filter(
-                pk=plano_id,
+                pk=int(plano_id),
                 ativo=True,
             )
             .first()

@@ -355,22 +355,25 @@ def home(request):
     busca = request.GET.get(
         "q",
         "",
-    ).strip()
+    ).strip()[:100]
 
     cidade_slug = request.GET.get(
         "cidade",
         "",
-    ).strip()
+    ).strip()[:140]
 
     categoria_slug = request.GET.get(
         "categoria",
         "",
-    ).strip()
+    ).strip()[:120]
 
     tipo = request.GET.get(
         "tipo",
         "",
     ).strip()
+
+    if tipo not in {"", "empresas", "profissionais"}:
+        tipo = ""
 
     cidades = Cidade.objects.filter(
         ativa=True
@@ -413,7 +416,7 @@ def home(request):
             termo
             for termo in busca.split()
             if termo.strip()
-        ]
+        ][:10]
 
         for termo in termos:
 
@@ -563,7 +566,7 @@ def cidade_home(
     busca = request.GET.get(
         "q",
         "",
-    ).strip()
+    ).strip()[:100]
 
     categorias = Categoria.objects.filter(
         ativa=True
