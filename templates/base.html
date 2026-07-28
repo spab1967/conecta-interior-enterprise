@@ -63,6 +63,32 @@
 
     {% include "includes/footer.html" %}
 
+    <nav class="mobile-app-nav" aria-label="Navegação do aplicativo">
+        <a class="mobile-app-nav__link{% if request.resolver_match.url_name == 'home' %} is-active{% endif %}"
+           href="{% url 'core:home' %}">
+            <span class="mobile-app-nav__icon" aria-hidden="true">⌂</span>
+            <span>Início</span>
+        </a>
+
+        <a class="mobile-app-nav__link"
+           href="{% url 'core:home' %}#buscar">
+            <span class="mobile-app-nav__icon" aria-hidden="true">⌕</span>
+            <span>Buscar</span>
+        </a>
+
+        <a class="mobile-app-nav__link{% if request.resolver_match.namespace == 'cadastros' %} is-active{% endif %}"
+           href="{% url 'cadastros:anuncie' %}">
+            <span class="mobile-app-nav__icon" aria-hidden="true">＋</span>
+            <span>Anunciar</span>
+        </a>
+
+        <a class="mobile-app-nav__link{% if request.resolver_match.url_name == 'minha_conta' %} is-active{% endif %}"
+           href="{% url 'core:minha_conta' %}">
+            <span class="mobile-app-nav__icon" aria-hidden="true">●</span>
+            <span>Minha Conta</span>
+        </a>
+    </nav>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="{% static 'js/app.js' %}"></script>
