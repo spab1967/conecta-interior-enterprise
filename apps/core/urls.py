@@ -26,6 +26,12 @@ login_cliente = ratelimit(
 urlpatterns = [
 
     path(
+        "health/",
+        views.health,
+        name="health",
+    ),
+
+    path(
         "service-worker.js",
         views.service_worker,
         name="service_worker",
