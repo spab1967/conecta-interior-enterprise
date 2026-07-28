@@ -410,7 +410,7 @@ class EnterpriseBusinessFlowTests(TestCase):
             ).exists()
         )
 
-    def test_solicitacao_publica_empresa_e_pendente(self):
+    def test_cadastro_publico_cria_acesso_e_empresa_automaticamente(self):
         response = self.client.post(
             reverse(
                 "cadastros:anuncie"
@@ -444,6 +444,11 @@ class EnterpriseBusinessFlowTests(TestCase):
             302,
         )
 
+        self.assertEqual(
+            response.url,
+            reverse("core:minha_conta"),
+        )
+
         solicitacao = (
             SolicitacaoCadastro.objects.get(
                 nome="Empresa Solicitada"
@@ -452,7 +457,7 @@ class EnterpriseBusinessFlowTests(TestCase):
 
         self.assertEqual(
             solicitacao.status,
-            SolicitacaoCadastro.STATUS_PENDENTE,
+            SolicitacaoCadastro.STATUS_APROVADO,
         )
 
         self.assertEqual(
@@ -464,12 +469,53 @@ class EnterpriseBusinessFlowTests(TestCase):
             username="empresa.solicitada@example.com"
         )
 
-        self.assertFalse(
+        self.assertTrue(
             usuario.is_active
         )
 
         self.assertTrue(
             usuario.check_password("SenhaForte@123")
+        )
+
+        empresa = Empresa.objects.get(
+            nome_fantasia="Empresa Solicitada"
+        )
+
+        self.assertEqual(
+            empresa.usuario_id,
+            usuario.pk,
+        )
+
+        self.assertTrue(
+            empresa.ativa
+        )
+
+        response = self.client.get(
+            reverse("core:minha_conta")
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
+        )
+
+        self.assertContains(
+            response,
+            "Empresa Solicitada",
+        )
+
+        response = self.client.get(
+            reverse(
+                "core:selecionar_plano",
+                kwargs={
+                    "plano_id": self.plano.pk,
+                },
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            200,
         )
 
     def test_solicitacao_profissional_exige_especialidade(self):
