@@ -2,6 +2,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from django_ratelimit.decorators import ratelimit
+
+
+admin.site.login = ratelimit(
+    key="post:username",
+    rate="5/5m",
+    method="POST",
+    block=True,
+)(admin.site.login)
 
 
 urlpatterns = [
