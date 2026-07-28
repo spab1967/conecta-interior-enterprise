@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.http import Http404
+from django.db import transaction
 from django.db.models import (
     Avg,
     Case,
@@ -836,6 +837,8 @@ def minha_conta(request):
                 empresa=empresa,
                 profissional__isnull=True,
                 status=PedidoFinanceiro.STATUS_PENDENTE,
+                valor__gt=0,
+                plano__preco_mensal__gt=0,
             )
             .order_by(
                 "-criado_em"
@@ -935,6 +938,8 @@ def minha_conta(request):
                 profissional=profissional,
                 empresa__isnull=True,
                 status=PedidoFinanceiro.STATUS_PENDENTE,
+                valor__gt=0,
+                plano__preco_mensal__gt=0,
             )
             .order_by(
                 "-criado_em"
@@ -1065,19 +1070,92 @@ def alterar_plano_empresa(
         ativa=True,
     )
 
-    pedido = PedidoFinanceiro.objects.create(
-        empresa=empresa,
-        plano=plano,
-        valor=plano.preco_mensal,
-        status=PedidoFinanceiro.STATUS_PENDENTE,
+    assinatura_atual = assinatura_vigente(
+        empresa=empresa
     )
+
+    if (
+        assinatura_atual
+        and assinatura_atual.plano_id
+        == plano.id
+    ):
+
+        messages.info(
+            request,
+            (
+                f"A empresa "
+                f"{empresa.nome_fantasia} "
+                f"já utiliza o plano "
+                f"{plano.nome}."
+            ),
+        )
+
+        return redirect(
+            "core:minha_conta"
+        )
+
+    with transaction.atomic():
+
+        PedidoFinanceiro.objects.filter(
+            empresa=empresa,
+            profissional__isnull=True,
+            status=PedidoFinanceiro.STATUS_PENDENTE,
+        ).update(
+            status=PedidoFinanceiro.STATUS_CANCELADO,
+        )
+
+        if plano.preco_mensal <= 0:
+
+            Assinatura.objects.filter(
+                empresa=empresa,
+                profissional__isnull=True,
+                status=Assinatura.STATUS_ATIVA,
+            ).update(
+                status=Assinatura.STATUS_CANCELADA,
+            )
+
+            Assinatura.objects.create(
+                empresa=empresa,
+                profissional=None,
+                plano=plano,
+                status=Assinatura.STATUS_ATIVA,
+                inicio=timezone.localdate(),
+                vencimento=calcular_vencimento_plano(
+                    plano,
+                    timezone.localdate(),
+                ),
+                renovacao_automatica=False,
+                observacoes=(
+                    "Plano gratuito ativado diretamente "
+                    "pelo cliente."
+                ),
+            )
+
+            messages.success(
+                request,
+                (
+                    f"Plano {plano.nome} ativado "
+                    f"para {empresa.nome_fantasia}."
+                ),
+            )
+
+            return redirect(
+                "core:minha_conta"
+            )
+
+        pedido = PedidoFinanceiro.objects.create(
+            empresa=empresa,
+            profissional=None,
+            plano=plano,
+            valor=plano.preco_mensal,
+            status=PedidoFinanceiro.STATUS_PENDENTE,
+        )
 
     return redirect(
         "financeiro:pagamento",
         pedido_id=pedido.pk,
     )
-              
-               
+
 @login_required
 def alterar_plano_profissional(
     request,
@@ -1129,19 +1207,67 @@ def alterar_plano_profissional(
             "core:minha_conta"
         )
 
-    pedido = PedidoFinanceiro.objects.create(
-        empresa=None,
-        profissional=profissional,
-        plano=plano,
-        valor=plano.preco_mensal,
-        status=PedidoFinanceiro.STATUS_PENDENTE,
-    )
+    with transaction.atomic():
+
+        PedidoFinanceiro.objects.filter(
+            profissional=profissional,
+            empresa__isnull=True,
+            status=PedidoFinanceiro.STATUS_PENDENTE,
+        ).update(
+            status=PedidoFinanceiro.STATUS_CANCELADO,
+        )
+
+        if plano.preco_mensal <= 0:
+
+            Assinatura.objects.filter(
+                profissional=profissional,
+                empresa__isnull=True,
+                status=Assinatura.STATUS_ATIVA,
+            ).update(
+                status=Assinatura.STATUS_CANCELADA,
+            )
+
+            Assinatura.objects.create(
+                empresa=None,
+                profissional=profissional,
+                plano=plano,
+                status=Assinatura.STATUS_ATIVA,
+                inicio=timezone.localdate(),
+                vencimento=calcular_vencimento_plano(
+                    plano,
+                    timezone.localdate(),
+                ),
+                renovacao_automatica=False,
+                observacoes=(
+                    "Plano gratuito ativado diretamente "
+                    "pelo cliente."
+                ),
+            )
+
+            messages.success(
+                request,
+                (
+                    f"Plano {plano.nome} ativado "
+                    f"para {profissional.nome}."
+                ),
+            )
+
+            return redirect(
+                "core:minha_conta"
+            )
+
+        pedido = PedidoFinanceiro.objects.create(
+            empresa=None,
+            profissional=profissional,
+            plano=plano,
+            valor=plano.preco_mensal,
+            status=PedidoFinanceiro.STATUS_PENDENTE,
+        )
 
     return redirect(
         "financeiro:pagamento",
         pedido_id=pedido.pk,
     )
-
 
 @login_required
 def editar_empresa(
