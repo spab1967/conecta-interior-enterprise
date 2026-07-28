@@ -1,5 +1,17 @@
 "use strict";
 
+document.addEventListener("click", (evento) => {
+    const controle = evento.target.closest("[data-confirm]");
+
+    if (
+        controle
+        && !window.confirm(controle.dataset.confirm)
+    ) {
+        evento.preventDefault();
+        evento.stopImmediatePropagation();
+    }
+});
+
 let recarregandoAplicativo = false;
 
 function mostrarAtualizacaoAplicativo(registro) {
