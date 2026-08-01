@@ -51,6 +51,8 @@
         </a>
 
 
+        {% if request.resolver_match.url_name != "minha_conta" %}
+
         <button
             class="navbar-toggler"
             type="button"
@@ -133,6 +135,9 @@
             </ul>
 
         </div>
+
+        {% endif %}
+
 
     </div>
 
