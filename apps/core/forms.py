@@ -1,5 +1,6 @@
 from django import forms
 
+from apps.cadastros.forms import ESPECIALIDADES_SERVICOS
 from apps.empresas.models import Empresa
 from apps.profissionais.models import Profissional
 
@@ -65,6 +66,10 @@ class EmpresaClienteForm(forms.ModelForm):
 
 class ProfissionalClienteForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.especialidades_servicos = ESPECIALIDADES_SERVICOS
+
     class Meta:
         model = Profissional
 
@@ -89,7 +94,11 @@ class ProfissionalClienteForm(forms.ModelForm):
                 attrs={"class": "form-control"}
             ),
             "especialidade": forms.TextInput(
-                attrs={"class": "form-control"}
+                attrs={
+                    "class": "form-control",
+                    "list": "especialidades-servicos",
+                    "autocomplete": "off",
+                }
             ),
             "descricao": forms.Textarea(
                 attrs={
