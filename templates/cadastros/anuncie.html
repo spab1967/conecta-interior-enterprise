@@ -293,6 +293,17 @@ Anuncie | Conecta Interior
 
                             {{ form.especialidade }}
 
+                            <datalist id="especialidades-servicos">
+                                {% for especialidade in form.especialidades_servicos %}
+                                    <option value="{{ especialidade }}"></option>
+                                {% endfor %}
+                            </datalist>
+
+                            <div class="form-text">
+                                Comece a digitar para localizar uma profissão
+                                ou serviço. Se não encontrar, digite livremente.
+                            </div>
+
                             <div class="form-text">
                                 Obrigatória para profissionais.
                             </div>
