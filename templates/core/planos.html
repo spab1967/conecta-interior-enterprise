@@ -21,6 +21,15 @@ Planos e Preços | Conecta Interior
 </div>
 
 
+<div class="alert alert-primary border-0 shadow-sm mb-4">
+    <strong>Todos ganham divulgação no ConectaInterior.</strong>
+    Empresas e profissionais de qualquer plano aparecem nas pesquisas,
+    nas páginas das cidades e na divulgação geral da plataforma.
+    Profissionais dos planos Destaque e Premium também podem aparecer
+    na página da empresa à qual estão vinculados.
+</div>
+
+
 <div class="row g-4 justify-content-center mb-5">
 
     {% for plano in planos %}
@@ -119,6 +128,24 @@ Planos e Preços | Conecta Interior
                         <li class="mb-2">
                             ✓ Canais de contato
                         </li>
+
+                        <li class="mb-2">
+                            ✓ Divulgação no site ConectaInterior
+                        </li>
+
+                        {% if plano.nome|lower == "destaque" or plano.nome|lower == "premium" %}
+
+                            <li class="mb-2 fw-semibold text-success">
+                                ✓ Profissional pode aparecer na página da empresa vinculada
+                            </li>
+
+                        {% else %}
+
+                            <li class="mb-2 text-muted">
+                                — Sem exibição profissional na página de empresa vinculada
+                            </li>
+
+                        {% endif %}
 
 
                         {% if plano.destaque_busca %}
