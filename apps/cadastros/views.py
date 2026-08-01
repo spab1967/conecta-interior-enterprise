@@ -7,6 +7,7 @@ from django.shortcuts import (
     render,
 )
 
+from apps.financeiro.models import PedidoFinanceiro
 from apps.planos.models import Plano
 
 from .forms import SolicitacaoCadastroForm
@@ -79,7 +80,7 @@ def anuncie(request):
 
             solicitacao.save()
 
-            solicitacao.criar_cadastro(
+            cadastro = solicitacao.criar_cadastro(
                 usuario=usuario,
             )
 
@@ -91,6 +92,42 @@ def anuncie(request):
                     "ModelBackend"
                 ),
             )
+
+            if solicitacao.plano.preco_mensal > 0:
+
+                dados_pedido = {
+                    "plano": solicitacao.plano,
+                    "valor": solicitacao.plano.preco_mensal,
+                    "status": PedidoFinanceiro.STATUS_PENDENTE,
+                }
+
+                if (
+                    solicitacao.tipo
+                    == solicitacao.TIPO_EMPRESA
+                ):
+                    dados_pedido["empresa"] = cadastro
+                    dados_pedido["profissional"] = None
+                else:
+                    dados_pedido["empresa"] = None
+                    dados_pedido["profissional"] = cadastro
+
+                pedido = PedidoFinanceiro.objects.create(
+                    **dados_pedido
+                )
+
+                messages.success(
+                    request,
+                    (
+                        "Cadastro concluído. Efetue o pagamento "
+                        "para ativar os benefícios do plano "
+                        f"{solicitacao.plano.nome}."
+                    ),
+                )
+
+                return redirect(
+                    "financeiro:pagamento",
+                    pedido_id=pedido.pk,
+                )
 
             messages.success(
                 request,
