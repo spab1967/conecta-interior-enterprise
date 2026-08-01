@@ -5,17 +5,36 @@
         <div class="text-center mb-4">
 
             <h1 class="display-5 fw-bold">
-                Encontre empresas e profissionais perto de você
+                Encontre empresas e profissionais perto de você. Ou divulgue o seu negócio para toda a cidade.
             </h1>
 
-            <p class="lead mt-3 mb-0">
-                Comércio, serviços e profissionais da sua região
-                reunidos em uma única plataforma.
+            <p class="lead mt-3">
+                Cadastre gratuitamente sua empresa ou serviço profissional e ganhe uma página exclusiva na internet, administrada por você.
             </p>
+
+            <p class="mb-4">
+                Apresente sua marca, publique fotos, informe seus contatos, receba avaliações e seja encontrado por novos clientes todos os dias.
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a
+                    href="#pesquisa"
+                    class="btn btn-light btn-lg px-4"
+                >
+                    🔍 Encontrar empresas
+                </a>
+
+                <a
+                    href="{% url 'cadastros:anuncie' %}"
+                    class="btn btn-warning btn-lg px-4 fw-semibold"
+                >
+                    Cadastrar minha empresa gratuitamente
+                </a>
+            </div>
 
             <button
                 type="button"
-                class="btn btn-light btn-lg mt-4 js-install-app"
+                class="btn btn-outline-light btn-lg mt-3 js-install-app"
                 hidden
             >
                 📲 Instalar aplicativo
@@ -24,7 +43,123 @@
         </div>
 
 
+        <div class="bg-white text-dark rounded-4 p-4 mb-4 shadow-sm">
+
+            <h2 class="h4 fw-bold text-center mb-4">
+                Ao se cadastrar você recebe:
+            </h2>
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>Uma página exclusiva para sua empresa</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>Galeria de fotos</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>Logo personalizada</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>WhatsApp</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>Instagram</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>Telefone</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>Endereço</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>Horário de funcionamento</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>Descrição completa</span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="d-flex gap-2">
+                        <span>✅</span>
+                        <span>Área administrativa para atualizar tudo quando desejar</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="text-center py-3 mb-4">
+
+            <h2 class="h3 fw-bold">
+                Sua empresa ganha presença na internet em poucos minutos.
+            </h2>
+
+            <p class="lead mb-1">
+                Sem precisar criar um site próprio.
+            </p>
+
+            <p class="lead mb-1">
+                Sem conhecimentos técnicos.
+            </p>
+
+            <p class="lead mb-4">
+                Você administra tudo através da sua Área da Empresa.
+            </p>
+
+            <h3 class="h4 fw-bold mb-3">
+                Mais clientes começam encontrando você.
+            </h3>
+
+            <a
+                href="{% url 'cadastros:anuncie' %}"
+                class="btn btn-warning btn-lg px-5 fw-semibold"
+            >
+                Cadastre sua empresa agora
+            </a>
+
+        </div>
+
+
         <form
+            id="pesquisa"
             method="get"
             action="{% url 'core:home' %}"
             class="bg-white rounded-4 p-3 p-lg-4 shadow-sm"
