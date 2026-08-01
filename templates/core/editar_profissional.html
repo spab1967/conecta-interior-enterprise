@@ -127,6 +127,20 @@ Editar Perfil Profissional | Conecta Interior
 
                                 {{ field }}
 
+                                {% if field.name == "especialidade" %}
+                                    <datalist id="especialidades-servicos">
+                                        {% for especialidade in form.especialidades_servicos %}
+                                            <option value="{{ especialidade }}"></option>
+                                        {% endfor %}
+                                    </datalist>
+
+                                    <div class="form-text mt-2">
+                                        Comece a digitar para escolher uma profissão
+                                        ou serviço. Também é possível informar outra
+                                        especialidade livremente.
+                                    </div>
+                                {% endif %}
+
                                 {% if field.name == "foto" %}
 
                                     <div class="form-text mt-2">
