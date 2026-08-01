@@ -747,6 +747,34 @@ def empresa_detalhe(
         relacionadas
     )[:6]
 
+    hoje = timezone.localdate()
+
+    profissionais_empresa = (
+        Profissional.objects
+        .filter(
+            empresa=empresa,
+            ativo=True,
+            assinaturas__status=Assinatura.STATUS_ATIVA,
+            assinaturas__inicio__lte=hoje,
+            assinaturas__plano__ativo=True,
+            assinaturas__plano__nome__in=[
+                "Destaque",
+                "Premium",
+            ],
+        )
+        .filter(
+            Q(assinaturas__vencimento__isnull=True)
+            | Q(assinaturas__vencimento__gte=hoje)
+        )
+        .distinct()
+    )
+
+    profissionais_empresa = (
+        _ordenar_profissionais(
+            profissionais_empresa
+        )
+    )
+
     avaliacoes_aprovadas = (
         empresa.avaliacoes
         .filter(aprovado=True)
@@ -767,12 +795,13 @@ def empresa_detalhe(
         {
             "empresa": empresa,
             "relacionadas": relacionadas,
+            "profissionais_empresa":
+                profissionais_empresa,
             "avaliacoes_aprovadas": avaliacoes_aprovadas[:10],
             "media_avaliacoes": media_avaliacoes,
             "total_avaliacoes": total_avaliacoes,
         },
     )
-
 
 def profissional_detalhe(
     request,
