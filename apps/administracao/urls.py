@@ -31,6 +31,18 @@ urlpatterns = [
     ),
 
     path(
+        "empresas/<int:empresa_id>/desbloquear/",
+        views.desbloquear_empresa,
+        name="desbloquear_empresa",
+    ),
+
+    path(
+        "profissionais/<int:profissional_id>/desbloquear/",
+        views.desbloquear_profissional,
+        name="desbloquear_profissional",
+    ),
+
+    path(
         "empresas/<int:empresa_id>/definir-senha/",
         views.definir_senha_empresa,
         name="definir_senha_empresa",

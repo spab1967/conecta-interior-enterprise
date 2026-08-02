@@ -47,6 +47,8 @@ class EmpresaAdmin(admin.ModelAdmin):
 
     readonly_fields = (
         "painel_metricas",
+        "liberacao_financeira_por",
+        "liberacao_financeira_em",
     )
 
     fieldsets = (
@@ -125,6 +127,17 @@ class EmpresaAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "painel_metricas",
+                )
+            },
+        ),
+
+        (
+            "Liberação financeira",
+            {
+                "fields": (
+                    "liberacao_financeira_ativa", "liberacao_financeira_ate",
+                    "liberacao_financeira_motivo", "liberacao_financeira_observacao",
+                    "liberacao_financeira_por", "liberacao_financeira_em",
                 )
             },
         ),

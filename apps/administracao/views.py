@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 from django.shortcuts import get_object_or_404, redirect
 from apps.servicos.models import Servico
 from django.contrib import messages
@@ -28,6 +30,7 @@ from apps.empresas.models import Empresa
 from apps.financeiro.models import Pagamento, PedidoFinanceiro
 from apps.financeiro.services import aprovar_pagamento
 from apps.planos.models import Assinatura
+from apps.planos.services import situacao_financeira
 from apps.profissionais.models import Profissional
 
 
@@ -314,6 +317,9 @@ def empresas(request):
         request.GET.get("page")
     )
 
+    for empresa in page_obj:
+        empresa.status_financeiro = situacao_financeira(empresa=empresa)
+
     return render(
         request,
         "administracao/empresas.html",
@@ -352,6 +358,11 @@ def profissionais(request):
     paginator = Paginator(profissionais_cadastrados, 20)
     page_obj = paginator.get_page(request.GET.get("page"))
 
+    for profissional in page_obj:
+        profissional.status_financeiro = situacao_financeira(
+            profissional=profissional
+        )
+
     return render(
         request,
         "administracao/profissionais.html",
@@ -361,6 +372,64 @@ def profissionais(request):
             "total_profissionais": total_profissionais,
             "profissionais_ativos": profissionais_ativos,
         },
+    )
+
+
+def _registrar_liberacao_manual(request, titular, destino):
+    validade = request.POST.get("validade", "7")
+    motivo = request.POST.get("motivo", "").strip()
+    observacao = request.POST.get("observacao", "").strip()
+    hoje = timezone.localdate()
+
+    if not motivo:
+        messages.error(request, "Informe o motivo do desbloqueio.")
+        return redirect(destino)
+
+    if validade == "indefinida":
+        liberada_ate = None
+    elif validade == "data":
+        try:
+            liberada_ate = date.fromisoformat(
+                request.POST.get("liberada_ate", "")
+            )
+        except ValueError:
+            messages.error(request, "Informe uma data de liberação válida.")
+            return redirect(destino)
+        if liberada_ate < hoje:
+            messages.error(request, "A validade não pode estar no passado.")
+            return redirect(destino)
+    else:
+        dias = 3 if validade == "3" else 7
+        liberada_ate = hoje + timedelta(days=dias)
+
+    titular.liberacao_financeira_ativa = True
+    titular.liberacao_financeira_ate = liberada_ate
+    titular.liberacao_financeira_motivo = motivo
+    titular.liberacao_financeira_observacao = observacao
+    titular.liberacao_financeira_por = request.user
+    titular.liberacao_financeira_em = timezone.now()
+    titular.save(update_fields=[
+        "liberacao_financeira_ativa", "liberacao_financeira_ate",
+        "liberacao_financeira_motivo", "liberacao_financeira_observacao",
+        "liberacao_financeira_por", "liberacao_financeira_em",
+    ])
+    messages.success(request, "Página desbloqueada com sucesso.")
+    return redirect(destino)
+
+
+@staff_member_required
+@require_POST
+def desbloquear_empresa(request, empresa_id):
+    empresa = get_object_or_404(Empresa, pk=empresa_id)
+    return _registrar_liberacao_manual(request, empresa, "administracao:empresas")
+
+
+@staff_member_required
+@require_POST
+def desbloquear_profissional(request, profissional_id):
+    profissional = get_object_or_404(Profissional, pk=profissional_id)
+    return _registrar_liberacao_manual(
+        request, profissional, "administracao:profissionais"
     )
 
 @staff_member_required

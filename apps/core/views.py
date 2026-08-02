@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from PIL import Image, UnidentifiedImageError
 
 from django.contrib import messages
@@ -31,9 +33,12 @@ from apps.empresas.models import Empresa, FotoEmpresa
 from apps.financeiro.models import PedidoFinanceiro
 from apps.planos.models import Assinatura, Plano
 from apps.planos.services import (
+    assinatura_financeira,
     assinatura_vigente,
+    filtrar_publicaveis,
     plano_vigente,
     limite_fotos,
+    situacao_financeira,
 )
 from apps.planos.vigencia import calcular_vencimento_plano
 from apps.profissionais.forms import ProfissionalClienteForm
@@ -106,7 +111,7 @@ def _ids_por_prioridade_comercial(
 
     filtro_vigencia = (
         Q(vencimento__isnull=True)
-        | Q(vencimento__gte=hoje)
+        | Q(vencimento__gte=hoje - timedelta(days=7))
     )
 
     assinaturas = (
@@ -428,6 +433,9 @@ def home(request):
         )
     )
 
+    empresas = filtrar_publicaveis(empresas, "empresa")
+    profissionais = filtrar_publicaveis(profissionais, "profissional")
+
     if busca:
 
         termos = [
@@ -602,6 +610,9 @@ def cidade_home(
         ativo=True,
     )
 
+    empresas = filtrar_publicaveis(empresas, "empresa")
+    profissionais = filtrar_publicaveis(profissionais, "profissional")
+
     if busca:
 
         empresas = empresas.filter(
@@ -691,6 +702,9 @@ def categoria(
         ativo=True,
     )
 
+    empresas = filtrar_publicaveis(empresas, "empresa")
+    profissionais = filtrar_publicaveis(profissionais, "profissional")
+
     empresas = _ordenar_empresas(
         empresas
     )
@@ -727,6 +741,9 @@ def empresa_detalhe(
         ativa=True,
     )
 
+    if not situacao_financeira(empresa=empresa).pagina_publica:
+        return render(request, "core/perfil_suspenso.html")
+
     empresa = _aplicar_plano_empresa(
         empresa
     )
@@ -742,6 +759,7 @@ def empresa_detalhe(
             pk=empresa.pk
         )
     )
+    relacionadas = filtrar_publicaveis(relacionadas, "empresa")
 
     relacionadas = _ordenar_empresas(
         relacionadas
@@ -820,6 +838,9 @@ def profissional_detalhe(
         ativo=True,
     )
 
+    if not situacao_financeira(profissional=profissional).pagina_publica:
+        return render(request, "core/perfil_suspenso.html")
+
     profissional = (
         _aplicar_plano_profissional(
             profissional
@@ -837,6 +858,7 @@ def profissional_detalhe(
             pk=profissional.pk
         )
     )
+    relacionados = filtrar_publicaveis(relacionados, "profissional")
 
     relacionados = (
         _ordenar_profissionais(
@@ -928,6 +950,8 @@ def minha_conta(request):
 
     for empresa in empresas:
 
+        situacao = situacao_financeira(empresa=empresa, hoje=hoje)
+
         assinatura = (
             Assinatura.objects
             .select_related(
@@ -954,6 +978,9 @@ def minha_conta(request):
             )
             .first()
         )
+
+        if assinatura is None:
+            assinatura = assinatura_financeira(empresa=empresa)
 
         plano = (
             assinatura.plano
@@ -1022,12 +1049,15 @@ def minha_conta(request):
                     renovacao_programada,
                 "pedido_pendente":
                     pedido_pendente,
+                "situacao_financeira": situacao,
             }
         )
         
     profissionais_cliente = []
 
     for profissional in profissionais:
+
+        situacao = situacao_financeira(profissional=profissional, hoje=hoje)
 
         assinatura = (
             Assinatura.objects
@@ -1055,6 +1085,9 @@ def minha_conta(request):
             )
             .first()
         )
+
+        if assinatura is None:
+            assinatura = assinatura_financeira(profissional=profissional)
 
         plano = (
             assinatura.plano
@@ -1125,6 +1158,7 @@ def minha_conta(request):
                     renovacao_programada,
                 "pedido_pendente":
                     pedido_pendente,
+                "situacao_financeira": situacao,
             }
         )
         

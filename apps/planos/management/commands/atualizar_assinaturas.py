@@ -1,8 +1,11 @@
+from datetime import timedelta
+
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
 from apps.planos.models import Assinatura
+from apps.planos.services import DIAS_TOLERANCIA
 
 
 class Command(BaseCommand):
@@ -22,7 +25,8 @@ class Command(BaseCommand):
             .filter(
                 status=Assinatura.STATUS_ATIVA,
                 vencimento__isnull=False,
-                vencimento__lt=hoje,
+                vencimento__lt=hoje - timedelta(days=DIAS_TOLERANCIA),
+                plano__preco_mensal__gt=0,
             )
         )
 

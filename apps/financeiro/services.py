@@ -244,9 +244,9 @@ def _assinatura_futura_equivalente(
     if not assinatura_origem.vencimento:
         return None
 
-    inicio_novo_periodo = (
-        assinatura_origem.vencimento
-        + timedelta(days=1)
+    inicio_novo_periodo = max(
+        assinatura_origem.vencimento + timedelta(days=1),
+        timezone.localdate(),
     )
 
     novo_vencimento = calcular_vencimento_plano(
@@ -302,6 +302,11 @@ def aprovar_pagamento(pagamento):
         ]
     )
 
+    titular = pedido.empresa or pedido.profissional
+    if titular and titular.liberacao_financeira_ativa:
+        titular.liberacao_financeira_ativa = False
+        titular.save(update_fields=["liberacao_financeira_ativa"])
+
     assinatura_origem = pedido.assinatura
 
     # RENOVAÇÃO
@@ -342,9 +347,9 @@ def aprovar_pagamento(pagamento):
         inicio_novo_periodo = hoje
 
         if assinatura_origem.vencimento:
-            inicio_novo_periodo = (
-                assinatura_origem.vencimento
-                + timedelta(days=1)
+            inicio_novo_periodo = max(
+                assinatura_origem.vencimento + timedelta(days=1),
+                hoje,
             )
 
         novo_vencimento = calcular_vencimento_plano(

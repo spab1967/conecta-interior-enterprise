@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Página temporariamente indisponível | Conecta Interior{% endblock %}
+{% block content %}
+<section class="container py-5"><div class="card border-0 shadow-sm mx-auto text-center" style="max-width:720px"><div class="card-body p-5">
+    <div class="display-5 mb-3">⏸️</div>
+    <h1 class="h2 fw-bold">Página temporariamente indisponível</h1>
+    <p class="lead text-muted">Este perfil encontra-se temporariamente suspenso.</p>
+    <p class="text-muted">Consulte novamente em breve.</p>
+    <a href="{% url 'core:home' %}" class="btn btn-primary">Voltar ao início</a>
+</div></div></section>
+{% endblock %}

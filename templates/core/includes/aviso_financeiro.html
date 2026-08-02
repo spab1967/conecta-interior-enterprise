@@ -1,0 +1,17 @@
+{% if item.situacao_financeira.codigo == "atraso" %}
+<div class="alert alert-warning border-warning mb-3" role="alert">
+    <strong class="d-block">Pagamento em atraso</strong>
+    Sua fatura venceu em {{ item.situacao_financeira.vencimento|date:"d/m/Y" }}. Efetue o pagamento até {{ item.situacao_financeira.limite_tolerancia|date:"d/m/Y" }} para evitar a suspensão da página pública.
+    <div><a href="{% if item.pedido_pendente %}{% url 'financeiro:pagamento' item.pedido_pendente.pk %}{% else %}{% url 'core:planos' %}{% endif %}" class="btn btn-warning btn-sm mt-2">Pagar agora</a></div>
+</div>
+{% elif item.situacao_financeira.codigo == "suspensa" %}
+<div class="alert alert-danger border-danger mb-3" role="alert">
+    <strong class="d-block">Página suspensa</strong>
+    Sua página pública está suspensa por falta de pagamento. Envie o comprovante para análise. Após a aprovação, a página será reativada.
+    <div><a href="{% if item.pedido_pendente %}{% url 'financeiro:pagamento' item.pedido_pendente.pk %}{% else %}{% url 'core:planos' %}{% endif %}" class="btn btn-danger btn-sm mt-2">Pagar agora</a></div>
+</div>
+{% elif item.situacao_financeira.codigo == "liberada" %}
+<div class="alert alert-info mb-3"><strong>Perfil liberado manualmente pela administração.</strong></div>
+{% elif item.assinatura.vencimento and item.plano.preco_mensal > 0 %}
+<div class="alert alert-info mb-3">Sua assinatura vence em <strong>{{ item.assinatura.vencimento|date:"d/m/Y" }}</strong>.</div>
+{% endif %}
