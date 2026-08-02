@@ -449,9 +449,9 @@ class EnterpriseBusinessFlowTests(TestCase):
             302,
         )
 
-        self.assertEqual(
+        self.assertRegex(
             response.url,
-            reverse("core:minha_conta"),
+            r"^/financeiro/pagamento/\d+/$",
         )
 
         solicitacao = (
