@@ -1,6 +1,112 @@
+from dataclasses import dataclass
+from datetime import timedelta
+
 from django.utils import timezone
 
 from .models import Assinatura
+
+
+DIAS_TOLERANCIA = 7
+STATUS_REGULAR = "regular"
+STATUS_ATRASO = "atraso"
+STATUS_SUSPENSA = "suspensa"
+STATUS_LIBERADA = "liberada"
+
+
+@dataclass(frozen=True)
+class SituacaoFinanceira:
+    codigo: str
+    rotulo: str
+    assinatura: object = None
+    vencimento: object = None
+    limite_tolerancia: object = None
+
+    @property
+    def pagina_publica(self):
+        return self.codigo != STATUS_SUSPENSA
+
+
+def _liberacao_manual_valida(titular, hoje):
+    return bool(
+        titular.liberacao_financeira_ativa
+        and (
+            titular.liberacao_financeira_ate is None
+            or titular.liberacao_financeira_ate >= hoje
+        )
+    )
+
+
+def assinatura_financeira(empresa=None, profissional=None):
+    titular = empresa if empresa is not None else profissional
+    cache = getattr(titular, "_prefetched_objects_cache", {}) if titular else {}
+    if "assinaturas" in cache:
+        candidatas = [
+            assinatura for assinatura in cache["assinaturas"]
+            if assinatura.status in (
+                Assinatura.STATUS_ATIVA, Assinatura.STATUS_VENCIDA,
+            )
+        ]
+        return max(
+            candidatas,
+            key=lambda assinatura: (assinatura.inicio, assinatura.criada_em),
+            default=None,
+        )
+
+    queryset = Assinatura.objects.select_related("plano").filter(
+        status__in=(Assinatura.STATUS_ATIVA, Assinatura.STATUS_VENCIDA),
+    )
+    if empresa is not None:
+        queryset = queryset.filter(empresa=empresa, profissional__isnull=True)
+    elif profissional is not None:
+        queryset = queryset.filter(profissional=profissional, empresa__isnull=True)
+    else:
+        return None
+    return queryset.order_by("-inicio", "-criada_em").first()
+
+
+def situacao_financeira(empresa=None, profissional=None, hoje=None):
+    hoje = hoje or timezone.localdate()
+    titular = empresa if empresa is not None else profissional
+    if titular is None:
+        raise ValueError("Informe uma empresa ou um profissional.")
+
+    assinatura = assinatura_financeira(empresa=empresa, profissional=profissional)
+    if _liberacao_manual_valida(titular, hoje):
+        return SituacaoFinanceira(
+            STATUS_LIBERADA, "Liberada manualmente", assinatura,
+            getattr(assinatura, "vencimento", None),
+        )
+
+    if not assinatura or assinatura.plano.preco_mensal <= 0:
+        return SituacaoFinanceira(STATUS_REGULAR, "Regular", assinatura)
+
+    vencimento = assinatura.vencimento
+    if not vencimento or vencimento >= hoje:
+        return SituacaoFinanceira(
+            STATUS_REGULAR, "Regular", assinatura, vencimento,
+        )
+
+    limite = vencimento + timedelta(days=DIAS_TOLERANCIA)
+    if hoje <= limite:
+        return SituacaoFinanceira(
+            STATUS_ATRASO, "Em atraso — período de tolerância",
+            assinatura, vencimento, limite,
+        )
+
+    return SituacaoFinanceira(
+        STATUS_SUSPENSA, "Suspensa por inadimplência",
+        assinatura, vencimento, limite,
+    )
+
+
+def filtrar_publicaveis(queryset, tipo):
+    objetos = list(queryset.prefetch_related("assinaturas__plano"))
+    ids = []
+    for objeto in objetos:
+        kwargs = {tipo: objeto}
+        if situacao_financeira(**kwargs).pagina_publica:
+            ids.append(objeto.pk)
+    return queryset.filter(pk__in=ids)
 
 
 def assinatura_vigente(
@@ -37,10 +143,11 @@ def assinatura_vigente(
     else:
         return None
 
+    limite = hoje - timedelta(days=DIAS_TOLERANCIA)
     queryset = queryset.filter(
         vencimento__isnull=True
     ) | queryset.filter(
-        vencimento__gte=hoje
+        vencimento__gte=limite
     )
 
     return (

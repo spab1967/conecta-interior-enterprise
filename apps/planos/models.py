@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -227,9 +229,12 @@ class Assinatura(models.Model):
         if self.inicio > hoje:
             return False
 
+        if self.plano.preco_mensal <= 0:
+            return True
+
         if (
             self.vencimento
-            and self.vencimento < hoje
+            and self.vencimento + timedelta(days=7) < hoje
         ):
             return False
 

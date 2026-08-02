@@ -100,6 +100,8 @@ Minha Conta | Conecta Interior
                             {{ item.objeto.cidade.nome }}
                         </p>
 
+                        {% include "core/includes/aviso_financeiro.html" with item=item %}
+
 
                         {% if item.assinatura %}
 
@@ -431,6 +433,8 @@ Minha Conta | Conecta Interior
                         <p class="text-muted mb-3">
                             {{ item.objeto.cidade.nome }}
                         </p>
+
+                        {% include "core/includes/aviso_financeiro.html" with item=item %}
 
 
                         {% if item.assinatura %}

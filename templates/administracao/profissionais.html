@@ -32,7 +32,7 @@
                 <thead>
                     <tr>
                         <th>ID</th><th>Profissional</th><th>Especialidade</th>
-                        <th>Cidade</th><th>Categoria</th><th>Status</th><th>Usuário / Segurança</th>
+                        <th>Cidade</th><th>Categoria</th><th>Status</th><th>Status financeiro</th><th>Usuário / Segurança</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,6 +59,24 @@
                             {% endif %}
                         </td>
                         <td>
+                            {% if profissional.status_financeiro.codigo == "regular" %}<span class="badge text-bg-success">Regular</span>
+                            {% elif profissional.status_financeiro.codigo == "atraso" %}<span class="badge text-bg-warning">Em atraso — período de tolerância</span>
+                            {% elif profissional.status_financeiro.codigo == "liberada" %}<span class="badge text-bg-info">Liberada manualmente</span>
+                            {% else %}
+                            <span class="badge text-bg-danger">Suspensa por inadimplência</span>
+                            <details class="mt-2"><summary class="btn btn-sm btn-outline-primary">🔓 Desbloquear página</summary>
+                                <form method="post" action="{% url 'administracao:desbloquear_profissional' profissional.id %}" class="mt-2 p-2 border rounded" onsubmit="return confirm('Confirma o desbloqueio manual desta página?');">
+                                    {% csrf_token %}
+                                    <select name="validade" class="form-select form-select-sm mb-2" required><option value="3">Liberar por 3 dias</option><option value="7" selected>Liberar por 7 dias</option><option value="data">Até uma data definida</option><option value="indefinida">Até nova decisão administrativa</option></select>
+                                    <input type="date" name="liberada_ate" class="form-control form-control-sm mb-2">
+                                    <input type="text" name="motivo" class="form-control form-control-sm mb-2" placeholder="Motivo do desbloqueio" required>
+                                    <textarea name="observacao" class="form-control form-control-sm mb-2" placeholder="Observação opcional"></textarea>
+                                    <button class="btn btn-sm btn-primary">Confirmar desbloqueio</button>
+                                </form>
+                            </details>
+                            {% endif %}
+                        </td>
+                        <td>
                             {% if profissional.usuario %}
                             <div class="small mb-1">{{ profissional.usuario.username }}</div>
                             <a href="{% url 'administracao:definir_senha_profissional' profissional.id %}" class="btn btn-sm btn-outline-primary">🔐 Definir senha</a>
@@ -68,7 +86,7 @@
                         </td>
                     </tr>
                 {% empty %}
-                    <tr><td colspan="7" class="text-center py-5 text-muted">Nenhum profissional encontrado.</td></tr>
+                    <tr><td colspan="8" class="text-center py-5 text-muted">Nenhum profissional encontrado.</td></tr>
                 {% endfor %}
                 </tbody>
             </table>

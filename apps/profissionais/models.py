@@ -115,6 +115,19 @@ class Profissional(models.Model):
         default=True,
     )
 
+    liberacao_financeira_ativa = models.BooleanField(default=False)
+    liberacao_financeira_ate = models.DateField(null=True, blank=True)
+    liberacao_financeira_motivo = models.CharField(max_length=255, blank=True)
+    liberacao_financeira_observacao = models.TextField(blank=True)
+    liberacao_financeira_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    liberacao_financeira_em = models.DateTimeField(null=True, blank=True)
+
     criado_em = models.DateTimeField(
         auto_now_add=True,
     )
@@ -242,4 +255,3 @@ class FotoProfissional(models.Model):
 
     def __str__(self):
         return f"Foto de {self.profissional.nome}"
-
