@@ -44,9 +44,26 @@ class RegraInadimplenciaTests(TestCase):
             vencimento=vencimento, status=Assinatura.STATUS_ATIVA, **kwargs,
         )
 
-    def test_plano_gratuito_nao_suspende(self):
+    def test_plano_gratuito_nao_publica_pagina(self):
         self.assinatura(self.empresa, self.gratuito, None)
-        self.assertEqual(situacao_financeira(empresa=self.empresa).codigo, STATUS_REGULAR)
+        situacao = situacao_financeira(empresa=self.empresa)
+        self.assertEqual(situacao.codigo, STATUS_REGULAR)
+        self.assertFalse(situacao.pagina_publica)
+
+    def test_sem_assinatura_nao_publica_pagina(self):
+        self.assertFalse(
+            situacao_financeira(profissional=self.profissional).pagina_publica
+        )
+
+    def test_gratuito_nao_aparece_na_home_e_nao_tem_acesso_direto(self):
+        self.assinatura(self.empresa, self.gratuito, None)
+        resposta_home = self.client.get(reverse("core:home"))
+        self.assertNotContains(resposta_home, self.empresa.nome_fantasia)
+        resposta_perfil = self.client.get(reverse(
+            "core:empresa_detalhe",
+            args=[self.cidade.slug, self.empresa.slug],
+        ))
+        self.assertEqual(resposta_perfil.status_code, 404)
 
     def test_sete_dias_de_tolerancia(self):
         self.assinatura(self.empresa, self.pago, self.hoje - timedelta(days=7))

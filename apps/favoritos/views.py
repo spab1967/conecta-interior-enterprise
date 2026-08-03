@@ -1,9 +1,11 @@
 from django.contrib import messages
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from apps.empresas.models import Empresa
 from apps.profissionais.models import Profissional
+from apps.planos.services import filtrar_publicaveis, situacao_financeira
 
 from .models import Favorito
 
@@ -55,6 +57,23 @@ def meus_favoritos(request):
         )
     )
 
+    empresas_publicas = filtrar_publicaveis(
+        Empresa.objects.filter(
+            pk__in=favoritos_empresas.values_list("empresa_id", flat=True)
+        ),
+        "empresa",
+    )
+    profissionais_publicos = filtrar_publicaveis(
+        Profissional.objects.filter(
+            pk__in=favoritos_profissionais.values_list("profissional_id", flat=True)
+        ),
+        "profissional",
+    )
+    favoritos_empresas = favoritos_empresas.filter(empresa__in=empresas_publicas)
+    favoritos_profissionais = favoritos_profissionais.filter(
+        profissional__in=profissionais_publicos
+    )
+
     return render(
         request,
         "favoritos/meus_favoritos.html",
@@ -80,6 +99,9 @@ def alternar_empresa(
         slug=empresa_slug,
         ativa=True,
     )
+
+    if not situacao_financeira(empresa=empresa).pagina_publica:
+        raise Http404
 
     identificador = obter_identificador(request)
 
@@ -129,6 +151,9 @@ def alternar_profissional(
         slug=profissional_slug,
         ativo=True,
     )
+
+    if not situacao_financeira(profissional=profissional).pagina_publica:
+        raise Http404
 
     identificador = obter_identificador(request)
 

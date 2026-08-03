@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import (
     Avg,
     Case,
+    Count,
     IntegerField,
     Q,
     Value,
@@ -33,6 +34,7 @@ from apps.empresas.models import Empresa, FotoEmpresa
 from apps.financeiro.models import PedidoFinanceiro
 from apps.planos.models import Assinatura, Plano
 from apps.planos.services import (
+    STATUS_SUSPENSA,
     assinatura_financeira,
     assinatura_vigente,
     filtrar_publicaveis,
@@ -436,6 +438,23 @@ def home(request):
     empresas = filtrar_publicaveis(empresas, "empresa")
     profissionais = filtrar_publicaveis(profissionais, "profissional")
 
+    empresas_por_cidade = dict(
+        empresas.values("cidade_id")
+        .annotate(total=Count("id"))
+        .values_list("cidade_id", "total")
+    )
+    profissionais_por_cidade = dict(
+        profissionais.values("cidade_id")
+        .annotate(total=Count("id"))
+        .values_list("cidade_id", "total")
+    )
+    cidades = list(cidades)
+    for cidade in cidades:
+        cidade.total_empresas_publicas = empresas_por_cidade.get(cidade.pk, 0)
+        cidade.total_profissionais_publicos = profissionais_por_cidade.get(
+            cidade.pk, 0
+        )
+
     if busca:
 
         termos = [
@@ -741,8 +760,11 @@ def empresa_detalhe(
         ativa=True,
     )
 
-    if not situacao_financeira(empresa=empresa).pagina_publica:
-        return render(request, "core/perfil_suspenso.html")
+    situacao = situacao_financeira(empresa=empresa)
+    if not situacao.pagina_publica:
+        if situacao.codigo == STATUS_SUSPENSA:
+            return render(request, "core/perfil_suspenso.html")
+        raise Http404("Esta empresa não possui um plano com página pública.")
 
     empresa = _aplicar_plano_empresa(
         empresa
@@ -838,8 +860,11 @@ def profissional_detalhe(
         ativo=True,
     )
 
-    if not situacao_financeira(profissional=profissional).pagina_publica:
-        return render(request, "core/perfil_suspenso.html")
+    situacao = situacao_financeira(profissional=profissional)
+    if not situacao.pagina_publica:
+        if situacao.codigo == STATUS_SUSPENSA:
+            return render(request, "core/perfil_suspenso.html")
+        raise Http404("Este profissional não possui um plano com página pública.")
 
     profissional = (
         _aplicar_plano_profissional(
