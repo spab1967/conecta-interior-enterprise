@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
@@ -8,6 +9,7 @@ from django.test import (
     override_settings,
 )
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.avaliacoes.models import Avaliacao
 from apps.cadastros.models import SolicitacaoCadastro
@@ -93,6 +95,23 @@ class EnterpriseBusinessFlowTests(TestCase):
             plano=self.plano,
             valor=self.plano.preco_mensal,
             status=PedidoFinanceiro.STATUS_PENDENTE,
+        )
+
+    def _liberar_perfil_empresa(self):
+        plano_publico, _ = Plano.objects.get_or_create(
+            nome="Destaque",
+            defaults={
+                "descricao": "Plano público para testes.",
+                "preco_mensal": Decimal("39.90"),
+                "ativo": True,
+                "ordem": 11,
+            },
+        )
+        return Assinatura.objects.create(
+            empresa=self.empresa,
+            plano=plano_publico,
+            status=Assinatura.STATUS_ATIVA,
+            vencimento=timezone.localdate() + timedelta(days=30),
         )
 
     def test_aprovar_pagamento_empresa_cria_assinatura(self):
@@ -763,6 +782,7 @@ class EnterpriseBusinessFlowTests(TestCase):
         )
 
     def test_avaliacao_aprovada_aparece_no_perfil_empresa(self):
+        self._liberar_perfil_empresa()
         Avaliacao.objects.create(
             empresa=self.empresa,
             nome="Avaliador Aprovado",
@@ -787,6 +807,7 @@ class EnterpriseBusinessFlowTests(TestCase):
         )
 
     def test_avaliacao_pendente_nao_aparece_no_perfil_empresa(self):
+        self._liberar_perfil_empresa()
         Avaliacao.objects.create(
             empresa=self.empresa,
             nome="Avaliador Pendente",

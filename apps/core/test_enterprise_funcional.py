@@ -12,6 +12,7 @@ from apps.categorias.models import Categoria
 from apps.cidades.models import Cidade
 from apps.empresas.models import Empresa
 from apps.favoritos.models import Favorito
+from apps.planos.models import Assinatura, Plano
 from apps.profissionais.models import Profissional
 from apps.servicos.models import Servico
 
@@ -61,6 +62,28 @@ class EnterpriseFunctionalFlowTests(TestCase):
             especialidade="Serviço de teste",
             whatsapp="37988888888",
             ativo=True,
+        )
+
+        cls.plano_publico = Plano.objects.create(
+            nome="Destaque",
+            descricao="Plano público para testes funcionais.",
+            preco_mensal=Decimal("39.90"),
+            ativo=True,
+            ordem=10,
+        )
+
+        vencimento = timezone.localdate() + timedelta(days=30)
+        Assinatura.objects.create(
+            empresa=cls.empresa,
+            plano=cls.plano_publico,
+            status=Assinatura.STATUS_ATIVA,
+            vencimento=vencimento,
+        )
+        Assinatura.objects.create(
+            profissional=cls.profissional,
+            plano=cls.plano_publico,
+            status=Assinatura.STATUS_ATIVA,
+            vencimento=vencimento,
         )
 
     def test_home_responde_200(self):

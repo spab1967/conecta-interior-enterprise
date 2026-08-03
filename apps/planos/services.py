@@ -11,6 +11,7 @@ STATUS_REGULAR = "regular"
 STATUS_ATRASO = "atraso"
 STATUS_SUSPENSA = "suspensa"
 STATUS_LIBERADA = "liberada"
+PLANOS_COM_PAGINA_PUBLICA = {"destaque", "premium"}
 
 
 @dataclass(frozen=True)
@@ -20,10 +21,19 @@ class SituacaoFinanceira:
     assinatura: object = None
     vencimento: object = None
     limite_tolerancia: object = None
+    plano_publicavel: bool = False
 
     @property
     def pagina_publica(self):
-        return self.codigo != STATUS_SUSPENSA
+        return self.plano_publicavel and self.codigo != STATUS_SUSPENSA
+
+
+def _plano_permite_pagina(assinatura):
+    return bool(
+        assinatura
+        and assinatura.plano.ativo
+        and assinatura.plano.nome.strip().casefold() in PLANOS_COM_PAGINA_PUBLICA
+    )
 
 
 def _liberacao_manual_valida(titular, hoje):
@@ -71,31 +81,37 @@ def situacao_financeira(empresa=None, profissional=None, hoje=None):
         raise ValueError("Informe uma empresa ou um profissional.")
 
     assinatura = assinatura_financeira(empresa=empresa, profissional=profissional)
-    if _liberacao_manual_valida(titular, hoje):
+    plano_publicavel = _plano_permite_pagina(assinatura)
+
+    if plano_publicavel and _liberacao_manual_valida(titular, hoje):
         return SituacaoFinanceira(
             STATUS_LIBERADA, "Liberada manualmente", assinatura,
             getattr(assinatura, "vencimento", None),
+            plano_publicavel=True,
         )
 
-    if not assinatura or assinatura.plano.preco_mensal <= 0:
-        return SituacaoFinanceira(STATUS_REGULAR, "Regular", assinatura)
+    if not plano_publicavel:
+        return SituacaoFinanceira(
+            STATUS_REGULAR, "Regular", assinatura, plano_publicavel=False,
+        )
 
     vencimento = assinatura.vencimento
     if not vencimento or vencimento >= hoje:
         return SituacaoFinanceira(
             STATUS_REGULAR, "Regular", assinatura, vencimento,
+            plano_publicavel=True,
         )
 
     limite = vencimento + timedelta(days=DIAS_TOLERANCIA)
     if hoje <= limite:
         return SituacaoFinanceira(
             STATUS_ATRASO, "Em atraso — período de tolerância",
-            assinatura, vencimento, limite,
+            assinatura, vencimento, limite, plano_publicavel=True,
         )
 
     return SituacaoFinanceira(
         STATUS_SUSPENSA, "Suspensa por inadimplência",
-        assinatura, vencimento, limite,
+        assinatura, vencimento, limite, plano_publicavel=True,
     )
 
 
